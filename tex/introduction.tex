@@ -34,19 +34,34 @@ costs, CAD tool costs, IP costs, and engineering time for design and
 verification. Necessarily, all of these costs must fall, if custom silicon is
 to have a future in all but the largest corporations.
 
-\section{MIDAS: Attacking Simulation}
+\section{Attacking Full-System Simulation}
 
-One key driver of costs in the ASIC design process is simulation. The core of
-the design and development process of an ASIC are a suite of simulation
-technologies, ranging from SPICE simulation of key analog circuits, RTL
-simulation for digital components, and full system simulatiors capable of
-executing the complete software stack.
+One key driver of costs in the ASIC design process is simulation. Simulation preforms
+three different functions.
 
-Fundamental to all simulation is a tradeoff between fidelity (how accurately
-does the model represent that which it models) and speed (how quickly does it
-produce the result). Fast software simulators represent one extreme of the
-fidelity-speed curve, and serve as an important purpose as a sandbox for
-prototyping ideas.
+\begin{enumerate}
+
+    \item Prototyping: "What thing should we build?" Serves as a means to
+        rapidly evaluate different design points with abstract models, or an
+        incomplete implementation of a proposed design.
+
+    \item Verification: "Did we build the thing right?" To check that a
+        particular implementation has correctly executes.
+
+    \item Validation: "Did we build the right thing?" To show that an
+        implementation fulfills the high-level objectives set out for the
+        system. Here the hope is that simulation of the implementation
+        "validates" the results of the prototype.
+
+\end{enumerate}
+
+The core of the design and development process of an ASIC are a suite of
+simulation technologies, ranging from SPICE simulation of analog circuits,
+discrete event simulation of RTL implementations, to architectural simulators
+that may do no accounting of time.  Each of these technologies makes a tradeoff
+between \textit{fidelity}~(how accurate is the simulation), \textit{speed}~(how
+quickly does simulator execute) and \textit{cost}~(\$ per simulation hour).
+
 
 What should then follow is a concretization the system -- as parts of the
 simulation are improved with more accurate models or implementations as they
