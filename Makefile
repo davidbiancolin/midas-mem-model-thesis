@@ -1,11 +1,13 @@
-NAME = midas-mem-model-thesis
+PAPER = midas-mem-model-thesis
 
 all: paper
 
 paper:
-	pdflatex $(NAME).tex
-	pdflatex $(NAME).tex
-	pdflatex $(NAME).tex
+	pdflatex $(PAPER).tex </dev/null
+	biber $(PAPER)
+	pdflatex $(PAPER).tex </dev/null >/dev/null
+	pdflatex $(PAPER).tex </dev/null >/dev/null
+	pdflatex $(PAPER).tex </dev/null
 
 clean:
 	rm -f *.aux	*.log *.lof *.bcf *.run.xml *.toc *.lot

@@ -12,8 +12,8 @@
 % and then "latex thesis" (without the quotes in each case).
 
 % Double spacing, if you want it.  Do not use for the final copy.
-% \def\dsp{\def\baselinestretch{2.0}\large\normalsize}
-% \dsp
+\def\dsp{\def\baselinestretch{1.5}\large\normalsize}
+\dsp
 
 % If the Grad. Division insists that the first paragraph of a section
 % be indented (like the others), then include this line:
@@ -52,13 +52,13 @@
 % document a "dissertation", not a "thesis".
 
 % A slightly modified template of the ms thesis to reuse the title variables
-\include{tex/cover}
+\input{tex/cover}
 %\maketitle
 % Delete (or comment out) the \approvalpage line for the final version.
 %\approvalpage
 %\copyrightpage
 
-\include{tex/abstract}
+\input{tex/abstract}
 
 \begin{frontmatter}
 
@@ -80,8 +80,8 @@
 
 % (Optional) \part{First Part}
 
-\include{tex/introduction}
-\include{tex/background}
+\input{tex/introduction}
+\input{tex/background}
 
 % \appendix
 
