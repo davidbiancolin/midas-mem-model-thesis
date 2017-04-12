@@ -1,0 +1,13 @@
+*.aux
+*.bbl
+*.blg
+*.log
+*.bcf
+*.bot
+*.lot
+*.lof
+*.out
+midas-mem-model-thesis.pdf
+
+.*.swp
+.*.swo
