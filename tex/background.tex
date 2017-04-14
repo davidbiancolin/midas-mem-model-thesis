@@ -1,2 +1,72 @@
+
 \chapter{Background}
 
+Using computers to simulate computers is an obviously meta subject (perhaps to
+the point of clich\'e). To avoid confusion it is common to make a distinction
+between the \textit{target}, the computer being simulated, and the
+\textit{host}, the computer executing (\textit{hosting}) the simulation. It is important
+to note, the \textit{host} (or more illustrative, \textit{host-platform}) is
+often not a single machine, but instead some collection of interconnected
+machines, which may include CPUs, GPUs, and FPGAs, overwhich models of
+different components of the target are hosted.
+
+
+\section{A Brief Tour of Full-System Simulation}
+
+One key driver of costs in the ASIC design process is simulation. Simulation preforms
+three different functions.
+
+\begin{enumerate}
+
+    \item Prototyping: "What thing should we build?" Serves as a means to
+        rapidly evaluate different design points with abstract models, or an
+        incomplete implementation of a proposed design.
+
+    \item Verification: "Did we build the thing right?" To check that a
+        particular implementation has correctly executes.
+
+    \item Validation: "Did we build the right thing?" To show that an
+        implementation fulfills the high-level objectives set out for the
+        system. Here the hope is that simulation of the implementation
+        "validates" the results of the prototype.
+
+\end{enumerate}
+
+Radically different simulation technologies are deployed throughout the design
+process. Each of these technologies makes a tradeoff between
+\textit{fidelity}~(how accurate is the simulation), \textit{speed}~(how quickly
+does simulator execute) and \textit{cost}~(\$ per simulation hour). That
+operate, ranging from SPICE simulation of analog circuits, discrete event
+simulation of RTL implementations, to architectural simulators that may do
+litte or no accounting of time. \TODO{Some common technologies are illustrated
+in Table X}
+
+Few of these technologies are fast enough to host a simulation of the entire
+design at speeds.
+
+Generally, there are only two points during the development of an ASIC in which
+\textit{full-system simulation}, executes within two orders of magnitude of.
+
+\subsection{FPGA Accelerated Simulation}
+
+\subsection{FPGA Accelerated Simulation is not FPGA Prototyping}
+
+\section{An Overview of MIDAS}
+
+\subsection{Host-Target Decoupling in MIDAS}
+
+\subsection{Automatic FAME Transformations}
+
+\subsection{Platform Mapping}
+
+\subsection{Target Machines}
+
+\section{An Overview of Off-Chip Memory Systems \& DRAM}
+
+\subsection{DRAM Device Architecture}
+
+
+\subsection{DRAM Memory Access Scheduling}
+
+
+\subsection{System Integration of Off-Chip Memory Systems}

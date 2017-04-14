@@ -6,6 +6,7 @@
 
 \documentclass[masters]{ucbthesis}
 \usepackage{biblatex}
+\usepackage{color}
 
 % To compile this file, run "latex thesis", then "biber thesis"
 % (or "bibtex thesis", if the output from latex asks for that instead),
@@ -19,11 +20,17 @@
 % be indented (like the others), then include this line:
 % \usepackage{indentfirst}
 
+% Helpful commands
+
+\newcommand{\TODO}[1]{{\color{red}\textbf{TODO: #1}}}
+
 \bibliography{refs}
+
+
+% Increase the depth of numbering sections
 
 \hyphenation{Rocket-Chip}
 \begin{document}
-
 
 % Declarations for Front Matter
 
@@ -65,6 +72,8 @@
 % You can delete the \clearpage lines if you don't want these to start on
 % separate pages.
 
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
 \tableofcontents
 \clearpage
 \listoffigures
