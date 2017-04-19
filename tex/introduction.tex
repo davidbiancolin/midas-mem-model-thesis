@@ -1,56 +1,54 @@
-\chapter{Introduction}
-
 For the past half century Moore's law, and Dennard's law before it, has
 delivered incredible improvements in computing performance and energy
 efficiency. The rapid advance of process technology has proven to be a strong
 disincentive to building ASICs, as the competitive advantage of a custom
 silicon design would usually be lost to a general-purpose machine built in a
-newer process technology. This coupled with growing non-recurring
+newer process technology. This coupled with famously large and growing non-recurring
 engineering~(NRE) costs, has limited ASIC deployment to high volume domains
 where they offer a considerable advantage over a general-purpose part. For
 applications that would see enormous improvements with custom silicon but lack
 the volume to overcome the NRE costs, FPGAs have proven to be an effective
-stopgap, despite being inferior to an ASIC in logic density (40x), frequency
-(10x), and energy efficiency.
+stopgap, despite being inferior to an ASIC in logic density, delay, and energy
+efficiency.
 
 With Moore’s law ending, future advances in performance and energy-efficiency
 must come from improvements above the process technology. For system designers
 the risk balance is changing: while the NRE costs remain high, custom silicon
 may now present a lasting competitive advantage. Application, compiler, and OS
-developers will be more inclined to support more specialized computing devices
-if those devices can deliver a performance improvement that cannot be met by a
-general purpose machine. Perhaps the greatest opportunity for innovation, both for the
-deeply embedded systems of the Internet-of-Things and the for the warehouse
-scale computers of the Cloud, lies in hardware-software \emph{co-design}.
+developers will be more inclined to develop for specialized devices
+if they can deliver a performance improvement that cannot foreseeably be met by a
+general purpose machine. Perhaps the greatest opportunity for performance and
+energy efficiency gains, both for the deeply embedded systems of the Internet
+of Things and the for the warehouse scale computers of the Cloud, lies in
+hardware-software \emph{co-design}.
 
-Unfortunately, the high NRE costs custom silicon remain. NRE costs are driven
-by many factors, including mask, EDA tool, and IP costs, as well engineering
-time for design and verification. However, the largest contributor to NRE is
-often that of software development, especially in embedded systems. Ideally,
-software development would proceed in parallel to hardware design, however,
-lacking fast, cycle-accurate \emph{full-system simulators} (simulators capable
-of executing the entire software stack), software developers are forced to
-develop against a inaccurate model of the SoC or wait until first silicon is
-back. Logic bugs that would be caught by a long running full-system simulation
-are not detected, forcing costly silicon respins. This serialization
-also precludes efficient hardware-software co-design, as it difficult to reason
-about full-system design tradeoffs if the software and hardware are being
-evaluated in different simulation environments. Instead, poor design decisions
-based on poor system modeling lead to more silicon respins and failed products.
+Unfortunately, the NRE costs custom silicon remain a challenge. NRE costs are
+driven by many factors, including mask, EDA tool, and IP costs, as well
+engineering time for design and verification. However, the largest contributor
+to NRE is often that of software development, especially in embedded systems.
+Ideally, software development would proceed in parallel to hardware design,
+however, lacking fast, cycle-accurate \emph{full-system simulators} (simulators
+capable of executing the entire software stack), software developers are forced
+to develop against a inaccurate model of the SoC or wait until first silicon is
+back. Moreover, digital logic bugs that would be caught by a long running
+full-system simulation are not detected, forcing costly silicon respins.
+Finally, this serialization also precludes effective hardware-software
+co-design, as it difficult to reason about full-system design tradeoffs if the
+software and hardware are being evaluated in different simulation environments.
 
-Research in academia too, has been hampered by the lack of fast,
-cycle-accurate full-system simulation.  Software simulations have long been the
-mainstay of the computer architecture research community, but these have
-struggled to provide meaningful results especially since the spread of
-multicore systems in the mid-2000s.  While a number of abstracted and sampled
-simulation techniques have been developed to help reduce the runtime of
-software simulations, these generally cannot cope with dynamic workloads, such
-as JIT compilers, where code paths observed vary depending on performance, and
-where long runtimes are needed to observe meaningful application behavior.  As
-a result, few architectural studies use managed languages, and are often based
-solely on small inputs to statically compiled SPEC codes.  Furthermore, software
-simulations are notoriously inaccurate and have no direct path to obtain
-accurate physical metrics such as cycle time, area, or power.
+Academia too has been hampered by the lack of fast, cycle-accurate full-system
+simulation.  Software simulations have long been the mainstay of the computer
+architecture research community, but these have struggled to provide meaningful
+results especially since the spread of multicore systems in the mid-2000s.
+While a number of abstracted and sampled simulation techniques have been
+developed to help reduce the runtime of software simulations, these generally
+cannot cope with dynamic workloads, such as JIT compilers, where code paths
+observed vary depending on performance, and where long runtimes are needed to
+observe meaningful application behavior.  As a result, few architectural
+studies use managed languages, and are often based solely on small inputs to
+statically compiled SPEC codes.  Furthermore, software simulations are
+notoriously inaccurate and have no direct path to obtain accurate physical
+metrics such as cycle time, area, or power.
 
 The recent trend towards heterogenous SoCs with a plethora of custom hardware
 accelerators for both server and mobile applications has only exacerbated the
@@ -69,13 +67,7 @@ JIT compilation), but the interactions between the application and system layer
 are often very fine-grained (such as a few cycles spent in an interrupt handler
 or a call into the memory allocator).  Fast, cycle-accurate, full-system
 simulation is desired to properly account for the interactions between the
-layers of the software stack and the hardware underneath.  there is a belief
-that new programming models, runtimes, and operating systems will be necessary
-to ease the challenge of programming machines that may have dozens of custom
-accelerators. This work ranges from new OS designs such as data-plane operating
-systems~\cite{arrakis} or multikernels~\cite{barrelfish} to a renewed interest
-in managed-language runtime systems such as Java Virtual
-Machines~\cite{broom,taurus}.
+layers of the software stack and the hardware underneath.
 
 To address this simulation gap, many in industry and some in academia have
 turned to FPGAs. In industry, companies have long relied on
@@ -93,33 +85,43 @@ compilation time, 3) FPGAs are difficult to debug, 4) FPGAs have historically
 been resource constrained, either limiting the scale of the system under
 simulation or requiring even more complexity to partition designs across FPGAs,
 5) the cost of purchasing and maintaining FPGA hardware and software tools.
+
 Recent technological advances have eased some of these challenges of employing
 FPGA-accelerated simulators. FPGAs are larger and faster than ever before and
 are becoming available to researchers as resources in research
-clusters\cite{catapultannounce} and datacenters\cite{amazonf1}.  However, the
-usability challenges remain.
+clusters\cite{catapultannounce} and datacenters\cite{amazonf1}.  Given the lack
+of a competing technology that is both as cheap and as effective at
+accelerating cycle-accurate simulations, it appears that FPGAs remain the only
+vehicle capable of bridging the simulation gap.
 
 \emph{MIDAS} (Modeling Infrastructure for Debugging and Simulation) is Berkeley
-Architecture Research's answer to the full-system simulation gap.  Building off
-the findings of the RAMP\cite{ramp} project at Berkeley, MIDAS differs in
-primarly in it's objective aims to make RAMPGold\cite{rampgold} and
-DIABLO\cite{diablo}-like simulators easier to build, use and extend. MIDAS
-permits co-hosting SW models and FPGA-accelerated models on an arbitrary
-\emph{host-platform} consisting of a mix of FPGAs, CPUs. As implementations, or
-more complete models of components of the system become available, they can
-replace more abstract ones, easing the transistion from an abstract prototype
-to a simulator capable of pre-silicon validation. Throughout the whole process
-there is a functioning model of the target machine, that is fast enough for
-software developers and researchers to code against. We believe this methodolgy
-can empower both academic and industrial design efforts, and encourage greater
-technology transfer from academia to industry.
+Architecture Research's answer to improving the usability of FPGA-accelerated
+simulators. MIDAS permits co-hosting SW models and FPGA-accelerated models on
+an arbitrary \emph{host-platform} consisting of a mix of FPGAs, CPUs.
+Initially, a MIDAS simulation will consist entire of software models of the
+system.  However, as RTL implementations become available, MIDAS can
+automatically transform them into FPGA-accelerated models that can be linked
+into the simulator. This process culminates in a simulator that can subsume the
+function of an FPGA-prototype. Throughout the whole process there is a functioning
+model of the machine, that is fast enough for software development.
 
-This report presents an important component of the MIDAS environment: an
-FPGA-hosted off-chip memory timing model, that is both reconfigurable and
-agnostic of the particular FPGA architecture that hosts it. Just as MIDAS
-succeeds RAMP, this report succeeds an earlier masters thesis by Asif
-Khan\cite{khanmasters} on the same subject. This report differs from that work
-in three dimensions: 1) The use of a generator to flexibly emit different
+Before RTL for the memory system is available, FPGA-accelerated models of the
+off-chip memory subsystem will still be required. These models must be hand
+written in RTL, and are subject to the same usability pitfalls of prior
+FPGA-accelerated simulation work. For MIDAS to succeed, models like this must
+be flexible enough to be reusable across a wide range of simulations in order
+to amortize the high cost of writing them. Generally, I propose that using a
+hardware \emph{generator} to synthesize timing model \emph{instances} addresses
+this challenge. To this end, the generator described herein emits off-chip
+memory models that uses the available FPGA off-chip memory system as a backing
+store for a timing model hosted in fabric. These instances are re-configurable
+at runtime, allowing for design space exploration without lengthy FPGA
+recompilation. Finally, the generator can also add instrumentation to ease
+debugging and to preform non-invasive measurements of the simulation.
+
+Just as MIDAS succeeds RAMP, this report succeeds an earlier masters thesis by
+Asif Khan\cite{khanmasters} on similar subject. This report differs from that
+work in three dimensions: 1) The use of a generator to flexibly emit different
 instances of a timing model. 2) Demonstration of the ability to integrate this
 model with models automatically transformed from source RTL. 3) The degree to
 which off-chip memory systems are modeled.
@@ -144,12 +146,12 @@ Finally, MIDAS depends on the availability of open-source SoC IP. Here we use
 the Rocket-Chip\cite{rocketchip} SoC generator, and Chris Celio's
 BOOM(\cite{boom}) OoO core generator.
 
-This report borrows heavily from our MICRO50 submission, on the same subject.
+This report borrows heavily from our MICRO50 submission on the same subject.
 Most of the results were collected by Donggyu Kim, borrowing some
-infrastructure initially built by Chris Celio to automatically build linux
-images and submit jobs to our local FPGA cluster. Martin Maas was responsible
-for all things Java: porting the JikesRVM, and for instrumenting Java
-applications to produce the plots in the case study.
+infrastructure initially built by Chris Celio to automatically build Linux
+images containing the desired workload and submit jobs to our local FPGA
+cluster. Martin Maas was responsible for all things Java: porting the JikesRVM,
+and for instrumenting Java applications to produce the plots in the case study.
 
 \TODO{Funding?}
 
