@@ -202,6 +202,17 @@ timing model connects to rocketchip's an AXI4 slave interface, Remaining, I/O
 coming off the transformed model, including reset, are bound to a default I/O
 widget.
 
+\begin{figure}
+	\centering
+	\includegraphics[width=16cm]{figures/masters-target.pdf}
+    \caption{The MIDAS SDF of the target design used in this report. Channel
+    details and initial tokens are omitted for simplicity. Both the Tether I/O
+    and AXI4 have bidirectional decoupled (ready-valid) target interconnect,
+    thus the channels model queues. SReset channels are pipes with
+    a latency of one (a single register).}
+	\label{fig:default-target}
+\end{figure}
+
 Thus unless stated otherwise, simulations are hosted with the master program
 and FESVR model running on the PS, with the transformed RTL and memory-timing
 model implemented in the PL. Simulation MMIO is mapped directly to reads and
