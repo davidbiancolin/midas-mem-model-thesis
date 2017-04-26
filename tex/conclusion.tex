@@ -1,18 +1,22 @@
 While FPGA-accelerated simulation is not yet a standard technique for
-computer architecture researchers, it appears to be the only path for
-obtaining the fast and accurate full-system models required to
-investigate many future computing applications and platforms.  The
-advent of cloud-hosted FPGA-enhanced server instances significantly
-reduces the barrier for researchers to begin using FPGA-accelerated
-simulation, but productive development of full-system FPGA simulations
-is still a challenge.  In this paper, we present some approaches to
-improve productivity.  Automatically deriving cycle-exact, bit-exact
-FPGA models from synthesizable target RTL modules reduces
-model-building and validation effort and enables researchers to also
-observe cycle-time, area, and power impacts using commercial ECAD
-tools.  As not all components are readily mapped from RTL into an FPGA
-model, we also develop parameterized generators to produce
-configurable models for these components.  Combining these two forms
-of module provides a highly productive environment for performing
-complex computer architecture research, as shown by the detailed
-results obtained for garbage collection in a managed-language runtime.
+full-system simulation, it appears to be the only path for obtaining the fast
+and accurate full-system models required to investigate many future computing
+applications and platforms. The advent of cloud-hosted FPGA-enhanced server
+instances significantly reduces the barrier to using FPGA-accelerated
+simulation, but productive development of full-system FPGA simulations is still
+a challenge.
+
+MIDAS is making inroads to solving these challenges by automating the
+construction of FPGA-accelerated simulations. Automatically deriving
+cycle-exact, bit-exact FPGA models from synthesizable target RTL modules
+reduces model-building and validation effort and enables researchers and system
+designers to also observe cycle-time, area, and power impacts using commercial
+ECAD tools.
+
+However, when RTL implementation has not yet been built, or when that RTL is
+not easily tranformed into an FPGA model, parameterized generators to produce
+configurable models for these components are required. This report demonstrates
+this approach for modelling off-chip DRAM memory systems. Combining these two forms
+of model generation provides a highly productive environment for performing
+complex computer architecture research, as shown by the detailed results
+obtained for garbage collection in a managed-language runtime.
