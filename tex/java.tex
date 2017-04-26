@@ -107,11 +107,18 @@ experiments that become possible with our platform.
 		\includegraphics[width=\textwidth]{results/rowmisses_xalan.png}
 		\caption{xalan}
 	\end{subfigure}
-	\caption{Running the Dacapo Java benchmarks and plotting the percentage of memory accesses that incur a DRAM row miss with the FCFS open-row DRAM model. While their behavior differs substantially, Garbage Collection phases are immediately visible (shown in green): due to their very low locality, they have a much lower hit rate than the rest of the application, and at the beginning of each GC phase, there is a brief period with a very high hit rate -- namely, the sequential scanning of the application's stacks to identify all references contained in them (i.e., roots).}
+    \caption{Running the Dacapo Java benchmarks and plotting the percentage of
+    memory accesses that incur a DRAM row miss with the FCFS open-row DRAM
+    model. While their behavior differs substantially, Garbage Collection
+    phases are immediately visible (shown in green): due to their very low
+    locality, they have a much lower hit rate than the rest of the application,
+    and at the beginning of each GC phase, there is a brief period with a very
+    high hit rate -- namely, the sequential scanning of the application's
+    stacks to identify all references contained in them (i.e., roots).}
 	\label{fig:java_rowmisses}
 \end{figure*}
 
-\subsection{High-Fidelity Application Traces}
+\section{High-Fidelity Application Traces}
 
 To demonstrate the capabilities of our platform, we ran an experiment where we
 annotated all memory allocation operations in JikesRVM to record a trace of
@@ -166,7 +173,7 @@ overall temporal locality is low, confirming the conventional wisdom that
 free-list allocators produce poor locality
 \cite{Blackburn:2004:OWH:998675.999420}.
 
-\subsection{Varying the DRAM Timing Model}
+\section{Varying the DRAM Timing Model}
 
 Managed runtime systems are often sensitive to the underlying hardware
 \cite{Cao:2012:YYP:2337159.2337185}. Using our platform, it is possible to vary
@@ -193,7 +200,7 @@ This confirms a similar result regarding non-optimized managed code by Cao et
 al. \cite{Cao:2012:YYP:2337159.2337185}. We found the fact that our platform
 allowed us to identify this somewhat counter-intuitive effect encouraging.
 
-\subsection{Recording Memory System Metrics}
+\section{Recording Memory System Metrics}
 
 Finally, by running with one of our detailed memory models, we can gain deeper
 insights into the application behavior than on a traditional system. To
