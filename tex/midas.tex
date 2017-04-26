@@ -153,7 +153,7 @@ In principal, MIDAS can integrate any software or RTL model that obeys the seman
 \section{The MIDAS Compiler Flow}
 
 
-\subsection{Source Tranformations}
+\subsection{Source Tranformations}\label{sec:source-transformations}
 
 Source RTL must be transformed to conform to MIDAS' SDF model of computation.
 To do this, MIDAS uses a FIRRTL compiler pass that adds an additional enable to
@@ -223,7 +223,7 @@ At time of writing, the user is responsible for linking in their own software
 models, and for moving tokens between endpoints (presently, implemented over
 simulation MMIO).
 
-\section{Target \& Host Machines of this Report}
+\section{Target \& Host Machines of this Report}\label{sec:targetandhostmachines}
 
 While MIDAS has preliminary support for other host platforms, such as Catapult,
 all the experiments of this report are run on Xilinx ZC706 development boards,
