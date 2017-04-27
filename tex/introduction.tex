@@ -1,6 +1,6 @@
 For the past half century, transistor scaling has delivered incredible
 improvements in computing performance and energy efficiency. The rapid advance
-of process technology has proven to be a strong disincentive to building custom ASICs and SoCs, 
+of process technology has proven to be a strong disincentives to building custom ASICs and SoCs, 
 as the competitive advantage of a custom silicon design would usually be lost
 to a general-purpose machine built in a newer process technology. This coupled
 with famously large and growing NRE, has limited ASIC deployment to high volume
@@ -50,7 +50,7 @@ solely on small inputs to statically compiled SPEC codes.  Furthermore,
 software simulations are notoriously inaccurate and have no direct path to
 obtain accurate physical metrics such as cycle time, area, or power.
 
-The recent trend towards heterogenous SoCs with a plethora of custom hardware
+The recent trend towards heterogeneous SoCs with a plethora of custom hardware
 accelerators for both server and mobile applications has only exacerbated the
 simulation gap. There is a belief that new programming models, runtimes, and
 operating systems will be necessary to ease the challenge of programming
@@ -119,7 +119,7 @@ nearly all SoCs: DRAM off-chip memory systems. These model instances use the
 available FPGA off-chip memory system as a backing store for a timing model
 hosted in fabric. These instances are re-configurable at runtime, allowing for
 design space exploration without lengthy FPGA recompilation. The generator can
-also add instrumentation to ease debugging and to preform non-invasive
+also add instrumentation to ease debugging and to perform non-invasive
 measurements of the simulation. Finally, since the in-fabric timing model is
 split from the \emph{functional} units that interact with the FPGA memory
 system, extending the generator with new timing-model classes is made easy.
@@ -149,7 +149,7 @@ OoO core generator which implement the free and open RISC-V ISA.
 This report borrows heavily from our MICRO50 submission on the same subject.
 Most of the results were collected by Donggyu Kim. Our infrastructure to
 automatically build Linux images containing the desired workload and submit
-jobs to our local FPGA cluster was intially written by Chris Celio. Martin Maas
+jobs to our local FPGA cluster was initially written by Chris Celio. Martin Maas
 was responsible for all things Java: porting the JikesRVM, and for
 instrumenting Java applications to produce the plots in the case study.
 
