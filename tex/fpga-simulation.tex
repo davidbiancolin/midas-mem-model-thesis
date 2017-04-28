@@ -233,12 +233,13 @@ model is required.
 This is not a panacea as it is sometimes difficult or undesirable to
 automatically generate models from source RTL: perhaps the RTL is not yet
 available, or a more abstract, reconfigurable model is desired. In this report
-we consider off-chip DRAM memory systems: they have too much state to be hosted
-in fabric and yet they must must be tightly coupled to the processor model
-making it difficult to co-simulate DRAM in software.\footnote{High-latency
-peripherals, like disks, can often be modeled in software without any
-performance cost.\cite{disksim}} These components typically require an abstract
-model that virtualizes the target memory system over FPGA-host memory system.
+we consider off-chip DRAM memory systems as a motivating example: they have too
+much state to be hosted in fabric and yet they must must be tightly coupled to
+the processor model making it difficult to co-simulate DRAM in
+software.\footnote{High-latency peripherals, like disks, can often be modeled
+in software without any performance cost.\cite{disksim}} These components
+typically require an abstract model that virtualizes the target memory system
+over FPGA-host memory system.
 
 This reintroduces the aforementioned problem that anything but a simplistic RTL
 model is difficult to design, modify and reuse. We propose to address this
