@@ -126,9 +126,16 @@ and their output channels have space. The figures \ref{fig:adder-execution}a -
 valid, or it's outputs are not ready to accept a new token). Generally, this
 occurs when the SDF includes a combinational path that passes through zero or
 more other models before feeding back into itself -- it need not be a
-combinational loop. \TODO{This is demonstrated in example K.} Judicious choice
+combinational loop. Figure \ref{fig:deadlock}. Judicious choice
 of channel type (for instance using queues or pipes with non-zero latency) is
 required to prevent this.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=16cm]{figures/deadlock.pdf}
+    \caption{DEADLOCK BIATCH~!}
+	\label{fig:default-target}
+\end{figure}
 
 A simulation that faithfully implements an SDF of this form decouples
 target time from host time: it may take an arbitrary (but finite) host time for
