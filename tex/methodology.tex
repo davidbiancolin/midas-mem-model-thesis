@@ -81,14 +81,14 @@ built into an instance of the Berkeley Boot Loader (BBL).
 
 Despite our best efforts, this process produces relatively large BBL instances
 ($>$ 10MiB), which are slow to load directly over the tether.  We modified
-\texttt{FESVR} to permit the MIDAS master to detect and accelerate program load
+\texttt{riscv-fesvr} to permit the MIDAS master to detect and accelerate program load
 out-of-band (instead of fully simulating the process over the tether).
 
 Finally, present limitations with how console I/O is proxied over the tether to
-\texttt{FESVR} can dramatically slow down simulation (FMR may be increased
+\texttt{riscv-fesvr} can dramatically slow down simulation (FMR may be increased
 tenfold or more) depending on the volume of target console I/O. To circumvent
 this, all console output is piped to a file on the target's filesystem. At the
-end of the workload, the file is \texttt{cat}-ed to the console, and FESVR
+end of the workload, the file is dumped to the console, and \texttt{riscv-fesvr}
 enters a custom fast I/O mode. Thus, low FMR is maintained without pertubing
 program execution. In our evaluation flow, no console input is ever presented
 to the target. The \texttt{init} script included in the linux image includes

@@ -798,6 +798,93 @@
 	<key>GraphicsList</key>
 	<array>
 		<dict>
+			<key>Class</key>
+			<string>LineGraphic</string>
+			<key>FontInfo</key>
+			<dict>
+				<key>Font</key>
+				<string>Helvetica</string>
+				<key>Size</key>
+				<real>12</real>
+			</dict>
+			<key>Head</key>
+			<dict>
+				<key>ID</key>
+				<integer>91228</integer>
+			</dict>
+			<key>ID</key>
+			<integer>91319</integer>
+			<key>Points</key>
+			<array>
+				<string>{189.9994374952017, 825.57684174792576}</string>
+				<string>{215.00740403076821, 826.41599208386083}</string>
+			</array>
+			<key>Style</key>
+			<dict>
+				<key>shadow</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>stroke</key>
+				<dict>
+					<key>HeadArrow</key>
+					<string>FilledArrow</string>
+					<key>Legacy</key>
+					<true/>
+					<key>TailArrow</key>
+					<string>0</string>
+					<key>Width</key>
+					<real>2</real>
+				</dict>
+			</dict>
+			<key>Tail</key>
+			<dict>
+				<key>ID</key>
+				<integer>91316</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>Bounds</key>
+			<string>{{67.212738686419925, 783}, {121.78726131358009, 81}}</string>
+			<key>Class</key>
+			<string>ShapedGraphic</string>
+			<key>FontInfo</key>
+			<dict>
+				<key>Font</key>
+				<string>Meiryo</string>
+				<key>Size</key>
+				<real>21</real>
+			</dict>
+			<key>ID</key>
+			<integer>91316</integer>
+			<key>Shape</key>
+			<string>DocumentShape</string>
+			<key>Style</key>
+			<dict>
+				<key>shadow</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>stroke</key>
+				<dict>
+					<key>Width</key>
+					<real>2</real>
+				</dict>
+			</dict>
+			<key>Text</key>
+			<dict>
+				<key>Text</key>
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\fonttbl\f0\fnil\fcharset128 Meiryo;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
+
+\f0\fs42 \cf0 MIDAS SW Libraries}</string>
+			</dict>
+		</dict>
+		<dict>
 			<key>Bounds</key>
 			<string>{{198, 48}, {128, 103}}</string>
 			<key>Class</key>
@@ -1149,8 +1236,8 @@ Network}</string>
 			<integer>91274</integer>
 			<key>Points</key>
 			<array>
-				<string>{185.78722251842356, 838.0192897892}</string>
-				<string>{215.00003879514855, 837.7619601470949}</string>
+				<string>{189.93131438966262, 875.7194734403256}</string>
+				<string>{215.05157821470621, 865.89549836320407}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1197,8 +1284,8 @@ Network}</string>
 			<key>Points</key>
 			<array>
 				<string>{171, 372.9020131038788}</string>
-				<string>{171, 792}</string>
-				<string>{215.05462701837374, 807.1912506959909}</string>
+				<string>{171, 756}</string>
+				<string>{215.15035983380187, 783.4036716209805}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1535,7 +1622,7 @@ Network}</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{63, 811.46232854927212}, {121.78726131358009, 54.204338117394968}}</string>
+			<string>{{67.212738686419925, 872.79566188260503}, {121.78726131358009, 54.204338117394968}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FontInfo</key>
@@ -3342,7 +3429,7 @@ Network}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2017-04-24 20:08:02 +0000</string>
+	<string>2017-04-28 18:03:17 +0000</string>
 	<key>Modifier</key>
 	<string>David Biancolin</string>
 	<key>NotesVisible</key>
@@ -3430,15 +3517,15 @@ Network}</string>
 		<key>TopSlabHeight</key>
 		<real>250</real>
 		<key>VisibleRegion</key>
-		<string>{{-455.99999999999994, -20}, {1705, 1049.1666666666667}}</string>
+		<string>{{-456, -20}, {1704.9999322493898, 1049.1666249765308}}</string>
 		<key>Zoom</key>
-		<real>1.2</real>
+		<real>1.2000000476837158</real>
 		<key>ZoomValues</key>
 		<array>
 			<array>
 				<string>Canvas 1</string>
+				<real>1.2000000476837158</real>
 				<real>1.2</real>
-				<real>1.1800000000000002</real>
 			</array>
 		</array>
 	</dict>
