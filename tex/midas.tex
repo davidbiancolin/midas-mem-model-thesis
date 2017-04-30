@@ -10,7 +10,7 @@ simulator that can then be used to collect target state.
 \begin{figure}
 	\centering
 	\includegraphics[width=16cm]{figures/toolchain.pdf}
-	\caption{An overview of the MIDAS flow.  }
+    \caption{An overview of the MIDAS flow.}
 	\label{fig:midas}
 \end{figure}
 
@@ -22,7 +22,7 @@ models. The MIDAS compiler then automatically transforms source RTL into
 host-decoupled RTL models, instrumenting them if desired. MIDAS then performs a
 \emph{simulation mapping}, during which transformed models are connected to
 custom RTL models with \emph{channels} and to off-fabric models with
-\textit{channel endpoints} that implement latency-insensitive communication
+\emph{channel endpoints} that implement latency-insensitive communication
 between models on different parts of the host-platform. During this process,
 the compiler builds up a memory map of all the simulation constituents and
 generates a simulation interconnect. In \emph{platform mapping}, the
@@ -126,16 +126,37 @@ and their output channels have space. The figures \ref{fig:adder-execution}a -
 valid, or it's outputs are not ready to accept a new token). Generally, this
 occurs when the SDF includes a combinational path that passes through zero or
 more other models before feeding back into itself -- it need not be a
-combinational loop. Figure \ref{fig:deadlock}. Judicious choice
-of channel type (for instance using queues or pipes with non-zero latency) is
-required to prevent this.
+combinational loop. A common example of this involves connecting a model of a
+decoupled source to a model of a decoupled sink (shown in Figure
+\ref{fig:deadlock}). Judicious choice of channel type (for instance using
+queues or pipes with non-zero latency) is required to prevent this. There are
+two solutions to the deadlock example in \ref{fig:deadlock}: 1) move the output
+registers of the source model into the channel (figure \ref{fig:pipe-decoupled-example}) or 2) use a queue-type
+channel (figure \ref{fig:queue-decoupled-example}).  The prior preserves the RTL behavior of the intial SDF, but requires
+changes to the decoupled-source model.  The latter changes the RTL behavior of
+the target (without breaking it's functional behavior, since it is a latency
+insensitive interconnect), but requires no changes to the models.
+
 
 \begin{figure}
-	\centering
-	\includegraphics[width=16cm]{figures/deadlock.pdf}
-    \caption{DEADLOCK BIATCH~!}
-	\label{fig:default-target}
+    \centering
+    \begin{subfigure}[t]{0.6\textwidth}
+        \includegraphics[width=\textwidth]{figures/deadlock.pdf}
+        \caption{DEADLOCK BIATCH~!}
+        \label{fig:default-target}
+    \end{subfigure}\vspace{0.5cm}
+    \begin{subfigure}[t]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/pipe-decoupled-example.pdf}
+        \caption{Deadlock fix 1!}
+        \label{fig:pipe-decoupled-example}
+    \end{subfigure}\hspace{0.5cm}
+    \begin{subfigure}[t]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/queue-decoupled-example.pdf}
+        \caption{Deadlock fix 2!}
+        \label{fig:queue-decoupled-example}
+    \end{subfigure}
 \end{figure}
+
 
 A simulation that faithfully implements an SDF of this form decouples
 target time from host time: it may take an arbitrary (but finite) host time for
@@ -265,7 +286,7 @@ model.
 
 \begin{figure}
 	\centering
-	\includegraphics[width=16cm]{figures/masters-target.pdf}
+	\includegraphics[width=\textwidth]{figures/masters-target.pdf}
     \caption{The MIDAS SDF of the target design used in this report. Channel
     details and initial tokens are omitted for simplicity. Both the tether I/O
     and AXI4 have bidirectional decoupled (ready-valid) target interconnect,
@@ -274,6 +295,18 @@ model.
 	\label{fig:default-target}
 \end{figure}
 
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{figures/hosted-masters-target.pdf}
+    \caption{The MIDAS SDF of the target design used in this report. Channel
+    details and initial tokens are omitted for simplicity. Both the tether I/O
+    and AXI4 have bidirectional decoupled (ready-valid) target interconnect,
+    thus the channels are impemented as sets of queues. SReset channels are pipes with
+    a latency of one.}
+	\label{fig:hosted-default-target}
+\end{figure}
+
+The simulation is hosted as shown in figure \ref{fig:hosted-masters-target}
 All targets are mapped to the ZC706 with the master program and
 \texttt{riscv-fesvr} software model hosted on the PS (running in a single linux
 process) while the transformed RTL and memory-timing model are hosted in the
@@ -281,4 +314,4 @@ PL. The AXI4 slave interface of the simulation-mapped design is bound to the 32
 bit AXI4-GP0 master; the simulation MMIO driver simply mmaps the memory region
 bound to that port into the process' memory space.  The AXI4 master presented
 by the simulation mapping is bound directly to the slave interface presented by
-the DDR3 controller of the PL. See figure \TODO{Da figure!}
+the DDR3 controller of the PL.
