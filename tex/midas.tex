@@ -1,9 +1,9 @@
 Development of MIDAS\footnote{The name MIDAS: Modeling Infrastructure for
-Debugging and Simulation was a working backronym concieved of by Jack Koenig in
+Debugging and Simulation was a working backronym conceived of by Jack Koenig in
 2015. Only later did we learn the proposed successor to RAMP Gold was also to
 be named Midas (A tool to automatically transform a design into [RAMP]gold).
 The name stuck.} began in 2016 with the amalgamation of the Chisel3 port of
-Strober and a demo of an earler version of the generator presented here.
+Strober and a demo of an earlier version of the generator presented here.
 Strober is not subsumed by MIDAS.  Rather, Strober uses MIDAS to generator a
 simulator that can then be used to collect target state.  As a final
 introductory note, MIDAS is still very much in its infancy; many of the details
@@ -83,8 +83,8 @@ latency-insensitive interconnect in a target, MIDAS also has a
 optimizations that would be impossible by describing the same interconnect with
 some combination of pipes and models.
 
-At time zero each of the channels is intialized with a sequence of tokens based
-on the type of target interconnect they model. A pipe is intialized with tokens
+At time zero each of the channels is initialized with a sequence of tokens based
+on the type of target interconnect they model. A pipe is initialized with tokens
 equal to its latency. After initialization, target-time advances in a decoupled
 fashion with models firing as they may do so legally (all of their input tokens
 are available and all their output channels are not full). The figures
@@ -120,7 +120,7 @@ cycles.
     \label{fig:adder-execution}
 \end{sidewaysfigure}
 
-\emph{Deadlock} occurs if no model can advance (not all of its input tokes are
+\emph{Deadlock} occurs if no model can advance (not all of its input tokens are
 available or one of its output channels is full). Generally, this occurs when
 the SDF network includes a cycle of wire-type channels -- it need not be a
 combinational loop.  A common example of this involves decoupled source to a
@@ -128,7 +128,7 @@ model of a decoupled sink with a wire-type channels (shown in Figure
 \ref{fig:deadlock}). Judicious choice of channel type is required to prevent
 this. There are two solutions to the deadlock example in \ref{fig:deadlock}.
 Figure \ref{fig:pipe-decoupled-example} moves the output registers of the
-source into the channel, preserving the RTL behavior of the intial SDF but
+source into the channel, preserving the RTL behavior of the initial SDF but
 requiring changes to the decoupled-source model. Figure
 \ref{fig:queue-decoupled-example} uses a queue-type channel. This changes the
 RTL behavior of the target, but requires no changes to the models.  Assuming
@@ -145,7 +145,7 @@ behavior of the target.
     \end{subfigure}\vspace{0.5cm}
     \begin{subfigure}[t]{0.48\textwidth}
         \includegraphics[width=\textwidth]{figures/pipe-decoupled-example.pdf}
-        \caption{Solution A, use a pipe. Moving registers into the channel adds an intial token. While
+        \caption{Solution A, use a pipe. Moving registers into the channel adds an initial token. While
         this graph may not deadlock, the two models can never fire concurrently
         as the decoupled sink must first fire to produce a ready token.}
         \label{fig:pipe-decoupled-example}
@@ -187,7 +187,7 @@ $$ f_{model} = \frac{f_{FPGA}}{FMR} $$
 
 \section{The MIDAS Compiler Flow}
 
-\subsection{Source Tranformations}\label{sec:source-transformations}
+\subsection{Source Transformations}\label{sec:source-transformations}
 
 In order to integrate source RTL into a MIDAS simulation, it must be
 transformed to a host-decoupled model equivalent.  To do this, MIDAS uses a
@@ -235,12 +235,12 @@ Once all of the simulation components (widgets, models, endpoints. etc...) have
 been generated, the simulation interconnect is generated and bound to an AXI4
 slave port. All simulation memory-mapped components are managed with MMIO
 through this interface. Similarly, components that require FPGA-local DRAM are
-bound a single AXI4 master port.\footnote{We recognize this is an uneeded serialization but have only had to support single-channel FPGA-host memory systems to date.}
+bound a single AXI4 master port.\footnote{We recognize this is an unneeded serialization but have only had to support single-channel FPGA-host memory systems to date.}
 
 \subsection{Platform Mapping}
 
 In attempt to orthogonalize MIDAS from the complexity of FPGA toolchains, MIDAS
-requires that the user provide a skeleton project for each fpga-host type. This
+requires that the user provide a skeleton project for each FPGA-host type. This
 project should expose standard interfaces to its off-chip memory systems and
 interconnect, and provide a clock and synchronous reset to drive the
 MIDAS-generated RTL.  During platform mapping, MIDAS bridges out the interfaces
@@ -261,9 +261,9 @@ their own drivers that extend the basic set of simulation commands. For
 example, the default I/O model has \emph{peek}, which reads the value of the
 last token sunk through one of its ports, and \emph{poke}, to change the value
 of tokens it generates on a specific output port.  All of this functionality is
-facilitated with simulation MMIO that must be implemented with a host-plaform
+facilitated with simulation MMIO that must be implemented with a host-platform
 specific driver. This simulation MMIO driver supports read and write requests
-made by the libaries by tunneling these requests over the interconnect available
+made by the libraries by tunneling these requests over the interconnect available
 on the host.
 
 \section{Target \& Host Machines of this Report}\label{sec:targetandhostmachines}
@@ -297,7 +297,7 @@ default I/O model.
     \caption{The MIDAS SDF of the target design used in this report. Channel
     details and initial tokens are omitted for simplicity. Both the tether I/O
     and AXI4 have bidirectional decoupled (ready-valid) target interconnect,
-    thus the channels are impemented as sets of queues. SReset channels are pipes with
+    thus the channels are implemented as sets of queues. SReset channels are pipes with
     a latency of one.}
 	\label{fig:default-target}
 \end{figure}

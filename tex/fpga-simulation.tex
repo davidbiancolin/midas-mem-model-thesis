@@ -1,13 +1,13 @@
 To avoid confusion when speaking of computers simulating computers, the
 literature commonly makes a distinction between the \emph{target}, the computer
-being simulated, and the \emph{host} or \emph{host-plaform}, the computer
+being simulated, and the \emph{host} or \emph{host-platform}, the computer
 executing the simulation. The host-platform is often not a single machine but
 a collection of interconnected machines, which may include CPUs,
 GPUs, and FPGAs.
 
 \section{A Tour of Full-System Simulation}
 
-Simulation preforms three different functions.
+Simulation performs three different functions.
 
 \begin{enumerate}
 
@@ -32,7 +32,7 @@ verify an implementation of that accelerator. Validation, however, seeks to
 answer a system-level question, that spans the entire computing stack.  The
 surest way to validate a system is not in simulation, but with a physical
 prototype or the final product itself, when the application can be run at
-speed. This pushes validation late into the design cycle. To preform,
+speed. This pushes validation late into the design cycle. To perform,
 \emph{pre-silicon} validation a fast and accurate full-system simulator is
 required.
 
@@ -45,7 +45,7 @@ required.
 Generally, there are only two points during the development of an SoC where
 full-system simulation executes within even three orders of magnitude of a
 silicon implementation. Very early, when architecture-level simulators are used
-to preform initial system prototyping (hundreds of MIPS). And very late: when
+to perform initial system prototyping (hundreds of MIPS). And very late: when
 the SoC is completely implemented and full-system emulation tools like a
 Synopsys Palladium\cite{palladium} (ones of MHz) can be used -- if they are
 available.
@@ -117,11 +117,11 @@ output may be the console or file I/O of the target. In other cases, it
 may be a log of all memory requests made to DRAM or instructions retired.
 Alternatively, it may be a dump of the microarchitectural state of the target as it changes over the
 lifetime of the simulation.  As far as the user is concerned, the simulation
-may be optimized in any way whatsover so long as this output is the same.
+may be optimized in any way whatsoever so long as this output is the same.
 
-Like any other application, simulations have hotspots that account for the bulk
+Like any other application, simulations have hot spots that account for the bulk
 of their runtime. To improve runtime, the simulation may be parallelized over
-the host, either over multiple homogenous resources, or by offloading specific
+the host, either over multiple homogeneous resources, or by offloading specific
 kernels to \emph{accelerators}, which may execute concurrently or with the rest
 of the application.
 
@@ -201,7 +201,7 @@ heterogeneous, adding features that make them more amenable to hosting
 full-system simulators.  Both Intel and Xilinx now sell FPGAs with embedded ARM
 cores, making it easier to co-simulate tightly coupled hardware and software
 models of a system. Modern FPGAs include hardened DRAM controllers that are
-compareable to those of ASICs. This trend towards greater integration looks to
+comparable to those of ASICs. This trend towards greater integration looks to
 continue. For example, upcoming Intel Stratix 10 MX parts include in-package DRAM (HBM2)
 that can support up to 1 TBps of aggregate memory bandwidth\cite{stratix10mx}.
 Both DRAM capacity and bandwidth are crucial for simulating components
@@ -215,7 +215,7 @@ Web Services' EC2 F1 instances\cite{amazonf1}. Where in the past academics
 would have to purchase their own FPGAs -- even to reproduce published
 experiments -- it may soon be possible for them to instead spin up an identical
 simulation on a shared computing resource. Companies may no longer have to
-maintain their own FPGA prorotyping clusters; they could instead batch out
+maintain their own FPGA prototyping clusters; they could instead batch out
 simulations to the cloud.
 
 \section{Improving Usability Through Automation}
