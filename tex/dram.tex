@@ -14,7 +14,7 @@ command enables the word-lines of the array corresponding to a single
 the row buffer to read or write; data is bursted over successive clock edges.
 While the row buffer remains \emph{open}, the row can be accessed by issuing
 new CAS commands. To access a row not stored in the buffer, a PRE command must
-be issued to \emph{close} the row and charge the bit-lines for a new access.
+be issued to \emph{close} the row and charge the bit lines for a new access.
 
 \section{DRAM Controller Architecture}
 
@@ -30,25 +30,24 @@ imposed by the DRAM standard. Good MAS policies strike a delicate balance
 between minimizing latency, maintaining quality-of-service guarantees across
 multiple threads of execution, maximizing bandwidth, and minimizing power.
 There are plethora of academic papers on MAS policies, and still more
-industrial patents on the subject. We outline some of the most popular MAS policies
-here.
+industrial patents on the subject. Our memory-model generator supports two popular MAS policies
+described here.
 
-\subsection{First-Come First-Serve (FCFS) Policy}\label{fcfs}
-Commands for the oldest pending memory reference are always issued first. This
-is the simplest MAS policy, but one that grossly under-utilizes available DRAM
-bandwidth. FCFS schedulers are common in older machines, and those that present
-few concurrent memory requests.
+\subsection{First-Come First-Serve (FCFS) Policy}\label{fcfs} Commands for the
+oldest pending memory reference are issued first. This is the simplest MAS
+policy, but tends to under-utilize available DRAM bandwidth as younger requests
+that may hit in the row-buffer are not issued before older commands that miss.
+FCFS schedulers are common in older machines, and those that present few
+concurrent memory requests.
 
 \subsection{First-Ready FCFS (FR-FCFS)\cite{frfcfs} Policy}\label{frfcfs}
-First, column access commands that hit in an open row-buffer are prioritized,
-then row and precharge commands from the oldest pending reference are
-considered.  FR-FCFS is a relatively simple scheme that achieves far higher BW
-than FCFS. It is the defacto standard against which new MAS policies for
-machines with a single stream of memory references (like single-core
-out-of-order machines), are compared.
-
-\section{System Integration of Off-Chip Memory Systems}
-
+First, ready (legally issuable) column commands are prioritized over ready row
+commands. Second, commands for older references are prioritized over younger
+ones. This permits younger but ready column commands to be issued before older
+row commands. FR-FCFS is a relatively simple scheme that improves bandwidth
+utilization considerably. It is the defacto standard against which new MAS
+policies for machines with a single stream of memory references (like
+single-core out-of-order machines), are compared.
 
 \section{DRAM Software Simulation}
 
@@ -56,20 +55,19 @@ The current state of the art in DRAM simulation in academia are cycle-accurate
 software simulators like DRAMSim2\cite{dramsim}, Ramulator\cite{ramulator} and
 USIMM\cite{usimm}. These models generate DRAM command streams that have been
 validated against industrial models (for some standards). Both Ramulator and
-DRAMSim2 can be easily integrated into Gem5\cite{gem5}, though it includes a
+DRAMSim2 can be easily integrated into Gem5\cite{gem5}, though gem5 includes a
 detailed event-based model of its own\cite{gem5event}. In trace-driven mode,
 operating at full throughput and only as a timing model, these cycle-accurate
-models simulate at frequencies ranging from 100s of KHz to ones of
+models simulate at frequencies ranging from hundreds of KHz to ones of
 MHz\cite{ramulator}.
 
 \section{DRAM Power Modeling}
 
 In order to model power, Ramulator relies on DRAMPower\cite{drampower}, to
-which it passes its command trace. Micron describes strategies in their
-technical notes for estimating DRAM power\cite{micronpower} (which DRAMSim2
-employs). They also made these calculations accessible by providing
-spreadsheets that take micro-architectural event frequencies as input. These
-approaches can carry over to FPGA simulation, as sufficiently detailed FPGA
-models can add instrumentation for these events, while simpler models can save
-the memory access trace to a buffer and compute power
-out-of-band\cite{strober}.
+which it passes its command trace. DRAMSim2 directly implements strategies
+Micron has described in their technical notes\cite{micronpower}. Micron has
+also provided spreadsheets implementing these strategies, that take
+microarchitectural event frequencies as input. These approaches can also be
+used in an FPGA simulation, as sufficiently detailed FPGA models can add
+instrumentation for specific events, while simpler models could save or sample
+the memory access trace and compute power out-of-band.

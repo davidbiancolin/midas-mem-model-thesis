@@ -108,7 +108,7 @@ functioning model of the machine, that is fast enough for software development.
 
 One challenge with this vision, is that there are many cases in which an
 FPGA-accelerated model is required but there is not yet RTL available to be
-transformed. Here custom RTL models are required and are subject to the same
+transformed. Here custom-RTL models are required and are subject to the same
 usability pitfalls of prior FPGA-accelerated simulation work. For MIDAS to
 succeed, models like this must be flexible enough to be reusable across a wide
 range of simulations in order to amortize the high cost of writing them.
@@ -117,15 +117,15 @@ timing model \emph{instances} addresses this challenge. To this end, the
 generator described herein synthesizes models for an important component of
 nearly all SoCs: DRAM off-chip memory systems. These model instances use the
 available FPGA off-chip memory system as a backing store for a timing model
-hosted in fabric. These instances are re-configurable at runtime, allowing for
+hosted in fabric. These instances are reconfigurable at runtime, allowing for
 design space exploration without lengthy FPGA recompilation. The generator can
 also add instrumentation to ease debugging and to perform non-invasive
 measurements of the simulation. Finally, since the in-fabric timing model is
 split from the \emph{functional} units that interact with the FPGA memory
 system, extending the generator with new timing-model classes is made easy.
 
-Just as MIDAS succeeds RAMP, this report succeeds an earlier masters thesis by
-Asif Khan\cite{khanmasters} addressing challenge of modeling off-chip memory
+This report builds on the work of an earlier masters thesis by Asif
+Khan\cite{khanmasters} addressing challenge of modeling off-chip memory
 systems. This report differs from that work, in its use of a generator, its
 demonstration of the model interoperating with models automatically transformed
 from source RTL, and finally, in the degree to which off-chip memory systems
