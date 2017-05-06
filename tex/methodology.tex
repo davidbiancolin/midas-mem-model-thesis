@@ -1,13 +1,13 @@
 \section{Target Design Configuration}
 
-To demonstrate of the generator, we evaluate two microarchitecturally different
-processors:  Rocket, a 5-stage single-issue in-order core, and BOOM (Berkeley
-Out-of-Order Machine), a superscalar out-of-order core~\cite{boom}. Both
+To demonstrate of the use of our generator, we evaluated two
+microarchitecturally different processors:  Rocket, a 5-stage single-issue
+in-order core, and BOOM, a superscalar out-of-order core~\cite{boom}. Both
 microarchitectures leverage the open-source Rocket-Chip SoC
-generator~\cite{rocketchip}. All of the instances of RocketChip used in this
-report have same top-level I/O: hence any instance can be transformed and
-modeled as part of a target with the MIDAS SDF network shown in figure
-\ref{fig:default-target} (in section (\ref{sec:targetandhostmachines}).
+generator~\cite{rocketchip}. As descrived in section
+\ref{sec:targetandhostmachines}, all of the instances of RocketChip used in
+this report have same top-level I/O and are modeled as part of a target with
+the MIDAS SDF network shown in figure \ref{fig:default-target}.
 
 Both cores implement the 64-bit scalar RISC-V ISA~\cite{Waterman:EECS-2016-118,
 Waterman:EECS-2016-161}\footnote{User level specification v2.1, privileged
@@ -18,9 +18,9 @@ processors.\footnote{Note that BOOM-2w roughly approximates the configuration
 of the ARM Cortex-A9 processor, which coincidentally is same microarchitecture
 embedded in the Zynq host.}. Unfortunately, neither configuration includes an
 L2 cache as it was  temporarily removed in the version of RocketChip used to
-conduct the evaluation. As a final note, the rocket configuration we used
+conduct the evaluation. As a final note, the Rocket configuration we used
 includes a non-blocking data cache (instead of the default blocking
-implementation). Unlike a classic RISC pipeline, rocket's backend includes a
+implementation). Unlike a classic RISC pipeline, Rocket's backend includes a
 scoreboard that allows it to make multiple memory requests when there are no
 intermediate dependent instructions.
 
@@ -77,23 +77,26 @@ that workload within the image's initramfs.  Generally, workloads were compiled
 statically (using \texttt{gcc -02}). When required, namely for the Java workloads, we
 built library dependencies using the Yocto (\texttt{riscv-poky}) Linux
 distribution generator. After packaging up the complete linux image, it is
-built into an instance of the Berkeley Boot Loader (BBL).
+built into an instance of the Berkeley Bootloader (BBL).
 
 Despite our best efforts, this process produces relatively large BBL instances
 ($>$ 10MiB), which are slow to load directly over the tether.  We modified
 \texttt{riscv-fesvr} to permit the MIDAS master to detect and accelerate program load
 out-of-band (instead of fully simulating the process over the tether).
 
-Finally, present limitations with how console I/O is proxied over the tether to
-\texttt{riscv-fesvr} can dramatically slow down simulation (FMR may be increased
-tenfold or more) depending on the volume of target console I/O. To circumvent
-this, all console output is piped to a file on the target's filesystem. At the
-end of the workload, the file is dumped to the console, and \texttt{riscv-fesvr}
-enters a custom fast I/O mode. Thus, low FMR is maintained without pertubing
-program execution. In our evaluation flow, no console input is ever presented
-to the target. The \texttt{init} script included in the linux image includes
-all of the commands required to run and measure the desired workload,
-afterwhich it powers down the machine (See listing \ref{lst:init}).\\
+Finally, present limitations regarding how console I/O is proxied to
+\texttt{riscv-fesvr} can dramatically slow down simulation depending on the
+volume of target console I/O. \footnote{Changes introduced to
+\texttt{riscv-fesvr} with the priviledge specification 1.10 updates remove this
+bottleneck, as the host is no longer is required to acknowledge console
+output.} To circumvent this, all console output is piped to a file on the
+target's filesystem. At the end of the workload, the file is dumped to the
+console, and \texttt{riscv-fesvr} enters a custom fast I/O mode.  Thus, low FMR
+is maintained without pertubing program execution. In our evaluation flow, no
+console input is ever presented to the target; the \texttt{init} script of the
+linux image includes all of the commands required to run and measure the
+desired workload, afterwhich it powers down the machine (See listing
+\ref{lst:init} for an example).\\
 
 \lstdefinestyle{init}{
     frame=lines,
@@ -129,33 +132,32 @@ afterwhich it powers down the machine (See listing \ref{lst:init}).\\
 
 \section{Measuring the Target}
 
-Measurements of the target design occur through in two places.
-Memory-timing-model instances collect their own memory system statistics, and
+Measurements of the target design occur in two places.
+Memory timing model instances collect their own statistics, and
 as described previously, are read with MMIO through the simulation
 interconnect. While these measurements can be made while the simulation is
 executing, in our evaluation we halt target execution to get a consistent
-snapshot. In either case, these measurements do not perturb simulation
-behavior.
+snapshot. Regardless, these measurements do not perturb simulation behavior.
 
-While we ultimately plan to support source transformations that permit
-measuring generated RTL models in a similar fashion, in this report,
-measurements of the core are made invasively with a target process,
+While we ultimately plan to support transformations that permit
+measuring generated-RTL models non-invasively, in this report,
+measurements of the core are made using a process running on the target machine,
 \texttt{rv\_counters}. This program wakes up every hundred million target
-cycles to read the core's hardware performance monitor which natively measures
-cycles and instructions retired, but provides 29 other counters to measure
-other events defined by the microarchitect like branch mispredictions or data
+cycles to read the core's hardware performance monitor (HPM) which by default measures
+cycles and instructions retired. Additionally, the HPM provides 29 other counters to measure
+events defined by the microarchitect like branch mispredictions or data
 cache misses (see \cite{Waterman:EECS-2016-161} section 3.1.15).
-\texttt{rv\_counters} prints these values to standard out; they are collected
-in a second file in the target filesystem.  Since polling events are both
+\texttt{rv\_counters} prints the values of these counters to standard out; they are collected
+in a second file in the target filesystem. Since polling events are both
 short-lived and infrequent, perturbations in target execution are insignificant.
 
-When a specific event type was not measured by the existing design, we added
-them manually to the generator. In addition to measuring conventional
+When a specific event was not measured by the existing design, we added them
+manually to Rocket-Chip. In addition to measuring conventional
 microarchitectural events, with this mechanism we were also able to measure the
-execution time of short-lived events, like memory allocations in the JVM, with
-effectively zero pertubation. To do this, we instrumented the target program
-with specialy encoded NOP instructions which would enable and disable an
-incrementer when decoded.
+execution time of regions of the application, like memory allocations in the
+JVM, with effectively zero pertubation. To do this, we instrumented the target
+program with specialy encoded NOP instructions which would enable and disable
+an incrementer when decoded.
 
 \section{Workloads}
 
@@ -164,16 +166,21 @@ involving realistic software applications without sub-sampling execution, we
 chose two non-trivial benchmark suites, the SPEC 2006 CPU
 benchmarks~\cite{spec_cpu_2006} and the DaCapo benchmarks~\cite{dacapo}.
 
-\subsection{SPECint2006 Benchmarks} he SPECint2006 benchmarks are widely used
-by computer architects to validate their designs. However, evaluations using
-microarchitectural cycle-levelj software simulators typically do not run the
-entire suite due to their length.
+\subsection{SPECint2006 Benchmarks} The SPECint2006 benchmarks are defacto
+standard to benchmarking sequential performance of general-purpose
+microprocessors, and widely used by industrial computer architects to validate
+their designs. Academic computer architects seldom run the complete
+``reference" workload due to their length which commit between 23-25 trillion
+dynamic instructions in RISC-V (RV64G).
 
 Table~\ref{tbl:spec} shows the dynamic instruction counts and the cache and TLB
 misses per 1000 instructions~(MPKI) for each benchmark executed with its test
-inputs. Even with the test inputs, it would take at least 8 days to run the
-whole set of benchmarks on a single instance of a very fast microarchitectural
-cycle-accurate software simulator (400~KIPS)~\cite{marssx86}.
+inputs. It would take at least 8 days to run the test workloads on a single
+instance of a very fast microarchitectural cycle-accurate software simulator
+(400~KIPS)~\cite{marssx86}, and nearly two years to run the reference
+workloads. By comparison, a single MIDAS simulator, assuming ($f_{fpga} = 40
+MHz, FMR = 1.25, CPI_{target} = 2)$ takes approximately 5 hours and 17 days to
+run test and reference workloads respectively.
 
 \begin{table}[t]
 	\begin{center}
@@ -237,11 +244,6 @@ cycle-accurate software simulator (400~KIPS)~\cite{marssx86}.
 \caption{Dynamic instruction counts and MPKI for the DaCapo benchmarks with the ``small'' input size}
 \label{tbl:dacapo}
 \end{table}
-
-To demonstrate how our platform enables studies that are difficult to perform
-in existing FPGA-based simulators and cycle-accurate software simulators, we
-run the DaCapo benchmarks on JikesRVM, a research Java Virtual Machine that is
-widely used in managed-language research.
 
 The DaCapo benchmarks are widely used Java benchmarks that represent full Java
 applications, including the Lucene search engine and a raytracer. We use
