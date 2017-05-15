@@ -181,7 +181,7 @@ the details of the underlying memory system, and explore their impact on the
 application.
 
 We ran an experiment where we measured the impact of doubling the memory
-latency for the FCFS MAS timing model with open page policy from Table
+latency for the FCFS MAS timing-model with open page policy from Table
 \ref{tbl:fifo_mas} (Figure~\ref{fig:dacapo_latency2x}). This allowed us to
 understand how sensitive different phases of the language runtime system are to
 memory latencies.
@@ -204,7 +204,7 @@ allowed us to identify this somewhat counter-intuitive effect encouraging.
 
 Finally, by running with one of our detailed memory models, we can gain deeper
 insights into the application behavior than on a traditional system. To
-demonstrate this, we ran several Dacapo benchmarks with the FCFS timing model
+demonstrate this, we ran several Dacapo benchmarks with the FCFS timing-model
 and an open-row policy. We recorded the fraction of DRAM accesses that incurred
 a row miss (Figure \ref{fig:java_rowmisses}).
 

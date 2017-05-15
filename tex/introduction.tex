@@ -1,13 +1,13 @@
 For the past half century, transistor scaling has delivered incredible
 improvements in computing performance and energy efficiency. The rapid advance
-of process technology has proven to be a strong disincentives to building custom ASICs and SoCs, 
+of process technology has proven to be a strong disincentive to building ASICs and SoCs, 
 as the competitive advantage of a custom silicon design would usually be lost
 to a general-purpose machine built in a newer process technology. This coupled
 with famously large and growing NRE, has limited ASIC deployment to high volume
 domains where they offer a considerable advantage over a general-purpose part.
 For applications that would see enormous improvements with custom silicon but
 lack the volume to overcome the NRE, FPGAs have proven to be an effective
-stopgap, despite being inferior to an ASIC in logic density, delay, and energy
+stopgap, despite being inferior to ASICs in logic density, delay, and energy
 efficiency.
 
 With Moore’s law ending, the risk balance for system architects is beginning to
@@ -70,7 +70,7 @@ simulation is desired to properly account for the interactions between the
 layers of the software stack and the hardware underneath.
 
 To address the simulation gap, many have turned to FPGAs. In industry,
-companies have long relied on \emph{FPGA-prototypes} that implement the SoC's
+companies have long relied on \emph{FPGA prototypes} that implement the SoC's
 RTL directly. These prototypes are both relatively cheap to build (considering
 total cost of the project) and fast enough to support software development
 (executing at ones to tens of MHz). For academics, FPGA prototypes are too
@@ -103,25 +103,25 @@ simulation may consist entirely of software models of the system.  However, as
 RTL implementations become available, MIDAS can automatically transform them
 into FPGA-accelerated models that can be linked into the simulator. Once the
 SoC has a complete RTL implementation, a MIDAS generated simulator can subsume
-the function of an FPGA-prototype. Throughout the whole process there is a
+the function of an FPGA prototype. Throughout the whole process there is a
 functioning model of the machine, that is fast enough for software development.
 
-One challenge with this vision, is that there are many cases in which an
+One challenge with this vision is that there are many cases in which an
 FPGA-accelerated model is required but there is not yet RTL available to be
 transformed. Here custom-RTL models are required and are subject to the same
 usability pitfalls of prior FPGA-accelerated simulation work. For MIDAS to
 succeed, models like this must be flexible enough to be reusable across a wide
 range of simulations in order to amortize the high cost of writing them.
-Generally, I propose that using a hardware \emph{generator} to synthesize
-timing model \emph{instances} addresses this challenge. To this end, the
+Generally, we propose that using a hardware \emph{generator} to synthesize
+timing-model \emph{instances} addresses this challenge. To this end, the
 generator described herein synthesizes models for an important component of
 nearly all SoCs: DRAM off-chip memory systems. These model instances use the
-available FPGA off-chip memory system as a backing store for a timing model
+available FPGA off-chip memory system as a backing store for a timing-model
 hosted in fabric. These instances are reconfigurable at runtime, allowing for
 design space exploration without lengthy FPGA recompilation. The generator can
 also add instrumentation to ease debugging and to perform non-invasive
-measurements of the simulation. Finally, since the in-fabric timing model is
-split from the \emph{functional} units that interact with the FPGA memory
+measurements of the simulation. Finally, since the in-fabric timing-model is
+split from the functional components that interact with the FPGA memory
 system, extending the generator with new timing-model classes is made easy.
 
 This report builds on the work of an earlier masters thesis by Asif

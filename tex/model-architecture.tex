@@ -1,12 +1,12 @@
 % This section describes the design of the memory system model. How host target
 % decoupling is achieved. What configurations are available.
 
-Our memory-timing model \textit{generator} describes a space of
+Our memory timing-model \textit{generator} describes a space of
 \textit{instances}, each of which may be used to model a restricted set of
 memory systems. As input, the generator accepts a configuration that specifies
 the static parameters of the instance,  such as width of the interfaces it
 binds to, the number of outstanding requests it must support, and the type of
-memory system the instance will model (a \emph{timing model class}). As output,
+memory system the instance will model (a \emph{timing-model class}). As output,
 the generator produces an instance module and local memory map of all registers
 it will exposes to the simulation interconnect. These registers control timing
 parameters can be overwritten to reconfigure the instance without needing to
@@ -15,12 +15,12 @@ regenerate it.
 Instances operate by using the FPGA host's off-chip memory system as a backing
 store: target requests carried through simulation tokens are snooped by the
 \emph{ingress unit} and re-issued to the host-memory system. Responses from the
-host memory system are subsequently buffered by the \emph{egress unit}. In
-parallel, a host-decoupled \emph{timing model} explicitly consumes input tokens
-and generates output tokens. When the timing model wishes to release a token
+host-memory system are subsequently buffered by the \emph{egress unit}. In
+parallel, a host-decoupled \emph{timing-model} explicitly consumes input tokens
+and generates output tokens. When the timing-model wishes to release a token
 with a valid target response, it fetches the matching host response from the
-egress unit. If no host response is present, the timing model does not produce
-a token. This preserves simulation timing regardless of host memory system
+egress unit. If no host response is present, the timing-model does not produce
+a token. This preserves simulation timing regardless of host-memory system
 timing.
 
 A block diagram of an instance is shown in figure \ref{fig:timing_model}.
@@ -28,7 +28,7 @@ A block diagram of an instance is shown in figure \ref{fig:timing_model}.
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/memory-model-block-diagram.pdf}
-	\caption{Top-level diagram of memory system model with latency-bandwidth pipe timing model}
+	\caption{Top-level diagram of memory system model with latency-bandwidth pipe timing-model}
 	\label{fig:timing_model}
 \end{figure}
 
@@ -51,7 +51,7 @@ All instances have three interfaces.
         multiple output tokens accordingly.
 
     \item \textbf{Host-side:} AXI4 master. This interface is used by the
-        instance to make requests of the host memory system. It operates
+        instance to make requests of the host-memory system. It operates
         independently of target-time.
 
     \item \textbf{Configuration-side:} AXI4-lite slave. This interface exposes both
@@ -87,9 +87,9 @@ not worry about translating requests between different bus standards. Instead,
 the model relies on bridges and adapters in the host-memory system to manage
 that complexity instead.
 
-The ingress and egress unit are the gatekeepers of the host memory system. They
+The ingress and egress unit are the gatekeepers of the host-memory system. They
 apply target requests to the host-memory system and buffer responses so that
-they may be fetched by the timing model without violating ordering requirements
+they may be fetched by the timing-model without violating ordering requirements
 of the AXI4 standard. They must do this without locking up the host-memory
 system (more on this later).
 
@@ -97,11 +97,11 @@ The ingress unit snoops the values of input tokens and outputs tokens; when the
 timing-model handshakes on a read address, write address or write data request,
 it enqueues the payload of that request into a queue for that AXI channel. Once
 the ingress unit has buffered a complete read or write transaction, it issues
-it to the host memory system. The ingress unit must wait until it has complete
+it to the host-memory system. The ingress unit must wait until it has complete
 transaction to avoid locking up the host-memory system in the case that
 simulation halts during a target request, or if the target attempts to reset
 the controller.  If any of the queues of the ingress unit would overflow, the
-timing model may not advance (it cannot dequeue the input tokens). At minimum,
+timing-model may not advance (it cannot dequeue the input tokens). At minimum,
 the queues must be sized to hold a single complete request to avoid deadlocking
 simulation\footnote{The minimums are ARQueue depth of 1, WQueue depth of
 \emph{MaxWriteLength}, AWQueue depth of \emph{MaxWrites}, where MaxWriteLength
@@ -109,11 +109,11 @@ and MaxWrites are set in the base configuration.(Section
 \ref{sec:generator-parameters}, table \ref{tbl:base-config}). The default is
 the same, but with ARQueue depth increased to 4.} Adding additional buffering
 on the AR queue may increase FMR by insulating the model against backpressure
-received from the host memory system.
+received from the host-memory system.
 
 The egress unit is responsible for buffering the pertinent fields of host
-responses until they are requested by the timing model. The egress unit must
-rectify reorderings made by both the host memory system and the timing model.
+responses until they are requested by the timing-model. The egress unit must
+rectify reorderings made by both the host-memory system and the timing-model.
 In AXI4, there are two ordering constraints of concern for egress unit
 design(see \cite{amba}, section A6.4 for greater detail):
 
@@ -141,33 +141,33 @@ dropped.}. The implementation of the virtual queues depends on generator
 parameters described in section \ref{sec:generator-parameters}. Details of the
 various egress unit implementations are described in section \ref{sec:egress}.
 
-In parallel, the timing model consumes input tokens and generates output
+In parallel, the timing-model consumes input tokens and generates output
 tokens. As described in section \ref{sec:interfaces}, an output token includes
 both the backpressure (ready) on request channels as well as the valid bits and
-payloads of response channels. The timing model is free to drive signals in the
+payloads of response channels. The timing-model is free to drive signals in the
 read and write response payloads as it sees fit; it may wish to return custom
 errors or hints, or even return incorrect data. Generally, for read responses
-the timing model fetches missing fields beat-by-beat from the egress unit, where
+the timing-model fetches missing fields beat-by-beat from the egress unit, where
 as for write responses, it consumes a credit ensuring that the host write
 response has been received.
 
 To this end, the egress unit exposes ready-valid request and response
-interfaces for both reads and writes. The timing model fetches the oldest
+interfaces for both reads and writes. The timing-model fetches the oldest
 response for a given AXI ID by providing the ID through the request interface.
 After a request handshake, the egress unit returns the beats of the transaction
 at the head of that ID's virtual queue through the response interface. The
-timing model then handshakes on each beat to dequeue them from the egress unit.
+timing-model then handshakes on each beat to dequeue them from the egress unit.
 The egress unit will only accept a new request once it has presented the final
 beat of the previous one \footnote{This is a natural restriction, as the AXI4
 specification does not permit read-response interleaving. In the future this
 could be changed, to have the model request individual beats instead of whole
 transactions}.
 
-In the event that the host memory system is slow, the egress unit cannot return
-a valid response and thus the timing model cannot populate a complete output
+In the event that the host-memory system is slow, the egress unit cannot return
+a valid response and thus the timing-model cannot populate a complete output
 token. Local and downstream target-time stalls. Only once the egress unit
 receives the response from the host-memory system and forwards through to the
-timing model will the timing model enqueue the new output token, permitting
+timing-model will the timing-model enqueue the new output token, permitting
 target time to advance.  In this way, host-decoupling is maintained. This
 permits an instance to model physically unrealizable memory systems. For
 example, one could model single cycle memory system to perform studies of the
@@ -317,7 +317,7 @@ further optimizations, tend to be under LUT pressure. In the case of this
 generator, even when $VS >> IS$, directly implementing the virtual queues may
 well be desired.
 
-\section{Timing Model Classes}\label{sec:timing_model}
+\section{Timing-Model Classes}\label{sec:timing_model}
 
 \subsection{Latency-Bandwidth Pipe}
 
@@ -365,7 +365,7 @@ base latency if a read or write request used the bank $t_{\Delta}$ cycles
 prior, where $t_{CP}$ is the maximum conflict penalty. The model has a
 reconfigurable number of banks and bank address assignment.  The bank address
 is assigned by setting an offset and a mask, where: $$Address_{Bank} =
-(Address_{Physical} >> Offset) \& Mask$$  The timing model must be provisioned
+(Address_{Physical} >> Offset) \& Mask$$  The timing-model must be provisioned
 with the maximum number of banks at generation time. This model may reorder requests.
 
 \noindent Generation and runtime parameters are shown in tables
@@ -380,13 +380,13 @@ respectively.
     \textbf{Name} & \textbf{Default} & \textbf{Description} \\
     \hline
     \hline
-    \textit{MaxBanks} & N/A & Specifies the maximum number of banks the timing model can support. Must be a power of 2. \\
+    \textit{MaxBanks} & N/A & Specifies the maximum number of banks the timing-model can support. Must be a power of 2. \\
     \hline
     \textit{MaxLatencyBits} & 12 & Defines the number of bits used in cycle accountings of target-time. \\
     \hline
 \end{tabular}}
 \end{center}
-\caption{Additional generation parameters of the bank conflict timing model.}
+\caption{Additional generation parameters of the bank conflict timing-model.}
 \label{tbl:bc-generator-parameters}
 \end{table}%
 
@@ -414,7 +414,7 @@ respectively.
     \hline
 \end{tabular}}
 \end{center}
-\caption{Programmable registers of the bank conflict timing model.}
+\caption{Programmable registers of the bank conflict timing-model.}
 \label{tbl:bc-programmable-registers}
 \end{table}%
 
@@ -516,7 +516,7 @@ While, software DRAM simulators support multi-channel configurations, for the
 time being, in MIDAS we expect the user will simply use separate instances for
 each controller.  Finally, it should be said that there is no fundamental
 limitation of our scheme that presents us from modeling these characteristics
--- we intend to expand the fidelity of the DRAM timing model classes as we use
+-- we intend to expand the fidelity of the DRAM timing-model classes as we use
 them in the future.
 
 

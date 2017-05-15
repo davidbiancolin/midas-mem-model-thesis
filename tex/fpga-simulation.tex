@@ -52,7 +52,7 @@ available.
 
 When a hardware-emulation platform is unavailable or too expensive, and when
 faster full-system simulation is desired earlier, it is common in industry to
-use \emph{FPGA prototypes}. An FPGA prototype directly implements the SoC on
+use FPGA prototypes. An FPGA prototype directly implements the SoC on
 one more more FPGAs, often with a custom board design that may include
 peripherals identical to those that would be deployed in the final system. FPGA
 prototypes are fast enough to support software development(ones to hundreds of
@@ -60,12 +60,12 @@ MHz) and thus a greater degree pre-silicon validation. Moreover, for large
 project, they are inexpensive enough to duplicated and shared between hardware
 and software engineering teams.  The difficulty with using FPGA prototypes as
 full-system simulators is that they require complete RTL implementation of the
-design (and, sometimes, a custom PCB). While FPGA-prototypes can accelerate
+design (and, sometimes, a custom PCB). While FPGA prototypes can accelerate
 software development by months, they become useful too late in the design cycle
 to do hardware-software co-design, as the target hardware cannot easily be
 modified, limiting the scope of potential changes.
 
-Since a complete RTL implementation precludes the use FPGA-prototypes for
+Since a complete RTL implementation precludes the use FPGA prototypes for
 design space exploration and early prototyping, they are generally unused in
 academia. Instead, full-system simulation is done entirely in software with
 simulation frameworks such as Gem5\cite{gem5}, and MARSSx86\cite{marssx86}.
@@ -93,7 +93,7 @@ software development. Initially, this simulator could be used for system-level
 prototyping and design space exploration, but as desired, more detailed models
 or RTL implementations of target components would be integrated. Ultimately,
 once all of the target RTL has been integrated, the simulator subsume the role of an
-FPGA-prototype. Academics need not completely implement an SoC; they may simply
+FPGA prototype. Academics need not completely implement an SoC; they may simply
 stop adding fidelity to the simulation once they are content with the quality
 of its results.
 
@@ -106,7 +106,7 @@ used in FPGA prototypes.
 
 \section{Defining FPGA-Accelerated Simulation}
 
-The distinction between FPGA-accelerated simulation and FPGA-prototyping can be
+The distinction between FPGA-accelerated simulation and FPGA prototyping can be
 nebulous: we argue that FPGA prototyping represents a subset of the larger
 space of FPGA-accelerated simulation. Key to understanding this is first, think of
 simulation as any other application executing on a host, and second, forget
@@ -122,14 +122,14 @@ may be optimized in any way whatsoever so long as this output is the same.
 Like any other application, simulations have hot spots that account for the bulk
 of their runtime. To improve runtime, the simulation may be parallelized over
 the host, either over multiple homogeneous resources, or by offloading specific
-kernels to \emph{accelerators}, which may execute concurrently or with the rest
+kernels to accelerators, which may execute concurrently or with the rest
 of the application.
 
 %In simulations that account for time at the cycle-level, much of this runtime
 %is dedicated to modeling the cycle-by-cycle interactions of parts of the
 %system. These models may be written in C++ or SystemC, or implemented in an HDL
 %like verilog or VHDL. Parts of the simulation may be divided into functional
-%models, like an architecture simulator, and a timing model that does some
+%models, like an architecture simulator, and a timing-model that does some
 %accounting of time based on a model of the microarchitecture. What's important
 %to note, is that any cycle-level model of hardware attempts to capture the
 %behavior of a fine-grained highly concurrent digital-circuit. Taken to the
@@ -141,7 +141,7 @@ target. One way to achieve this is to dissolve the simulation spatially
 (perhaps along module boundaries): parts of the target, like an NoC or Core
 pipeline, could be offloaded to an FPGA, while models for I/O may be hosted on
 a CPU.  Alternatively, one could host a functional model of a module on the CPU
-and accelerate the timing model on the FPGA (or vice versa).  Again, the only
+and accelerate the timing-model on the FPGA (or vice versa).  Again, the only
 constraint on the implementation of the simulation, and thus, the
 implementation of FPGA-accelerated components of the simulation, is that as the
 output of the simulation is the same. Once this constraint is met, a faster
@@ -238,14 +238,14 @@ much state to be hosted in fabric and yet they must must be tightly coupled to
 the processor model making it difficult to co-simulate DRAM in
 software.\footnote{High-latency peripherals, like disks, can often be modeled
 in software without any performance cost.\cite{disksim}} These components
-typically require an abstract model that virtualizes the target memory system
-over FPGA-host memory system.
+typically require an abstract model that virtualizes the target-memory system
+over FPGA-host-memory system.
 
 This reintroduces the aforementioned problem that anything but a simplistic RTL
 model is difficult to design, modify and reuse. We propose to address this
 through \emph{generators} that synthesize abstract memory system models that
 can be easily modified and used across a wide range of targets.  This generator
-must provide a variety of timing models so as to enable the designer to trade
+must provide a variety of timing-models so as to enable the designer to trade
 fidelity for FPGA area when needed. Generated models must be reconfigurable, to
 permit sweeping memory system parameters without needing to recompile the FPGA
 bitstream. These models must provide useful instrumentation to both aid in

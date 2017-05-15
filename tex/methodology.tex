@@ -133,7 +133,7 @@ desired workload, afterwhich it powers down the machine (See listing
 \section{Measuring the Target}
 
 Measurements of the target design occur in two places.
-Memory timing model instances collect their own statistics, and
+Memory timing-model instances collect their own statistics, and
 as described previously, are read with MMIO through the simulation
 interconnect. While these measurements can be made while the simulation is
 executing, in our evaluation we halt target execution to get a consistent
@@ -178,7 +178,7 @@ misses per 1000 instructions~(MPKI) for each benchmark executed with its test
 inputs. It would take at least 8 days to run the test workloads on a single
 instance of a very fast microarchitectural cycle-accurate software simulator
 (400~KIPS)~\cite{marssx86}, and nearly two years to run the reference
-workloads. By comparison, a single MIDAS simulator, assuming ($f_{fpga} = 40
+workloads. For comparison, a single MIDAS simulator, assuming ($f_{fpga} = 40
 MHz, FMR = 1.25, CPI_{target} = 2)$ takes approximately 5 hours and 17 days to
 run test and reference workloads respectively.
 
