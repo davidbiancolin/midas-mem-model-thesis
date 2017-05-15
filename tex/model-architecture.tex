@@ -23,7 +23,7 @@ egress unit. If no host response is present, the timing-model does not produce
 a token. This preserves simulation timing regardless of host-memory system
 timing.
 
-A block diagram of an instance is shown in figure \ref{fig:timing_model}.
+A block diagram of an instance is shown in figure~\ref{fig:timing_model}.
 
 \begin{figure}
 	\centering
@@ -105,17 +105,18 @@ timing-model may not advance (it cannot dequeue the input tokens). At minimum,
 the queues must be sized to hold a single complete request to avoid deadlocking
 simulation\footnote{The minimums are ARQueue depth of 1, WQueue depth of
 \emph{MaxWriteLength}, AWQueue depth of \emph{MaxWrites}, where MaxWriteLength
-and MaxWrites are set in the base configuration.(Section
-\ref{sec:generator-parameters}, table \ref{tbl:base-config}). The default is
-the same, but with ARQueue depth increased to 4.} Adding additional buffering
-on the AR queue may increase FMR by insulating the model against backpressure
-received from the host-memory system.
+and MaxWrites are set in the base
+configuration.(Section~\ref{sec:generator-parameters},
+table~\ref{tbl:base-config}). The default is the same, but with ARQueue depth
+increased to 4.} Adding additional buffering on the AR queue may increase FMR
+by insulating the model against backpressure received from the host-memory
+system.
 
 The egress unit is responsible for buffering the pertinent fields of host
 responses until they are requested by the timing-model. The egress unit must
 rectify reorderings made by both the host-memory system and the timing-model.
 In AXI4, there are two ordering constraints of concern for egress unit
-design(see \cite{amba}, section A6.4 for greater detail):
+design(see~\cite{amba}, section A6.4 for greater detail):
 
 \begin{enumerate}
 
@@ -138,11 +139,11 @@ payload fields are enqueued; the queue degenerates into a up-down counter of
 write acknowledgments it has received for each ID\footnote{Write
 acknowledgments do have WUSER and WRESP fields but, as above, they are
 dropped.}. The implementation of the virtual queues depends on generator
-parameters described in section \ref{sec:generator-parameters}. Details of the
-various egress unit implementations are described in section \ref{sec:egress}.
+parameters described in section~\ref{sec:generator-parameters}. Details of the
+various egress unit implementations are described in section~\ref{sec:egress}.
 
 In parallel, the timing-model consumes input tokens and generates output
-tokens. As described in section \ref{sec:interfaces}, an output token includes
+tokens. As described in section~\ref{sec:interfaces}, an output token includes
 both the backpressure (ready) on request channels as well as the valid bits and
 payloads of response channels. The timing-model is free to drive signals in the
 read and write response payloads as it sees fit; it may wish to return custom
@@ -172,7 +173,7 @@ target time to advance.  In this way, host-decoupling is maintained. This
 permits an instance to model physically unrealizable memory systems. For
 example, one could model single cycle memory system to perform studies of the
 target design with an ideal memory system. The operation of such a model in
-figure \ref{fig:model_operation}.
+figure~\ref{fig:model_operation}.
 
 \begin{figure} \centering
 \includegraphics[width=0.8\textwidth]{figures/memory-model-operation.pdf}
@@ -192,7 +193,7 @@ giving hints to generator can greatly reduce FPGA resource utilization.
 
 The generator's input configuration consists of a \emph{base} configuration
 that is extended with a timing-model configuration .The parameters of the base
-configuration are described in the table \ref{tbl:base-config}. Timing-model
+configuration are described in the table~\ref{tbl:base-config}. Timing-model
 configurations are described section \label{sec:timing-model}.  Note, ingress
 and egress unit generation depends only on parameters of the base
 configuration.
@@ -230,7 +231,7 @@ configuration.
 In this section we consider only read responses, as they constitute the bulk of the area of the egress unit.
 
 How the egress unit implements its virtual queues depends on base-generation
-parameters (table \ref{tbl:base-config}), including the maximum number of
+parameters (table~\ref{tbl:base-config}), including the maximum number of
 requests sharing an ID concurrently,  MaxReadsPerID ($R_{ID,max}$), the maximum
 concurrent number of responses across all IDs, MaxReads ($R_{max}$), and the
 maximum length, in beats, of a read response, MaxReadLength ($L_{max}$).
@@ -255,7 +256,7 @@ $$VS = ISID_{max}$$
 The conventional wisdom in design for FPGAs is that BRAM is cheap. Instead of
 trying to be clever, for small degrees of virtual state, and the egress unit
 physical implements each of those queues in BRAM, in a structure called a
-SRAMMultiFIFO (SMF)\cite{smf}. Naturally, this requires $VS$ bits. Since there the egress unit only ever enqueues
+SRAMMultiFIFO (SMF)~\cite{smf}. Naturally, this requires $VS$ bits. Since there the egress unit only ever enqueues
 into one queue and dequeues from one queue, a 1R-1W port BRAM can be used to
 co-locate the entries of multiple queues.  Read and write pointers for each
 queue are maintained separately in registers. The AXI IDs and read or write
@@ -368,9 +369,9 @@ is assigned by setting an offset and a mask, where: $$Address_{Bank} =
 (Address_{Physical} >> Offset) \& Mask$$  The timing-model must be provisioned
 with the maximum number of banks at generation time. This model may reorder requests.
 
-\noindent Generation and runtime parameters are shown in tables
-\ref{tbl:bc-generator-parameters} and \ref{tbl:bc-programmable-registers}
-respectively.
+\noindent Generation and runtime parameters are shown in
+tables~\ref{tbl:bc-generator-parameters}
+and~\ref{tbl:bc-programmable-registers} respectively.
 
 \begin{table}[htb]
 \begin{center}
@@ -398,9 +399,9 @@ respectively.
     \textbf{Name} & \textbf{Description} \\
     \hline
     \hline
-    \textit{ReadMaxRequests} & Same as latency-bandwidth pipe (table \ref{tbl:lbp-programmable-registers}) \\
+    \textit{ReadMaxRequests} & Same as latency-bandwidth pipe (table~\ref{tbl:lbp-programmable-registers}) \\
     \hline
-    \textit{WriteMaxRequests} & Same as latency-bandwidth pipe (table \ref{tbl:lbp-programmable-registers}) \\
+    \textit{WriteMaxRequests} & Same as latency-bandwidth pipe (table~\ref{tbl:lbp-programmable-registers}) \\
     \hline
     \textit{Latency} & Sets the base latency of a read or write transaction. \\
     \hline
@@ -419,13 +420,15 @@ respectively.
 \end{table}%
 
 \clearpage
-\subsection{FCFS DRAM MAS} This class models a FCFS DRAM MAS (see section
-\ref{fcfs}) with programmable open and closed page policies. The FCFS model
-has programmable bank and row address assignment which are implemented as described in
-section \ref{sec:bank-conflict}. This model does not reorder requests.
+\subsection{FCFS DRAM MAS} This class models a FCFS DRAM MAS (see
+section~\ref{fcfs}) with programmable open and closed page policies. The FCFS
+model has programmable bank and row address assignment which are implemented as
+described in section~\ref{sec:bank-conflict}. This model does not reorder
+requests.
 
-\noindent Generation and runtime parameters are shown in tables
-\ref{tbl:fcfs-generator-parameters} and \ref{tbl:fcfs-programmable-registers}
+\noindent Generation and runtime parameters are shown in
+tables~\ref{tbl:fcfs-generator-parameters}
+and~\ref{tbl:fcfs-programmable-registers}
 respectively.
 
 \begin{table}[htb]
@@ -459,13 +462,13 @@ respectively.
     \hline
     \textit{tRCD} & Specifies row-to-column command delay. \\
     \hline
-    \textit{ReadMaxRequests} & Same as latency-bandwidth pipe (table \ref{tbl:lbp-programmable-registers}) \\
+    \textit{ReadMaxRequests} & Same as latency-bandwidth pipe (table~\ref{tbl:lbp-programmable-registers}) \\
     \hline
-    \textit{WriteMaxRequests} & Same as latency-bandwidth pipe (table \ref{tbl:lbp-programmable-registers}) \\
+    \textit{WriteMaxRequests} & Same as latency-bandwidth pipe (table~\ref{tbl:lbp-programmable-registers}) \\
     \hline
-    \textit{BankAddrOffset} & Same as bank-conflict model (table \ref{tbl:bc-programmable-registers}) \\
+    \textit{BankAddrOffset} & Same as bank-conflict model (table~\ref{tbl:bc-programmable-registers}) \\
     \hline
-    \textit{BankAddrMask} & Same as bank-conflict model (table \ref{tbl:bc-programmable-registers}) \\
+    \textit{BankAddrMask} & Same as bank-conflict model (table~\ref{tbl:bc-programmable-registers}) \\
     \hline
     \textit{RowAddrOffset} & Same mechanism as above for defining row address assignment in physical address. \\
     \hline
@@ -481,10 +484,9 @@ respectively.
 
 \clearpage
 \subsection{FR-FCFS DRAM MAS}
-This class models a FR-FCFS (section \ref{frfcfs}) with an open page policy. It
+This class models a FR-FCFS (section~\ref{frfcfs}) with an open page policy. It
 shares all of the same generation and runtime parameters as the FCFS DRAM MAS
-model (tables \ref{tbl:fcfs-programmable-registers} and
-\ref{tbl:fcfs-generator-parameters}))
+model (tables~\ref{tbl:fcfs-programmable-registers} and \ref{tbl:fcfs-generator-parameters}))
 
 
 \section{DRAM MAS Model Limitations}
@@ -494,7 +496,7 @@ $t_{RCD}$, they are incomplete models of a generic DDR DRAM. We enumerate some
 key limitations here:
 
 \begin{enumerate}
-    \item\textbf{No Refresh Model}. Neither model accounts for refresh leading to
+    \item\textbf{No refresh model}. Neither model accounts for refresh leading to
         artificially high bandwidths (especially in the FR-FCFS model) and
         depressing tail latency one might see in DRAM typically -- where read
         requests hit a bank currently under refresh.

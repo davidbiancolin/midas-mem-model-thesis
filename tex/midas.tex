@@ -17,7 +17,7 @@ described here may, and likely will, change in the future.
 \end{figure}
 
 MIDAS is a set of C++ and RTL libraries alongside a compiler. The current MIDAS
-flow is shown in figure \ref{fig:midas}. MIDAS accepts a description of target
+flow is shown in figure~\ref{fig:midas}. MIDAS accepts a description of target
 as a synchronous dataflow (SDF)-like network of interconnected models, which
 specifies how it is composed of transformed-RTL models, custom-RTL models, and
 software models.
@@ -41,10 +41,10 @@ of the target.
 In MIDAS, the target design is specified as a synchronous dataflow(SDF)-like
 network of \emph{models}, connected with FIFO \emph{channels}, that carry
 simulation \emph{tokens}. This is akin to model of target description used in
-RAMP\cite{ramp} and APorts\cite{APortNetworks}). This description is sufficient
+RAMP~\cite{ramp} and APorts~\cite{APortNetworks}). This description is sufficient
 to capture the RTL behavior of the target, while still enabling a wide range of
-optimizations that make FPGAs more effective accelerators for simulation. An example MIDAS SDF shown in figure
-\ref{fig:adder-example}.
+optimizations that make FPGAs more effective accelerators for simulation. An
+example MIDAS SDF shown in figure~\ref{fig:adder-example}.
 
 \begin{figure}
 	\centering
@@ -87,9 +87,9 @@ At time zero each of the channels is initialized with a sequence of tokens based
 on the type of target interconnect they model. A pipe is initialized with tokens
 equal to its latency. After initialization, target-time advances in a decoupled
 fashion with models firing as they may do so legally (all of their input tokens
-are available and all their output channels are not full). The figures
-\ref{fig:adder-execution}a - \ref{fig:adder-execution}d illustrate the
-execution of the example SDF in figure \ref{fig:adder-example} over two target
+are available and all their output channels are not full). The
+figures~\ref{fig:adder-execution}a~-~\ref{fig:adder-execution}d illustrate the
+execution of the example SDF in figure~\ref{fig:adder-example} over two target
 cycles.
 
 \begin{sidewaysfigure}
@@ -124,16 +124,16 @@ cycles.
 available or one of its output channels is full). Generally, this occurs when
 the SDF network includes a cycle of wire-type channels -- it need not be a
 combinational loop.  A common example of this involves decoupled source to a
-model of a decoupled sink with a wire-type channels (shown in Figure
-\ref{fig:deadlock}). Judicious choice of channel type is required to prevent
-this. There are two solutions to the deadlock example in \ref{fig:deadlock}.
-Figure \ref{fig:pipe-decoupled-example} moves the output registers of the
-source into the channel, preserving the RTL behavior of the initial SDF but
-requiring changes to the decoupled-source model. Figure
-\ref{fig:queue-decoupled-example} uses a queue-type channel. This changes the
-RTL behavior of the target, but requires no changes to the models.  Assuming
-downstream models are latency insensitive this should not change the functional
-behavior of the target.
+model of a decoupled sink with a wire-type channels (shown in
+Figure~\ref{fig:deadlock}). Judicious choice of channel type is required to
+prevent this. There are two solutions to the deadlock example
+in~\ref{fig:deadlock}.  Figure~\ref{fig:pipe-decoupled-example} moves the
+output registers of the source into the channel, preserving the RTL behavior of
+the initial SDF but requiring changes to the decoupled-source model.
+Figure~\ref{fig:queue-decoupled-example} uses a queue-type channel. This
+changes the RTL behavior of the target, but requires no changes to the models.
+Assuming downstream models are latency insensitive this should not change the
+functional behavior of the target.
 
 
 \begin{figure}
@@ -174,7 +174,7 @@ multi-ported RAMs, can instead by simulated over multiple host-cycles with
 fewer resources and greater host frequency.
 
 To help quantify this time-area trade-off it is useful to define FPGA-cycle to
-Model-Cycle Ratio\cite{APorts}, the mean number of FPGA-cycles required to
+Model-Cycle Ratio~\cite{APorts}, the mean number of FPGA-cycles required to
 execute a single target-cycle: $$ FMR = \frac{Cycles_{FPGA}}{Cycles_{Target}}
 $$
 
@@ -200,14 +200,14 @@ Additionally, target-fire that may adversely affect cycle time for sufficiently
 large blocks of RTL.
 
 MIDAS also supports optional transformations to add scan chains and I/O trace
-buffers for debugging, and for for use with Strober\cite{strober}. These passes
-are shown in \ref{fig:midas-passes}.
+buffers for debugging, and for for use with Strober~\cite{strober}. These passes
+are shown in~\ref{fig:midas-passes}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=16cm]{figures/midas-passes.pdf}
     \caption{Some passes supported by MIDAS. We often refer to the
-    host-decoupling pass as a FAME1 transformation\cite{fame}.}
+    host-decoupling pass as a FAME1 transformation~\cite{fame}.}
 	\label{fig:midas-passes}
 	\centering
 \end{figure}
@@ -281,7 +281,7 @@ ZC706, drives a DDR3 SODIMM (upgraded to 8GiB).
 
 All target designs used in this report are single-core, tethered RISC-V
 processors with a single-channel DRAM subsystem.  They all share the MIDAS SDF
-shown in figure \ref{fig:default-target}. This SDF includes: a transformed-RTL
+shown in figure~\ref{fig:default-target}. This SDF includes: a transformed-RTL
 model, sourced with RTL generated by RocketChip, that instantiates the
 processor pipeline (Rocket or BOOM), L1 caches, and an uncore containing the
 TileLink agent that manages the tether. A software model, which wraps the
@@ -305,11 +305,11 @@ default I/O model.
 \begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{figures/hosted-masters-target.pdf}
-    \caption{The target of figure \ref{fig:default-target} mapped to the ZC706.}
+    \caption{The target of figure~\ref{fig:default-target} mapped to the ZC706.}
 	\label{fig:hosted-masters-target}
 \end{figure}
 
-The simulation is hosted as shown in figure \ref{fig:hosted-masters-target}.
+The simulation is hosted as shown in figure~\ref{fig:hosted-masters-target}.
 The simulation main including the \texttt{riscv-fesvr} software model is hosted
 on the PS (running in a single linux process) while all other models are hosted
 in the PL. The simulation interconnect is bound to the AXI-GP0 port of the PS;

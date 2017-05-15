@@ -4,10 +4,9 @@ To demonstrate of the use of our generator, we evaluated two
 microarchitecturally different processors:  Rocket, a 5-stage single-issue
 in-order core, and BOOM, a superscalar out-of-order core~\cite{boom}. Both
 microarchitectures leverage the open-source Rocket-Chip SoC
-generator~\cite{rocketchip}. As descrived in section
-\ref{sec:targetandhostmachines}, all of the instances of RocketChip used in
+generator~\cite{rocketchip}. As described in section~\ref{sec:targetandhostmachines}, all of the instances of RocketChip used in
 this report have same top-level I/O and are modeled as part of a target with
-the MIDAS SDF network shown in figure \ref{fig:default-target}.
+the MIDAS SDF network shown in figure~\ref{fig:default-target}.
 
 Both cores implement the 64-bit scalar RISC-V ISA~\cite{Waterman:EECS-2016-118,
 Waterman:EECS-2016-161}\footnote{User level specification v2.1, privileged
@@ -95,8 +94,7 @@ console, and \texttt{riscv-fesvr} enters a custom fast I/O mode.  Thus, low FMR
 is maintained without pertubing program execution. In our evaluation flow, no
 console input is ever presented to the target; the \texttt{init} script of the
 linux image includes all of the commands required to run and measure the
-desired workload, afterwhich it powers down the machine (See listing
-\ref{lst:init} for an example).\\
+desired workload, afterwhich it powers down the machine (See listing~\ref{lst:init} for an example).\\
 
 \lstdefinestyle{init}{
     frame=lines,
@@ -146,7 +144,7 @@ measurements of the core are made using a process running on the target machine,
 cycles to read the core's hardware performance monitor (HPM) which by default measures
 cycles and instructions retired. Additionally, the HPM provides 29 other counters to measure
 events defined by the microarchitect like branch mispredictions or data
-cache misses (see \cite{Waterman:EECS-2016-161} section 3.1.15).
+cache misses (see~\cite{Waterman:EECS-2016-161} section 3.1.15).
 \texttt{rv\_counters} prints the values of these counters to standard out; they are collected
 in a second file in the target filesystem. Since polling events are both
 short-lived and infrequent, perturbations in target execution are insignificant.

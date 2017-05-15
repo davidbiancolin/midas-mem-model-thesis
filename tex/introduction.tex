@@ -88,8 +88,8 @@ and 5) FPGA hardware and software tools are expensive to purchase and maintain.
 
 Recent technological advances have eased some of these challenges of employing
 FPGA-accelerated simulators. FPGAs are larger and faster than ever before and
-are becoming available as resources in research clusters\cite{catapultannounce}
-and datacenters\cite{amazonf1}.  Given the lack of a competing technology that
+are becoming available as resources in research clusters~\cite{catapultannounce}
+and datacenters~\cite{amazonf1}.  Given the lack of a competing technology that
 is both as cheap and as effective at accelerating cycle-accurate simulations,
 it appears that FPGAs remain the only vehicle capable of bridging the
 simulation gap, and thus demand a careful reconsideration.
@@ -125,7 +125,7 @@ split from the functional components that interact with the FPGA memory
 system, extending the generator with new timing-model classes is made easy.
 
 This report builds on the work of an earlier masters thesis by Asif
-Khan\cite{khanmasters} addressing challenge of modeling off-chip memory
+Khan~\cite{khanmasters} addressing challenge of modeling off-chip memory
 systems. This report differs from that work, in its use of a generator, its
 demonstration of the model interoperating with models automatically transformed
 from source RTL, and finally, in the degree to which off-chip memory systems
@@ -136,14 +136,14 @@ are modeled.
 This report builds extensively on the work of current and previous students of
 our group. The MIDAS project is a multi-student collaboration between myself,
 Jack Koenig, Sagar Karandikar, Deborah Soung, and Donggyu Kim, whose Chisel3
-port of Strober\cite{strober} project constitutes the bulk of the MIDAS code
+port of Strober~\cite{strober} project constitutes the bulk of the MIDAS code
 base at the time of writing. The generator presented here and of the RTL used
-in MIDAS is written in Chisel3\cite{chisel}, which remains under active
+in MIDAS is written in Chisel3~\cite{chisel}, which remains under active
 development with the guidance from SiFive and Google. MIDAS leans heavily on
-FIRRTL\cite{firrtl}(Adam Izraelevitz et al.) to transform source RTL into
+FIRRTL~\cite{firrtl}(Adam Izraelevitz et al.) to transform source RTL into
 FPGA-accelerated models. Finally, MIDAS depends on the availability of
 open-source SoC IP as a source of transformable RTL. Here we use the
-Rocket-Chip\cite{rocketchip} SoC generator and Chris Celio's BOOM(\cite{boom})
+Rocket-Chip~\cite{rocketchip} SoC generator and Chris Celio's BOOM~\cite{boom}
 OoO core generator which implement the free and open RISC-V ISA.
 
 This report borrows heavily from our MICRO50 submission on the same subject.

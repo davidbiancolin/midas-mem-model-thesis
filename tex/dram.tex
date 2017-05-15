@@ -40,7 +40,7 @@ that may hit in the row-buffer are not issued before older commands that miss.
 FCFS schedulers are common in older machines, and those that present few
 concurrent memory requests.
 
-\subsection{First-Ready FCFS (FR-FCFS)\cite{frfcfs} Policy}\label{frfcfs}
+\subsection{First-Ready FCFS (FR-FCFS)~\cite{frfcfs} Policy}\label{frfcfs}
 First, ready (legally issuable) column commands are prioritized over ready row
 commands. Second, commands for older references are prioritized over younger
 ones. This permits younger but ready column commands to be issued before older
@@ -52,20 +52,20 @@ single-core out-of-order machines), are compared.
 \section{DRAM Software Simulation}
 
 The current state of the art in DRAM simulation in academia are cycle-accurate
-software simulators like DRAMSim2\cite{dramsim}, Ramulator\cite{ramulator} and
-USIMM\cite{usimm}. These models generate DRAM command streams that have been
+software simulators like DRAMSim2~\cite{dramsim}, Ramulator~\cite{ramulator} and
+USIMM~\cite{usimm}. These models generate DRAM command streams that have been
 validated against industrial models (for some standards). Both Ramulator and
-DRAMSim2 can be easily integrated into Gem5\cite{gem5}, though gem5 includes a
-detailed event-based model of its own\cite{gem5event}. In trace-driven mode,
+DRAMSim2 can be easily integrated into Gem5~\cite{gem5}, though gem5 includes a
+detailed event-based model of its own~\cite{gem5event}. In trace-driven mode,
 operating at full throughput and only as a timing-model, these cycle-accurate
 models simulate at frequencies ranging from hundreds of KHz to ones of
-MHz\cite{ramulator}.
+MHz~\cite{ramulator}.
 
 \section{DRAM Power Modeling}
 
-In order to model power, Ramulator relies on DRAMPower\cite{drampower}, to
+In order to model power, Ramulator relies on DRAMPower~\cite{drampower}, to
 which it passes its command trace. DRAMSim2 directly implements strategies
-Micron has described in their technical notes\cite{micronpower}. Micron has
+Micron has described in their technical notes~\cite{micronpower}. Micron has
 also provided spreadsheets implementing these strategies, that take
 microarchitectural event frequencies as input. These approaches can also be
 used in an FPGA simulation, as sufficiently detailed FPGA models can add

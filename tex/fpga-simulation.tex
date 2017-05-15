@@ -47,7 +47,7 @@ full-system simulation executes within even three orders of magnitude of a
 silicon implementation. Very early, when architecture-level simulators are used
 to perform initial system prototyping (hundreds of MIPS). And very late: when
 the SoC is completely implemented and full-system emulation tools like a
-Synopsys Palladium\cite{palladium} (ones of MHz) can be used -- if they are
+Synopsys Palladium~\cite{palladium} (ones of MHz) can be used -- if they are
 available.
 
 When a hardware-emulation platform is unavailable or too expensive, and when
@@ -68,7 +68,7 @@ modified, limiting the scope of potential changes.
 Since a complete RTL implementation precludes the use FPGA prototypes for
 design space exploration and early prototyping, they are generally unused in
 academia. Instead, full-system simulation is done entirely in software with
-simulation frameworks such as Gem5\cite{gem5}, and MARSSx86\cite{marssx86}.
+simulation frameworks such as Gem5~\cite{gem5}, and MARSSx86~\cite{marssx86}.
 These simulators can run target workloads at up to hundreds of KIPS, but are
 often much slower in practice when employing detailed or custom models. This
 makes it practically impossible to run complete workloads, such as
@@ -77,13 +77,13 @@ inputs. A common remedy is to employ statistical sampling
 techniques~\cite{smarts} to fast-forward to the region of interest, before
 executing O(100M) instructions at the desired fidelity.
 
-While this approach has well-acknowledged shortcomings \cite{gem5error},
+While this approach has well-acknowledged shortcomings~\cite{gem5error},
 judicious use of cycle-level simulators can be an appropriate vehicle for
 proposing new microarchitectural ideas. But for radical proposals that involve
 aggressive microarchitectural changes or traverse multiple layers of the
 computing stack, this approach is inadequate (particularly for workloads that
 are long-running, irregular and require a large number of cores, such as
-managed-language workloads \cite{MicroSimPanel}).
+managed-language workloads~\cite{MicroSimPanel}).
 
 The ideal full-system simulator -- sufficient for both academic and industrial
 uses -- would be inexpensive, fast and as accurate as desired throughout the
@@ -157,14 +157,14 @@ several key factors:
 \begin{enumerate}
 
     \item \textbf{Availability.} Much of the early FPGA simulator research
-        relied on boutique FPGA-host platforms like the BEE\cite{bee2}, or
+        relied on boutique FPGA-host platforms like the BEE~\cite{bee2}, or
         used custom board designs. The cost of these platforms disincentivizes
         their adoption by researchers who already have the means to run
         software simulations at low cost.
 
     \item \textbf{FPGA Capacity.} Common ASIC structures, such as CAMs and
         multi-ported RAMs, are known to map poorly to FPGA
-        fabrics\cite{fpgagap, fpgagap2}, making it difficult to host large ASIC
+        fabrics~\cite{fpgagap, fpgagap2}, making it difficult to host large ASIC
         designs on an FPGA.
 
     \item \textbf{Configurability \& Extensibility.} Extending FPGA-accelerated
@@ -194,8 +194,8 @@ several key factors:
 
 Even as Moore's law wanes, FPGA capacity continues to scale. The largest FPGAs
 have over 50 MB of BRAM and millions of logic cells\footnote{Comically, scaling
-RAMPGold\cite{rampgold}, to use the largest Xilinx UltraScale
-FPGA\cite{ultrascale} by BRAM capacity would permit modeling in excess of 5000
+RAMPGold~\cite{rampgold}, to use the largest Xilinx UltraScale
+FPGA~\cite{ultrascale} by BRAM capacity would permit modeling in excess of 5000
 cores.}. As they have scaled, FPGAs have continued to become more
 heterogeneous, adding features that make them more amenable to hosting
 full-system simulators.  Both Intel and Xilinx now sell FPGAs with embedded ARM
@@ -203,15 +203,15 @@ cores, making it easier to co-simulate tightly coupled hardware and software
 models of a system. Modern FPGAs include hardened DRAM controllers that are
 comparable to those of ASICs. This trend towards greater integration looks to
 continue. For example, upcoming Intel Stratix 10 MX parts include in-package DRAM (HBM2)
-that can support up to 1 TBps of aggregate memory bandwidth\cite{stratix10mx}.
+that can support up to 1 TBps of aggregate memory bandwidth~\cite{stratix10mx}.
 Both DRAM capacity and bandwidth are crucial for simulating components
 of the target that may not fit in BRAM.
 
 Lower cost and increased on-chip integration have also made FPGAs more
 accessible. Not only are COTS development boards cheaper and more featureful,
 FPGAs are now available as a service, both through academic clusters, like
-TACC's Microsoft Catapult\cite{catapultannounce} deployment, and through Amazon
-Web Services' EC2 F1 instances\cite{amazonf1}. Where in the past academics
+TACC's Microsoft Catapult~\cite{catapultannounce} deployment, and through Amazon
+Web Services' EC2 F1 instances~\cite{amazonf1}. Where in the past academics
 would have to purchase their own FPGAs -- even to reproduce published
 experiments -- it may soon be possible for them to instead spin up an identical
 simulation on a shared computing resource. Companies may no longer have to
@@ -222,11 +222,11 @@ simulations to the cloud.
 
 While the trends described in the previous section solve the
 \emph{availability} and \emph{FPGA capacity} challenges, the usability
-challenges remain. Previous work\cite{fabscalarfpga, strober} has shown that
+challenges remain. Previous work~\cite{fabscalarfpga, strober} has shown that
 much of an FPGA accelerated simulation can be automatically generated from
 source RTL. This RTL can be written in an HDL like Verilog or emitted by
 high-level synthesis tools or generators written in languages like
-Chisel\cite{chisel}. While this still requires an RTL implementation, the same
+Chisel~\cite{chisel}. While this still requires an RTL implementation, the same
 RTL to measure physical design metrics, and no validation of the generated
 model is required.
 
@@ -237,7 +237,7 @@ we consider off-chip DRAM memory systems as a motivating example: they have too
 much state to be hosted in fabric and yet they must must be tightly coupled to
 the processor model making it difficult to co-simulate DRAM in
 software.\footnote{High-latency peripherals, like disks, can often be modeled
-in software without any performance cost.\cite{disksim}} These components
+in software without any performance cost~\cite{disksim}.} These components
 typically require an abstract model that virtualizes the target-memory system
 over FPGA-host-memory system.
 
