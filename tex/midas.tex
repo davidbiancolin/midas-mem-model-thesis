@@ -1,13 +1,9 @@
-Development of MIDAS\footnote{The name MIDAS: Modeling Infrastructure for
-Debugging and Simulation was a working backronym conceived of by Jack Koenig in
-2015. Only later did we learn the proposed successor to RAMP Gold was also to
-be named Midas (A tool to automatically transform a design into [RAMP]gold).
-The name stuck.} began in 2016 with the amalgamation of the Chisel3 port of
+Development of MIDAS began in 2016 with the amalgamation of the Chisel3 port of
 Strober and a demo of an earlier version of the generator presented here.
-Strober is not subsumed by MIDAS.  Rather, Strober uses MIDAS to generator a
-simulator that can then be used to collect target state.  As a final
-introductory note, MIDAS is still very much in its infancy; many of the details
-described here may, and likely will, change in the future.
+Strober is not subsumed by MIDAS.  Rather, Strober uses MIDAS to generate a
+simulator that can be used to collect target state. MIDAS is still very much in
+its infancy; many of the details described here may, and likely will, change in
+the future.
 
 \begin{figure}
 	\centering
@@ -18,23 +14,24 @@ described here may, and likely will, change in the future.
 
 MIDAS is a set of C++ and RTL libraries alongside a compiler. The current MIDAS
 flow is shown in figure~\ref{fig:midas}. MIDAS accepts a description of target
-as a synchronous dataflow (SDF)-like network of interconnected models, which
-specifies how it is composed of transformed-RTL models, custom-RTL models, and
-software models.
+machine as a synchronous dataflow (SDF)-like network of interconnected models,
+which specifies how the target is composed of transformed-RTL models,
+custom-RTL models, and software models.
 
-First, the MIDAS compiler automatically transforms source RTL into
-host-decoupled RTL models, instrumenting them if desired. Next, it performs
-\emph{simulation mapping}, during which all FPGA-hosted models are connected to
-one another, and to endpoints that implement latency-insensitive communication
-to models that aren't hosted locally. During this process, the compiler builds
-up a memory map of all the stateful components of the simulation and ties them
-together with an AXI4 bus. In \emph{platform mapping}, the simulation-mapped
-design is connected to the memory and communication resources exposed by the
-FPGA-host. The compiler emits a verilog file that is included in an FPGA
-project and a C header that describes the simulation memory map.  With this
-memory map, the simulation designer builds a main that sequences simulation by
-invoking commands defined in MIDAS libraries and links in the software models
-of the target.
+To generate an FPGA-acclerated simulator, first, the MIDAS compiler
+automatically transforms source RTL into host-decoupled RTL models,
+instrumenting them if desired. Next, it performs \emph{simulation mapping},
+during which FPGA-hosted models are connected to one another and to
+endpoints that implement latency-insensitive communication to models that
+aren't hosted locally. During this process, the compiler builds up a memory map
+of all the stateful components of the simulation and ties them together with an
+AXI4 bus. In \emph{platform mapping}, the simulation-mapped design is connected
+to the memory and communication resources exposed by the FPGA-host. The
+compiler emits a verilog file that is included in an FPGA project and a C
+header that describes the simulation memory map.  With this memory map, the
+simulation designer builds a main that sequences simulation by invoking
+commands defined in MIDAS libraries and links in the software models of the
+target.
 
 \section{Target Specification and Simulation Abstractions}\label{sec:sdf}
 
@@ -68,8 +65,8 @@ cycle.
 
 \emph{Channels} carry tokens between models in FIFO order, and simulate the
 target interconnect between those models. MIDAS has a single primitive type of
-channel --  the \emph{pipe} -- which represents a pipeline with 0 more register
-stages. A wire is a degenerate pipe; it has zero register stages. In MIDAS,
+channel --  the \emph{pipe} -- which represents a pipeline with zero more register
+stages (Figure~\ref{fig:pipe}). A wire is a degenerate pipe; it has zero register stages. In MIDAS,
 channels implement clock domain crossing (CDC).  Channels accomplish this by
 duplicating or destroying tokens based on the relative clock frequency of the
 models they connect.\footnote{The channel differs from a classical SDF channel
@@ -79,9 +76,23 @@ infinitely deep.  (Though, one could mimic a finite channel in an SDF with a
 bidirectional pair of channels: one carrying the original tokens from source to
 sink, and the second carrying credit tokens from sink to source.)} To describe
 latency-insensitive interconnect in a target, MIDAS also has a
-\emph{queue}-type channel. Using queue-type channels permits simulation
+\emph{queue}-type channel (figure~\ref{fig:queue}). Using queue-type channels permits simulation
 optimizations that would be impossible by describing the same interconnect with
 some combination of pipes and models.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/pipe.pdf}
+        \caption{Pipe-type channel.}
+        \label{fig:pipe}
+    \end{subfigure}\hspace{0.5cm}
+    \begin{subfigure}[t]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/queue.pdf}
+        \caption{Queue-type channel. CDC-related parameters omitted for simplicity.}
+        \label{fig:queue}
+    \end{subfigure}
+\end{figure}
 
 At time zero each of the channels is initialized with a sequence of tokens based
 on the type of target interconnect they model. A pipe is initialized with tokens
@@ -141,11 +152,12 @@ functional behavior of the target.
     \begin{subfigure}[t]{0.6\textwidth}
         \includegraphics[width=\textwidth]{figures/deadlock.pdf}
         \caption{Using wire-type channels to implement ready-valid target interconnect in the target deadlocks the graph at time zero.}
-        \label{fig:default-target}
+        \label{fig:deadlock}
     \end{subfigure}\vspace{0.5cm}
     \begin{subfigure}[t]{0.48\textwidth}
         \includegraphics[width=\textwidth]{figures/pipe-decoupled-example.pdf}
-        \caption{Solution A, use a pipe. Moving registers into the channel adds an initial token. While
+        \caption{Solution A, move registers from models into the channel. In
+        this case, using a pipe of latency one adds an initial token. While
         this graph may not deadlock, the two models can never fire concurrently
         as the decoupled sink must first fire to produce a ready token.}
         \label{fig:pipe-decoupled-example}
@@ -156,7 +168,7 @@ functional behavior of the target.
         behavior of target -- there's extra latency moving from source to sink.
         However, in addition to requiring no changes to the models, using a queue may also
         permit both models to fire concurrently as a queue may generate
-        ready tokens early if knows it will have space its buffer.}
+        ready-tokens early if knows it will have space its buffer.}
         \label{fig:queue-decoupled-example}
     \end{subfigure}
 \end{figure}
@@ -314,4 +326,4 @@ The simulation main including the \texttt{riscv-fesvr} software model is hosted
 on the PS (running in a single linux process) while all other models are hosted
 in the PL. The simulation interconnect is bound to the AXI-GP0 port of the PS;
 the simulation MMIO driver simply \texttt{mmap}s the memory region bound to that port
-into the process' memory space.
+into the process's memory space.
