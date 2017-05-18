@@ -4,7 +4,7 @@ To demonstrate of the use of our generator, we evaluated two
 microarchitecturally different processors:  Rocket, a 5-stage single-issue
 in-order core, and BOOM, a superscalar out-of-order core~\cite{boom}. Both
 microarchitectures leverage the open-source Rocket-Chip SoC
-generator~\cite{rocketchip}. As described in section~\ref{sec:targetandhostmachines}, all of the instances of RocketChip used in
+generator~\cite{rocketchip}. As described in section~\ref{sec:targetandhostmachines}, all of the instances of Rocket Chip used in
 this report have same top-level I/O and are modeled as part of a target with
 the MIDAS SDF network shown in figure~\ref{fig:default-target}.
 
@@ -16,7 +16,7 @@ Table~\ref{tbl:target} lists the selected configurations of the target
 processors.\footnote{Note that BOOM-2w roughly approximates the configuration
 of the ARM Cortex-A9 processor, which coincidentally is same microarchitecture
 embedded in the Zynq host.}. Unfortunately, neither configuration includes an
-L2 cache as it was  temporarily removed in the version of RocketChip used to
+L2 cache as it was  temporarily removed in the version of Rocket Chip used to
 conduct the evaluation. As a final note, the Rocket configuration we used
 includes a non-blocking data cache (instead of the default blocking
 implementation). Unlike a classic RISC pipeline, Rocket's backend includes a
@@ -75,7 +75,7 @@ workload, we built a minimal BusyBox image and included all required files for
 that workload within the image's initramfs.  Generally, workloads were compiled
 statically (using \texttt{gcc -02}). When required, namely for the Java workloads, we
 built library dependencies using the Yocto (\texttt{riscv-poky}) Linux
-distribution generator. After packaging up the complete linux image, it is
+distribution generator. After packaging up the complete Linux image, it is
 built into an instance of the Berkeley Bootloader (BBL).
 
 Despite our best efforts, this process produces relatively large BBL instances
@@ -86,15 +86,15 @@ out-of-band (instead of fully simulating the process over the tether).
 Finally, present limitations regarding how console I/O is proxied to
 \texttt{riscv-fesvr} can dramatically slow down simulation depending on the
 volume of target console I/O. \footnote{Changes introduced to
-\texttt{riscv-fesvr} with the priviledge specification 1.10 updates remove this
+\texttt{riscv-fesvr} with the privileged specification 1.10 updates remove this
 bottleneck, as the host is no longer is required to acknowledge console
 output.} To circumvent this, all console output is piped to a file on the
 target's filesystem. At the end of the workload, the file is dumped to the
 console, and \texttt{riscv-fesvr} enters a custom fast I/O mode.  Thus, low FMR
-is maintained without pertubing program execution. In our evaluation flow, no
+is maintained without perturbing program execution. In our evaluation flow, no
 console input is ever presented to the target; the \texttt{init} script of the
-linux image includes all of the commands required to run and measure the
-desired workload, afterwhich it powers down the machine (See listing~\ref{lst:init} for an example).\\
+Linux image includes all of the commands required to run and measure the
+desired workload, after which it powers down the machine (See listing~\ref{lst:init} for an example).\\
 
 \lstdefinestyle{init}{
     frame=lines,
@@ -153,8 +153,8 @@ When a specific event was not measured by the existing design, we added them
 manually to Rocket-Chip. In addition to measuring conventional
 microarchitectural events, with this mechanism we were also able to measure the
 execution time of regions of the application, like memory allocations in the
-JVM, with effectively zero pertubation. To do this, we instrumented the target
-program with specialy encoded NOP instructions which would enable and disable
+JVM, with effectively zero perturbation. To do this, we instrumented the target
+program with specially encoded NOP instructions which would enable and disable
 an incrementer when decoded.
 
 \section{Workloads}
@@ -164,7 +164,7 @@ involving realistic software applications without sub-sampling execution, we
 chose two non-trivial benchmark suites, the SPEC 2006 CPU
 benchmarks~\cite{spec_cpu_2006} and the DaCapo benchmarks~\cite{dacapo}.
 
-\subsection{SPECint2006 Benchmarks} The SPECint2006 benchmarks are defacto
+\subsection{SPECint2006 Benchmarks} The SPECint2006 benchmarks are de facto
 standard to benchmarking sequential performance of general-purpose
 microprocessors, and widely used by industrial computer architects to validate
 their designs. Academic computer architects seldom run the complete

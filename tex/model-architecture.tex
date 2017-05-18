@@ -241,17 +241,17 @@ save FPGA resources where possible. To describe the trade off we define virtual
 state $VS$ as the total state required to directly implement each virtual
 queue:
 
-$$VS = ID_{max}R{ID,max}L_{max}B$$
+$$VS = ID_{max}*R{ID,max}*L_{max}*B$$
 
 Where $B$ are the number of bits per beat. We also define ideal state, $IS$,
 the state required to store the maximum number of responses of maximum length.
 
-$$IS = R_{max}L_{max}B$$
+$$IS = R_{max}*L_{max}*B$$
 
 Note that, if the user does not specify a bound on ($R_{ID,max}$, then, all
 responses may share a single ID and thus,
 
-$$VS = ISID_{max}$$
+$$VS = IS*ID_{max}$$
 
 The conventional wisdom in design for FPGAs is that BRAM is cheap. Instead of
 trying to be clever, for small degrees of virtual state, and the egress unit
@@ -304,19 +304,18 @@ KiB.\footnote{In a Xilinx 7 series architecture, this is 4 36Kb BRAMs ($<$ 1\%
 of the BRAM available on the XC7Z045)} Furthermore, in many cases masters do not
 issue multiple requests using the same transaction ID to maximize the
 flexibility of the slave to reorder requests. Using the same example, and
-setting $R_{ID,max}$ to one, sets $VS = IS = 1 KiB$ which fits handily in a
-single BRAM of any modern FPGA architecture.
+setting $R_{ID,max}$ to one, sets $VS = IS = 1 KiB$ permitting a direct
+implementation to fit in a single BRAM of any modern FPGA architecture.
 
 Presently, the generator uses a direct implementation if $VS <= 32 KiB$ or $VS
 = IS$. We leave defining a better heuristic to future work. Ultimately, how
-custom-RTL models should be optimized is a system-level level question that
-depends on metrics such as resource utilization the project, desired FMR, and
-the host-FPGA architecture. Simulators under BRAM pressure may well wish to use
-translation logic, when the generator by default may choose otherwise. MIDAS
-generated simulators, with only a primitive host-decoupling transform and no
-further optimizations, tend to be under LUT pressure. In the case of this
-generator, even when $VS >> IS$, directly implementing the virtual queues may
-well be desired.
+custom-RTL models should be optimized is a system-level question that
+depends on the resource utilization the project, desired FMR, and
+the host-FPGA architecture. Indeed, simulators under BRAM pressure may wish to use
+translation logic when the generator by default may choose otherwise. At time
+of writing, MIDAS generated simulators tend to be under LUT pressure. In this
+case, even when $VS > IS$, directly implementing the virtual queues may be
+desired.
 
 \section{Timing-Model Classes}\label{sec:timing_model}
 
@@ -326,7 +325,7 @@ The latency-bandwidth pipe model applies independently programmable latencies
 to read and write requests. It does not accept any new requests beyond a
 programmable limit; this serves as a coarse-grain bandwidth bound via Little's
 law. Note, for systems that make requests of varying lengths, the simulated
-DRAM bandwidth will fall when making shorter requests. This model never
+DRAM bandwidth will be reduced when making shorter requests. This model never
 reorders target requests.
 
 \noindent Runtime parameters are shown in table~\ref{tbl:lbp-programmable-registers}.
@@ -501,25 +500,28 @@ key limitations here:
         depressing tail latency one might see in DRAM typically -- where read
         requests hit a bank currently under refresh.
 
-    \item\textbf{Missing timings}. Models currently do not account for all timing
-        constraints present even in a generic DDR SDRAM protocol. Some notable
-        examples are four row activation window ($t_{FAW}$), which can
-        substantially limit bandwidth when memory requests have poor row buffer
-        locality or in MAS that close rows more aggressively.
+    \item\textbf{Missing timings}. Models currently do not account for all
+        timing DRAM timing constraints. Some notable examples are four row
+        activation window ($t_{FAW}$), and row-activation to row-activation
+        delay ($t_{RRD}$) which can limit achievable bandwidth when memory
+        requests have poor row buffer locality or in MAS that close rows more
+        aggressively.
 
     \item\textbf{No multi-rank support}. Models currently assume single-rank
         memory organizations. Multi-rank organizations have substantial
         implications on MAS policies, as accessing banks in different ranks is
-        more expensive then accessing banks on the same rank .
+        more expensive then accessing banks on the same rank. In contrast,
+        rank-level parallelism in a memory access stream may permit the MAS to
+        issue more activation commands than would be legal in a single-rank
+        configuration due to $t_{FAW}$ and $t_{RRD}$ constraints.
 
 \end{enumerate}
 
-While, software DRAM simulators support multi-channel configurations, for the
-time being, in MIDAS we expect the user will simply use separate instances for
-each controller.  Finally, it should be said that there is no fundamental
-limitation of our scheme that presents us from modeling these characteristics
--- we intend to expand the fidelity of the DRAM timing-model classes as we use
-them in the future.
+While software DRAM simulators support multi-channel configurations, in MIDAS
+we expect the user will simply use separate model instances for each
+controller.  Finally, there is no fundamental limitation of our scheme that
+presents us from addressing any of three limitation above. We intend to expand
+the fidelity of the DRAM timing-model classes as we use them in the future.
 
 
 
