@@ -21,7 +21,7 @@ custom-RTL models, and software models.
 To generate an FPGA-accelerated simulator, first, the MIDAS compiler
 automatically transforms source RTL into models that can be hosted on an FPGA,
 instrumenting them if desired. Next, it performs \emph{simulation mapping},
-during which FPGA-hosted models are connected to one another and to to models
+during which FPGA-hosted models are connected to one another and to models
 that aren't hosted locally though latency-insensitive channel \emph{endpoints}.
 During this process, the compiler builds up a memory map of all the stateful
 components of the simulation and ties them together with an AXI4 bus. In
