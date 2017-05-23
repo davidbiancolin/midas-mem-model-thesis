@@ -1,96 +1,57 @@
 For the past half century, transistor scaling has delivered incredible
 improvements in computing performance and energy efficiency. The rapid advance
 of process technology has proven to be a strong disincentive to building ASICs and custom SoCs, 
-as the competitive advantage of a custom silicon design would usually be lost
+as the competitive advantage of a custom-silicon design would usually be lost
 to a general-purpose machine built in a newer process technology. This coupled
 with famously large and growing NRE, has limited ASIC deployment to high volume
 domains where they offer a considerable advantage over a general-purpose part.
-For applications that would see enormous improvements with custom silicon but
+For applications that would see enormous improvements with custom-silicon but
 lack the volume to overcome the NRE, FPGAs have proven to be an effective
 stopgap, despite being inferior to ASICs in logic density, delay, and energy
 efficiency.
 
-With Moore’s law ending, the risk balance for system architects is beginning to
-change: while NRE remains high, custom silicon may now present a lasting
+With Moore'’s law ending, the risk balance for system architects is beginning
+to change: while NRE remains high, custom-silicon may now present a lasting
 competitive advantage.  Application, compiler, and OS developers will be more
 inclined to support specialized devices if they can deliver a performance
 improvement that cannot foreseeably be met by a general purpose machine.
 Perhaps the greatest performance and energy efficiency improvements are to be
-had when hardware and the software can be \emph{co-designed} for one another.
-In the absence of frequency scaling, custom silicon and hardware-software
-co-design are perhaps the only ways to maintain the advances in computing
-performance and efficiency advances the market has come to expect.
+had when hardware and the software can be \emph{co-designed}.  In the absence
+of frequency scaling, custom-silicon and hardware-software co-design are
+perhaps the only ways to maintain the advances in computing performance and
+efficiency advances the market has come to expect.
 
-NRE, however, remains a substantial barrier to  custom silicon.
-NRE is driven by many factors, including mask, EDA, and IP costs, as well
-engineering time for design and verification. Increasingly, however, the
-largest contributor to NRE is that of software development.  Ideally, software
-development would proceed in parallel to hardware development, however, lacking
-fast, cycle-accurate \emph{full-system simulators} (simulators capable of
-executing the entire software stack), software engineers are forced to develop
-against a inaccurate model of the SoC or wait until first silicon is back.
-Consequently, this also precludes effective hardware-software co-design, as it
-difficult to reason about full-system design trade-offs if the software and
-hardware are being evaluated in different simulation environments. This lack of
-fast and accurate full-system simulation is often referred to as the
-\emph{simulation gap}.
-
-The simulation gap has also plagued academic research. Software simulations
-have long been the mainstay of the computer architecture research community,
-but these have struggled to provide meaningful results especially since the
-spread of multicore systems in the mid-2000s.  While a number of abstracted and
-sampled simulation techniques have been developed to help reduce the runtime of
-software simulations, these generally cannot cope with dynamic workloads, such
-as JIT compilers, where code paths observed vary depending on performance, and
-where long runtimes are needed to observe meaningful application behavior.  As
-a result, few architectural studies use managed languages, and are often based
-solely on small inputs to statically compiled SPEC codes.  Furthermore,
-software simulations are notoriously inaccurate and have no direct path to
-obtain accurate physical metrics such as cycle time, area, or power.
-
-The recent trend towards heterogeneous SoCs with a plethora of custom hardware
-accelerators for both server and mobile applications has only exacerbated the
-simulation gap. There is a belief that new programming models, runtimes, and
-operating systems will be necessary to ease the challenge of programming
-machines that may have dozens of custom accelerators. This work ranges from new
-OS designs such as data-plane operating systems~\cite{arrakis} and
-multikernels~\cite{barrelfish} to a renewed interest in managed-language
-runtime systems such as Java Virtual Machines~\cite{broom,taurus}.
-
-While research employing hardware-software co-design of such systems has the
-potential to yield substantial improvements, it is challenging with current
-simulation methodologies.  Many of these systems have the property that
-workloads are long-running and irregular (e.g., due to garbage collection or
-JIT compilation), but the interactions between the application and system layer
-are often very fine-grained (such as a few cycles spent in an interrupt handler
-or a call into the memory allocator).  Fast, cycle-accurate, full-system
-simulation is desired to properly account for the interactions between the
-layers of the software stack and the hardware underneath.
+NRE, however, remains a substantial barrier to custom-silicon.
+Increasingly, however, the largest contributor to NRE is that of software
+development.  Ideally, software development would proceed in parallel to
+hardware development, however, lacking fast, cycle-accurate \emph{full-system
+simulators} (simulators capable of executing the entire software stack),
+software engineers are forced to develop against a inaccurate model of the SoC
+or wait until first silicon is back.  Consequently, this also precludes
+effective hardware-software co-design, as it difficult to reason about
+full-system design trade-offs if the software and hardware are being evaluated
+in different simulation environments. This lack of fast and accurate
+full-system simulation is often referred to as the \emph{simulation gap}.
 
 To address the simulation gap, many have turned to FPGAs. In industry,
 companies have long relied on \emph{FPGA prototypes} that implement the SoC's
-RTL directly. These prototypes are both relatively cheap to build (considering
-total cost of the project) and fast enough to support software development
-(executing at ones to tens of MHz). For academics, FPGA prototypes are too
-expensive and inflexible as they require a complete RTL implementation of the
-SoC. Instead, academia has explored using FPGAs as \emph{accelerators} for
-architecture simulations~\cite{fast, fame, hasim, protoflex,ramp} that are
+RTL directly. In academia, researchers have explored using FPGAs as \emph{accelerators}
+for architecture simulations~\cite{fast, fame, hasim, protoflex,ramp} that are
 better suited for prototyping research ideas and performing design space
-exploration. Despite early promise, \emph{FPGA-accelerated simulation} has seen little adoption in the
-academia or industry for a number of reasons: 1) FPGA-accelerated simulators
-are difficult to write or modify, 2) FPGA mappings require a lengthy
-compilation time, 3) FPGAs are difficult to debug, 4) FPGAs have historically
-been resource constrained, either limiting the scale of the system under
-simulation or requiring even more complexity to partition designs across FPGAs,
-and 5) FPGA hardware and software tools are expensive to purchase and maintain.
-
-Recent technological advances have eased some of these challenges. FPGAs are
-larger and faster than ever before and are becoming available as resources in
-research clusters~\cite{catapultannounce} and datacenters~\cite{amazonf1}.
-Given the lack of a competing technology that is both as cheap and as effective
-at accelerating cycle-accurate simulations, it appears that FPGAs remain the
-only vehicle capable of bridging the simulation gap, and thus demand a careful
-reconsideration.
+exploration. Despite early promise, \emph{FPGA-accelerated simulation} has seen
+little adoption in the academia or industry for a number of reasons: 1)
+FPGA-accelerated simulators are difficult to write or modify, 2) FPGA mappings
+require a lengthy compilation time, 3) FPGAs are difficult to debug, 4) FPGAs
+have historically been resource constrained, either limiting the scale of the
+system under simulation or requiring even more complexity to partition designs
+across FPGAs, and 5) FPGA hardware and software tools are expensive to purchase
+and maintain.  Recent technological advances have eased some of these
+challenges. FPGAs are larger and faster than ever before and are becoming
+available as resources in research clusters~\cite{catapultannounce} and
+datacenters~\cite{amazonf1}.  Given the lack of a competing technology that is
+both as cheap and as effective at accelerating cycle-accurate simulations, it
+appears that FPGAs remain the only vehicle capable of bridging the simulation
+gap, and thus demand a careful reconsideration.
 
 \emph{MIDAS} (Modeling Infrastructure for Debugging and Simulation) is Berkeley
 Architecture Research's answer to improving the usability of FPGA-accelerated
@@ -99,15 +60,14 @@ models on an arbitrary \emph{host-platform} consisting of a mix of FPGAs and
 CPUs.  During early design space exploration or system specification, a MIDAS
 simulation may consist entirely of software models of the system.  However, as
 RTL implementations become available, MIDAS can automatically transform them
-into FPGA-accelerated models that can be linked into the simulator. Once the
-SoC has a complete RTL implementation, a MIDAS-generated simulator can subsume
-the function of an FPGA prototype. Throughout the whole process there is a
-functioning model of the machine that is fast enough for software development.
+into FPGA-accelerated models that can be linked into the simulator. Throughout
+the whole process there is a functioning model of the machine that is fast
+enough for software development.
 
 One challenge with this vision is that there are many cases in which an
 FPGA-accelerated model is required but there is not yet RTL available to be
 transformed. Here custom-RTL models are required and are subject to the same
-usability pitfalls of prior FPGA-accelerated simulation work. For MIDAS to
+pitfalls of prior FPGA-accelerated simulation work. For MIDAS to
 succeed, models like this must be flexible enough to be reusable across a wide
 range of simulations in order to amortize the high cost of writing them.
 Generally, we propose that using a hardware \emph{generator} to synthesize
@@ -115,14 +75,14 @@ timing-model \emph{instances} can address this challenge. To demonstrate this, t
 generator described herein synthesizes models for an important component of
 nearly all SoCs: DRAM off-chip memory systems. These model instances use the
 available FPGA off-chip memory system as a backing store for a timing-model
-hosted in FPGA fabric. These instances are reconfigurable at runtime, allowing for
+hosted in FPGA fabric. They are reconfigurable at runtime, allowing for
 design space exploration without lengthy FPGA recompilation. Instances can be
 generated with instrumentation to ease debugging and to perform non-invasive
 measurements of the simulation. Finally, since the in-fabric timing-model is
 split from the functional components that interact with the FPGA memory system,
-extending the generator with new timing-model classes is made easy.
+extending the generator with new timing-model is easy.
 
-This report builds on the work of an earlier master's thesis by Asif
+This report builds on the work of an earlier master''s thesis by Asif
 Khan~\cite{khanmasters} addressing challenge of modeling off-chip memory
 systems in RAMP~\cite{ramp}. This report differs from that work, in its use of
 a generator, its demonstration of the model interoperating with models
