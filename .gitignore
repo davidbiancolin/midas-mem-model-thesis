@@ -7,6 +7,8 @@
 *.lot
 *.lof
 *.out
+*.toc
+*.run.xml
 midas-mem-model-thesis.pdf
 
 .*.swp
