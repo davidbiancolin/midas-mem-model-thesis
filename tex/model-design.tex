@@ -422,8 +422,9 @@ and~\ref{tbl:bc-programmable-registers} respectively.
 \section{DDR3 Timing-Model Classes}
 
 We provide two DDR3 timing-model classes based around the
-FCFS~(section~\ref{sec:fcfs}) and FR-FCFS~(section~\ref{sec:frfcfs}) MAS.Timing models can be decomposed into
-three stages: transaction scheduler, MAS, and response buffer.
+FCFS~(section~\ref{sec:fcfs}) and FR-FCFS~(section~\ref{sec:frfcfs}) MAS. Both
+timing-model classes can be decomposed into three stages: transaction
+scheduler, MAS, and response buffer.
 
 The transaction scheduler consists of a single unified transaction queue that
 can enqueue both a AXI4 read and write transaction in a single cycle, with reads
@@ -433,19 +434,22 @@ transaction scheduling schemes are left to future work.
 
 The MAS contains a set state-tracking modules for every rank and bank; these
 modules indicate what commands that rank or bank may legally accept on a given
-cycle. The MAS also contains a reference queue; references contain relevant
-subset of transaction metadata and additional MAS-specific metadata.  For that
-cycle, the MAS selects a legal command based on the available references, which
-is broadcasted back to each of the bank and rank-state trackers.  Both MAS use
-a preemptive all-ranks refresh scheme, that makes no attempt to pull-in or
-delay refresh commands.
+cycle. Each MAS has data structures for the memory references it may schedule
+across; these structures add additional metadata to the transcation to ease
+scheduling decisions. On every target-cycle, the MAS selects a legal command
+based on the available references. The selected command is broadcasted back to
+each of the bank and rank-state trackers.  Both MAS use a preemptive all-ranks
+refresh scheme, that makes no attempt to pull-in or delay refresh commands.
+When a refresh is required, commands for pending references are not considered,
+the MAS precharges every open bank in every rank, and issues REF commands as
+soon as it may legally do so.
 
-Both timing-model classes will attempt to return a read response a single cycle after they would
-receive the first beat from DRAM. Write acknowledgements are returned the
-cycle after a CASW command is issued. In the event that the target is not ready
-to accept reponses, completed transactions are stored in seperate read and
-write queues, with capacities large enough to hold the maximum number of
-outstanding requests the model may accept.
+Both timing-model classes will attempt to return a read response a single cycle
+after they would receive the first beat from DRAM. Write acknowledgements are
+returned the cycle after a CASW command is issued. However, in the event that
+the target is not ready to accept reponses, completed transactions are stored
+in seperate read and write response buffers, with capacities large enough to
+hold the maximum number of outstanding requests the model may accept.
 
 Models assume the width of the DRAM-system bus is one half of the width of the
 target-AXI4 interface. No explicit device width is passed to the timing
@@ -457,7 +461,7 @@ address mapping for certains types of MAS.  However, it takes twice as many
 devices to fill the same system-bus width, which makes it more difficult to
 build high-performance multi-rank memory systems.
 
-These models may be used to model DDR2 and DDR4 memory systems with an
+As a final note, these models may be used to model DDR2 and DDR4 memory systems with an
 appropriate choice of timing parameters, however they have only been validated
 against DDR3 models at time of writing.
 
@@ -527,12 +531,12 @@ respectively.
 
 \subsection{FCFS MAS Model}
 
-This class models a FCFS DRAM MAS (see section~\ref{sec:fcfs}) with programmable
-open and closed page policies. This model considers the head of the transaction
-queue and the most recently completed reference to generate candidate commands.
-The close-page policy always issues auto-precharge CAS commands, which close
-the row without requiring an expicity precharge command, even if the next
-reference would hit in the currently open row.  True to its name, this model
+This class models a FCFS DRAM MAS (see section~\ref{sec:fcfs}) with
+programmable open and closed page policies. This model considers the head of
+the transaction queue and the most recently completed reference to generate
+candidate commands.  The close-page policy always issues auto-precharge CAS
+commands, which close the row without requiring an expicity precharge command,
+even if the next reference accesses the same row.  True to its name, this model
 never reorders target-requests.
 
 \noindent Additional runtime parameters of this timing model class are shown in
@@ -554,20 +558,17 @@ table~\ref{tbl:fcfs-programmable-registers}.
 \label{tbl:fcfs-programmable-registers}
 \end{table}%
 
-\subsection{FR-FCFS DRAM MAS}
-This timing-class models a FR-FCFS MAS (section~\ref{sec:frfcfs}) with an open-page
-policy. The MAS considers references to all banks and ranks simultaenously. All
-references are stored in a single collapsing buffer, with additional bits to
-track if they are ready~(\emph{isReady}, they hit a currently-open row
-buffer), and whether precharge commands for the request may be
-considered~(\emph{mayPRE}, there are no other ready references that address the
-same bank). CAS, ACT, and PRE arbiters select the oldest legal command of that
-type from the legal candidates, and are scheduled in descending priority (CAS
-before ACT before PRE). When a refresh is required, no ACT or CAS commands are
-considered, the MAS precharges every open bank in every rank, and issues REF
-commands as soon as it may legally do so.
+\subsection{FR-FCFS DRAM MAS} This timing-class models a FR-FCFS MAS
+(section~\ref{sec:frfcfs}) with an open-page policy. The MAS considers
+references to all banks and ranks simultaenously; all references are stored in
+a single collapsing buffer, with additional bits to track if they are
+ready~(\emph{isReady}, they hit an open row buffer), and whether precharge
+commands for the request may be considered~(\emph{mayPRE}, there are no other
+ready references that address the same bank). CAS, ACT, and PRE arbiters select
+the oldest legal command of that type from the legal candidates, and are
+scheduled in descending priority (CAS before ACT before PRE).
 
-This model aggressively reorders target-requests.
+This model reorders target-requests.
 
 The generation and runtime parameters as the FR-FCFS DRAM MAS model are shown
 in table~\ref{tbl:frfcfs-generator-parameters}.
@@ -588,24 +589,24 @@ in table~\ref{tbl:frfcfs-generator-parameters}.
 \label{tbl:frfcfs-generator-parameters}
 \end{table}%
 
-\subsection{Feature Comparison to DRAMsim2}
+\subsection{Comparison to DRAMsim2}
 
 Perhaps the most frequent question we receive about the model is how it
-compares to DRAMsim2: we enumerate some noteworth differences here.
+compares to DRAMsim2: we enumerate some noteworthy differences here.
 
 \begin{enumerate}
-    \item \textbf{Different Controller Latencies.} Even with the same DRAM
-        timings and memory organization the our timing-model instances and
-        DRAMSim2 exhibit different per-transaction latencies. These come about
-        due to different controller modeling decisions. Commands for a new
-        transaction may be issued one and two cycles after the request was
-        received (FCFS and FR-FCFS models respectively), versus three cycles in
+    \item \textbf{Different controller modeling decisions.} Even with the same
+        DRAM timings and memory organization, model instances and
+        DRAMSim2 exhibit different per-transaction latencies. Commands for a
+        new transaction may be issued one and two cycles~(FCFS and FR-FCFS MAS
+        respectively) after the request was received, versus three cycles in
         DRAMsim2. DRAMsim2 releases a response once all beats have been
         received -- adding an additional three cycle latency to read-response
         in the case of an 8 beat burst. Finally, the MAS implementations differ
-        slightly, leading to different command schedules which introduces some
-        variability in the latencies seen by each request\footnote{MAS
-        implementations across the variation software simulators vary too, as shown
+        slightly and thus produce command schedules for the same transaction
+        trace. This introduces some variability in the latencies seen by each
+        request\footnote{MAS implementations, even of well-described
+        algorithms, vary across software simulators too, as shown
         in~\cite{ramulator}.}.
 
     \item \textbf{No multi-channel support.} While software DRAM simulators
@@ -613,12 +614,12 @@ compares to DRAMsim2: we enumerate some noteworth differences here.
         use separate model instances for each channel, just as there would be
         multiple physical controllers in an implementation.
 
-    \item \textbf{No power modeling.} This can be easily overcome by
-        instrumenting the models to count the same microarchitectural events
+    \item \textbf{No power modeling support.} This can be easily overcome by
+        instrumenting the model instances to count the same microarchitectural events
         as software simulators.
 
-    \item \textbf{No modeling of power-down modes:} Will be added alongside
-        power modeling support.
+    \item \textbf{No modeling of power-down or self-refresh modes.} Will be
+        added alongside power modeling support.
 
 \end{enumerate}
 
