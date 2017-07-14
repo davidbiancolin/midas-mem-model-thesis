@@ -447,7 +447,7 @@ soon as it may legally do so.
 Both timing-model classes will attempt to return a read response a single cycle
 after they would receive the first beat from DRAM. Write acknowledgements are
 returned the cycle after a CASW command is issued. However, in the event that
-the target is not ready to accept reponses, completed transactions are stored
+the target is not ready to accept responses, completed transactions are stored
 in seperate read and write response buffers, with capacities large enough to
 hold the maximum number of outstanding requests the model may accept.
 
@@ -623,3 +623,62 @@ compares to DRAMsim2: we enumerate some noteworthy differences here.
 
 \end{enumerate}
 
+\section{Validation}
+
+Validation of the memory timing model was done in RTL-simulation. Here, model
+instances are generated and simulated in isolation with a memory-access trace.
+A CPP test harness binds to each of its interfaces.  The host-side interface
+connects to a C++ memory model derived from that used in Rocket-Chip. The host
+memory can be configured to be a single-cycle memory system, or a particular
+configuration of DRAMSim2.  The configuration-side interface is bound to a
+simple AXI4 driver, that programs the instance based on command-line arguments
+passed to the simulator, spoofing the intialization that would occur at the
+start of a MIDAS simulation. The driver of the target-side interface accepts, a
+memory-access trace from which generates simulation tokens to drive to the DUT.
+Memory-access traces consist of address, data, either the write data or the
+expected read-response data, and target-cycle, the earliest cycle at which the
+request should be made visible to the DUT. Output tokens from the DUT are
+collected, and the timing data for each transaction is dumped to a file for
+post-processing. This includes the target and host-cycles at which a request is
+first accepted, and a response is first presented by the model.
+
+We used two different approaches for validating the generic timing-model classes
+and the DRAM timing-model classes. For the prior, the per-transaction latencies
+can be determined easily a priori for a given memory-access trace\footnote{This
+includes a model of the backpressure the master presents to the AXI4 read and
+write response channels, as head-of-line blocking due to backpressure on
+responses will further delay younger responses.  In our validation flow, we
+ensure the master is always ready to accept a new response.} Thus, we validate
+instances by diffing the timing dumps against those produced by a golden model
+for each memory-access trace. The timings must match or the instance fails
+validation.
+
+Validating DRAM timing-model classes is fundamentally more difficult as there
+is no complete specification against which to compare transaction timings.
+One could use DRAMsim2 as that specification, but this requires that the
+timing-model instances abide by all of the same modeling decisions made by
+DRAMsim2 (many of which are arbitrary). Indeed, different software models like
+Ramulator and USIMM exhibit different behaviors than DRAMSim2 even when
+configured to model indentical memory systems~\cite{ramulator}. Alternatively,
+writing a software golden-model, would be tantamount to writing another
+cycle-accurate DRAM simulator like DRAMsim2.
+
+Instead, we elected to use same approach employed by software simulators. In
+hddition to dumping transaction timing information, DRAM-timing model classes
+also dump a DRAM command schedule. This drives a RTL golden model of a
+single-device slice of the memory organization which detects DRAM timing
+violations. DDR2, DDR3, and DDR4 golden models and example testbenches are
+freely provided by Micron\cite{microngolden}. We validated against DDR3, making small
+modifications to the provided example testbench to support validation of
+multi-rank organizations, and to accept the generated command trace.
+
+Unfortunately, this approach does not prove the model faithly models the MAS it
+purports to model, as there are still infinitely many legal schedulings of DRAM
+commands for a given memory-reference trace. To sanity check against this,
+Ramulator passes the same memory-reference trace to a collection of other
+software simulators including DRAMsim2 and USIMM and compares
+target-runtime~(average bandwidth).
+
+Augmenting this approach, our validation flow generates plots that can be used
+to further inspect deviations between the models. This includes latency
+histograms, and rolling averages of achieved DRAM-bandwidth over time.
