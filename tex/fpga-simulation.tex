@@ -11,7 +11,7 @@ Simulation performs three different functions.
 
 \begin{enumerate}
 
-    \item \textbf{\TODO{Better term - Prototyping}:} ``What thing should we
+    \item \textbf{Prototyping:} ``What thing should we
         build?" Prototyping serves as a means to rapidly evaluate different
         design points with an imperfect model of a proposed design.
 
@@ -34,12 +34,6 @@ surest way to validate a system is not in simulation, but at-speed with a
 physical prototype or the final product itself. This pushes validation late
 into the design cycle. To perform, \emph{pre-silicon} validation a fast and
 accurate full-system simulator is required.
-
-%All simulation, full-system or otherwise, makes a tradeoff of between at least
-%three competing objectives.  \emph{fidelity}~(how accurate is the simulation),
-%\emph{speed}~(how quickly does simulator execute) and \emph{cost}~(\$ per
-%simulation hour). \TODO{Table X lists some common technologies are illustrated
-%in Table X}
 
 Generally, there are only two points during the development of an SoC where
 full-system simulation executes within even three orders of magnitude of a
@@ -141,12 +135,62 @@ pipeline, could be offloaded to an FPGA, while models for I/O may be hosted on
 a CPU.  Alternatively, one could host a functional model of a module on the CPU
 and accelerate the timing-model on the FPGA (or vice versa).  Again, the only
 constraint on the implementation of the simulation, and thus, the
-implementation of FPGA-accelerated components of the simulation, is that as the
+implementation of FPGA-accelerated components of the simulation, is that the
 output of the simulation is the same. Once this constraint is met, a faster
 implementation is always better.
 
 \section{Prior Work in FPGA-accelerated Simulation}
-\TODO{~Half a page on FAME, FAST, RAMP, PROTOFlex, HASim}
+
+Researchers have devised many clever techniques for using FPGAs as simulation
+accelerators. To highlight some of these techniques, we summarize the FAME
+taxonomy~\cite{fame}, which outlines three dimensions along which to categorize
+FPGA-accelerated simulators.
+
+\subsection{FAME1: Host-Target Decoupling}
+
+In host-decoupled fpga-accelerated simulators, a target-cycle of simulator
+executes over a variable number of FPGA-host cycles, in contrast to an
+FPGA-protoype where a single target-cycle is executed on every FPGA-host cycle.
+With this technique, multi-ported register files and CAMs can be modelled using
+dual-ported BRAM, saving FPGA resources. Additionally, host-decoupling permits
+the simulator to tolerate variable latencies in the host-platform without
+sacrificing simulator performance or changing the target-time behavior of the
+simulator. Nearly all academic FPGA-accelerated simulators are FAME-xx1
+simulators, though ProtoFlex~\cite{protoflex} is an early example of one.
+
+\subsection{FAME2: Multithreading}
+
+In a multithreaded FPGA-accelerated simulation, multiple virtual instances of a
+block or module within the target, are simulated using the same datapath on the
+FPGA -- the target state is duplicated according to the number of virtual
+instance. The intiution here is that, ASIC logic tends to be expensive when
+mapped to FPGA fabric; in FPGA-prototypes, designs tend to be logic~(LUT)
+constrained, which leaves much of the FPGA's embedded BRAM left unused.
+Multithreading improves the mapping efficiency of the target, by reusing the
+expensive logic over multiple copies of target state which maps easily into
+FPGA state. HASim~\cite{hasim} is an example of a multithreaded simulator.
+
+\subsection{FAME4: Abstraction}
+
+In an abstract FPGA-accelerated simulation, components of the simulator do not
+model the RTL exactly. For example, instead of having a complete model of the
+DRAM-subsystem, an abstract model that reponds to requests after a fixed
+latency may be used. Abstraction permits simply components of the simulator,
+trading simulation fidelity for FPGA resources.
+
+\subsection{Split Timing-Functional Models}
+
+Splitting timing and functional models is ubiquitous both in software and
+FPGA-accelerated simulators, as it permits amortizing the design effort of the
+functional model over multiple timing models. This is especially crucial in
+FPGA-based simulation, where the functional model can account for the bulk of
+the complexity (e.g., 35K vs. 1K SystemVerilog LoC in RAMPGold~\cite{rampgold}. With
+host-decoupling, it is possible to host the two models on different parts of
+the host-platform: FAST~\cite{fast} hosted its functional model in software and its
+timing model in fabric (ProtoFlex did the opposite~\cite{protoflex}).
+
+For a comphrehensive survey of FPGA-accelerated simulation work we direct
+the reader to~\cite{fpgasimbook}.
 
 \section{Adoption Challenges}
 
