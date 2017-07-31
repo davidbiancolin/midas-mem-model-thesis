@@ -625,7 +625,7 @@ compares to DRAMsim2: we enumerate some noteworthy differences here.
 
 \section{Validation}
 
-Validation of the memory timing model was done in RTL-simulation. Here, model
+Validation of the memory timing model was done in RTL simulation. Here, model
 instances are generated and simulated in isolation with a memory-access trace.
 A CPP test harness binds to each of its interfaces.  The host-side interface
 connects to a C++ memory model derived from that used in Rocket-Chip. The host
@@ -663,8 +663,8 @@ configured to model indentical memory systems~\cite{ramulator}. Alternatively,
 writing a software golden-model, would be tantamount to writing another
 cycle-accurate DRAM simulator like DRAMsim2.
 
-Instead, we elected to use same approach employed by software simulators. In
-hddition to dumping transaction timing information, DRAM-timing model classes
+Instead, we use same approach employed by software simulators. In
+addition to dumping transaction timing information, DRAM-timing model classes
 also dump a DRAM command schedule. This drives a RTL golden model of a
 single-device slice of the memory organization which detects DRAM timing
 violations. DDR2, DDR3, and DDR4 golden models and example testbenches are
