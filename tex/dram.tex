@@ -10,34 +10,51 @@ the command and data buses are shared between all ranks, with a one-hot
 chip-select indicating which rank a command is addressed to.
 
 A basic DRAM operation requires a series of three commands: \emph{activate
-(ACT)}, \emph{column access~(CAS)}, and \emph{precharge~(PRE)}. The ACT command
-enables the word-lines of the array corresponding to a single \emph{row} of the
-bank. The cells of the row are sensed and saved in a \emph{row
-buffer}(typically 1-2 kB). A CAS command then selects a subset of the row
-buffer to read or write~(CASR and CASW commands respectively). In double-data
-rate~(DDR) DRAM, data is bursted over successive rising and falling clock
-edges.  While the row buffer remains \emph{open}, the row can be accessed by
-issuing new CAS commands. To access a row not stored in the buffer, a PRE
-command must be issued to \emph{close} the row and charge the bit lines for a
-new access.
+(ACT)}, \emph{column access~(CAS)}, and \emph{precharge~(PRE)}. Initially, the
+bitlines of the DRAM-cell array are precharged to VDD/2, and DRAM-cells are
+isolated from the bitline by a single access transistor. First, a row must be
+\emph{opened}. The ACT command achieves this by enabling a word-line of the
+array corresponding to a single \emph{row} of the bank. Charge sharing between
+the cells of the now-open row and the bitlines of the array create
+perturbations in the bitline voltages that are sensed by the array of
+differential sense-amps.  This is temporarily destructive: the bit-cell voltage
+is driven to approximately VDD/2. However, after the initial ``sense" phase,
+the amps drive the bitline voltage back towards VCC or GND based on the
+state of the bit cell, restoring the cell voltage. The
+sense-amps also act as a \emph{row buffer}, storing the sensed state of
+the row indefinitely.
 
-DRAM is named dynamic-RAM because it gradually loses its stored state over time
-as bit-cell capacitors leak. DRAM-cell retention rates vary on a single die and
-between dies and are highly sensitive to temperature~(warmer cells leak
+A CAS command then selects a subset of the row buffer to read or write~(CASR
+and CASW commands respectively). In double-data rate~(DDR) DRAM, data is
+bursted over successive rising and falling clock edges.  While the row buffer
+remains open, the row can be accessed by issuing new CAS commands. 
+
+Finally, to access a row not stored in the buffer, a PRE command must be issued
+to \emph{close} the row, disabling the wordline, and precharging bitline back to
+VDD/2 to prepare for a new access.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=16cm]{figures/dram-device.pdf}
+    \caption{A simplified diagram of the organization of a typical DRAM device.}
+	\label{fig:dram-device}
+\end{figure}
+
+DRAM is named dynamic RAM because it gradually loses its stored state over time
+as bit-cell capacitors leak. DRAM-cell retention rates vary both on a single
+die and between dies and are highly sensitive to temperature~(warmer cells leak
 faster). To maintain their state, DRAM cells must be periodically ``refreshed".
-Activating a row of cells is sufficient to refresh them: the stored state is
-read by the sense amplifiers and fed back into the bitlines at the supply
-voltage, recharging the still-open capacitors.  As part of the DRAM standards,
-JEDEC mandates cells must be refreshed on-average once every 8ms; an interval
-they have maintained from DDR through DDR4. Since activations to every row
-cannot generally be guaranteed, DRAM devices are refreshed explicitly with
-a refresh command~(REF). To reduce complexity, this command refreshes a constant
-number of contiguous rows beginning at a base row address in all banks
-concurrently. The base address is incremented which each REF command. DRAM manufacturers generally
-have kept the number of refresh commands required to iterate through the entire
-array constant: 8192 commands per 8ms interval, or one on average every 64 $\mu s$.
-Hence, refresh commands take longer to execute on denser devices with more rows
-per bank.
+Activating a row of cells is sufficient to refresh them. As part of the DRAM
+standards, JEDEC mandates cells must be refreshed on-average once every 64 ms;
+an interval they have maintained from DDR through DDR4. Since activations to
+every row cannot generally be guaranteed, DRAM devices are refreshed explicitly
+with a refresh command~(REF). To reduce complexity, this command refreshes a
+constant number of contiguous rows beginning at a base row address in all banks
+concurrently.  The base address is incremented which each REF command. DRAM
+manufacturers generally have kept the number of refresh commands required to
+iterate through the entire array constant: 8192 commands per 64 ms interval, or
+one on average every 7.8 $\mu s$.  Hence, refresh commands take longer to
+execute on devices with more rows per bank.
 
 A complete list of timings required to model a generic DDR protocol is give in
 table \ref{tbl:dram-timings}. These have been taken, with some modification,
@@ -120,7 +137,43 @@ utilization considerably. It is the de facto standard against which new MAS
 policies for machines with a single stream of memory references~(like
 single-core out-of-order machines), are compared.
 
-\section{DRAM Software Simulation}
+\section{Power Consumption in DRAM Memories}\label{sec:dram-power}
+
+We can divided DRAM power consumption into six different classes: activation
+(including precharge), read, write, termination, refresh, and background power.
+
+Activation is generally the largest contributor to DRAM power consumption.  In an
+effort to maximize areal density and reduce cost-per-bit, DRAM sub-arrays have
+very long, high capacitance bit lines, which are driven to VDD or ground during
+the restore phase of an activation. Moreover, DRAM rows are long, with
+thousands of bitlines are simultaenously charged or discharged in a single
+activation, leading to large peak-current draw. In order to stay within a power
+envelope where DRAM ICs can be cooled passively without heatsinks, DRAM
+manufacturers introduced the $t_{RRD}$ and $t_{FAW}$ constraints described in
+table\ref{tbl:dram-timings} in DDR3.
+
+Read and write power consumption accounts accounts for the power dissipated as
+read or write data is driven to and from the I/Os of the chip to the various
+sub-arrays, as well as the power used to decode the read or write command.
+Shorter bursts consume less power.
+
+Refresh power accounts for the power lost during the successive activations and
+precharges of a refresh command. It is a growing contributor as modern DRAM ICs
+trend towards higher row counts and thus must refresh more rows per refresh
+command, forcing the IC to spend longer in refresh (higher $t_{RFC}$).
+
+Termination power accounts for the power dissipated in termination resistors
+during a write, and by the output buffers of a DRAM IC during a read. In
+multi-rank systems, this includes power is also dissipated in the termination
+resistors of ranks not being addressed.
+
+Finally, background power accounts for leakage of various circuits within the
+IC. Here there are two dimensions of note. Firstly, activated banks
+leak more than precharged banks. Second, powered-down banks~(CKE low) leak less
+than powered-up banks~(CKE high).
+
+
+\section{Simulation of DRAM-based Memory Systems}
 
 The current state of the art in DRAM simulation in academia are cycle-accurate
 software simulators like DRAMSim2~\cite{dramsim}, Ramulator~\cite{ramulator} and
@@ -132,13 +185,18 @@ operating at full throughput and only as a timing-model, these cycle-accurate
 models simulate at frequencies ranging from hundreds of KHz to ones of
 MHz~\cite{ramulator}.
 
-\section{DRAM Power Modeling}
+In order to model power, Micron has described a strategy that assigns an
+average current draw to each of the six states described in
+section~\ref{sec:dram-power}. These currents can be found in Micron data
+sheets, and must be derated according to supply voltage and frequency.
+DRAMSim2 directly implements this strategy, integrating the approriate current
+based on the state of the simulated memories. Micron provides spreadsheets that
+approximately implement this strategy for a variety of popular DRAM
+technologies. Thus, with measurements of the relative activities, one can
+generate estimate DRAM power dissipation as post-processing step.  These
+approaches can also be used in an FPGA simulation, as sufficiently detailed
+FPGA models can add instrumentation for the necessary events.
 
-In order to model power, Ramulator relies on DRAMPower~\cite{drampower}, to
-which it passes its command trace. DRAMSim2 directly implements strategies
-Micron has described in their technical notes~\cite{micronpower}. Micron has
-also provided spreadsheets implementing these strategies, that take
-microarchitectural event frequencies as input. These approaches can also be
-used in an FPGA simulation, as sufficiently detailed FPGA models can add
-instrumentation for specific events, while simpler models could save or sample
-the memory access trace and compute power out-of-band.
+One limitation of the Micron approach, is that it does not account for the
+power dissipation of the controller itself. However, for modest memory
+controller implementations, this should be small.
