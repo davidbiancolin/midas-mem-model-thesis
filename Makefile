@@ -10,6 +10,6 @@ paper:
 	pdflatex $(PAPER).tex </dev/null
 
 clean:
-	rm -f *.aux	*.log *.lof *.bcf *.run.xml *.toc *.lot
+	rm -f *.aux	*.log *.lof *.bcf *.run.xml *.toc *.lot *.bbl
 
 .PHONY: clean

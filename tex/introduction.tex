@@ -91,27 +91,24 @@ off-chip memory systems are modeled.
 
 \section{Collaboration, Previous Publications, and Funding}
 
-This report builds on the work of current and previous students of
-our group. The MIDAS project is a multi-student collaboration between myself,
-Jack Koenig, Sagar Karandikar, Deborah Soung, and Donggyu Kim, whose Chisel3
-port of Strober~\cite{strober} constitutes the bulk of the MIDAS code
-base at the time of writing. The generator presented here and the RTL libraries used
-in MIDAS are written in Chisel3~\cite{chisel}, which remains under active
-development with the guidance from SiFive and Google. MIDAS leans heavily on
-FIRRTL~\cite{firrtl}(Adam Izraelevitz et al.) to transform source RTL into
-FPGA-accelerated models. Finally, MIDAS depends on the availability of
-open-source SoC IP as a source of transformable RTL. Here we use the
-Rocket-Chip~\cite{rocketchip} SoC generator and Chris Celio's BOOM~\cite{boom}
-OoO core generator which implement the free and open RISC-V ISA.
+This report builds on the work of current and previous students of our group.
+The MIDAS project is a multi-student collaboration between myself, Jack Koenig,
+Sagar Karandikar, and Donggyu Kim, whose Chisel3 port of Strober~\cite{strober}
+constitutes the bulk of the MIDAS code base at the time of writing. The
+generator presented here and the RTL libraries used in MIDAS are written in
+Chisel3~\cite{chisel}, which remains under active development with the guidance
+from SiFive and Google. MIDAS leans heavily on FIRRTL~\cite{firrtl}(Adam
+Izraelevitz et al.) to transform source RTL into FPGA-accelerated models.
+Finally, MIDAS depends on the availability of open-source SoC IP as a source of
+transformable RTL. Here we use the Rocket-Chip~\cite{rocketchip} SoC generator
+and Chris Celio's BOOM~\cite{boom} OoO core generator which implement the free
+and open RISC-V ISA.  Our infrastructure to automatically build Linux images
+containing the desired workload and submit jobs to our local FPGA cluster was
+initially written by Chris Celio. Martin Maas was responsible for all things
+Java.
 
-This report borrows heavily from our MICRO50 submission on the same subject.
-Most of the results were collected by Donggyu Kim. Our infrastructure to
-automatically build Linux images containing the desired workload and submit
-jobs to our local FPGA cluster was initially written by Chris Celio. Martin Maas
-was responsible for all things Java: porting the JikesRVM, and for
-instrumenting Java applications to produce the plots in the case study.
-
-\TODO{Funding?}
-\TODO{What more to say about MICRO publication?}
-
-
+This project is partially funded by DARPA Award Number HR0011-12-2-0016; the
+Center for Future Architecture Research, a member of STARnet, a Semiconductor
+Research Corporation program sponsored by MARCO and DARPA; the Intel Agile
+iSTC; and ASPIRE Lab industrial sponsors and affiliates Intel, Google, HPE,
+Huawei, LGE, Nokia, NVIDIA, Oracle, and Samsung.
