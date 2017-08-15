@@ -14,21 +14,20 @@ the future.
 
 MIDAS is a set of C++ and RTL libraries alongside a compiler (the current MIDAS
 flow is shown in figure~\ref{fig:midas}). MIDAS accepts a description of target
-machine as a synchronous dataflow (SDF)-like network of interconnected models,
-which specifies how the target is composed of transformed-RTL models,
-custom-RTL models, and software models.
+machine as a synchronous dataflow (SDF)-like network of interconnected transformed-RTL models,
+handwritten-RTL models, and software models.
 
 To generate an FPGA-accelerated simulator, first, the MIDAS compiler
 automatically transforms source RTL into models that can be hosted on an FPGA,
 instrumenting them if desired. Next, it performs \emph{simulation mapping},
 during which FPGA-hosted models are connected to one another and to models
-that aren't hosted locally though latency-insensitive channel \emph{endpoints}.
+that aren't hosted locally, though latency-insensitive \emph{channel-endpoints}.
 During this process, the compiler builds up a memory map of all the stateful
 components of the simulation and ties them together with an AXI4 bus. In
 \emph{platform mapping}, the simulation-mapped design is connected to the
-memory and communication resources exposed by the FPGA-host. The compiler emits
+memory and communication resources exposed by the FPGA host. The compiler emits
 a verilog file that is included in an FPGA project and a C header that
-describes the simulation memory map.  With this memory map, the simulation
+describes the simulation memory map.  With this header, the simulation
 designer builds a main that links in software models of the target, and
 sequences simulation by invoking commands defined in MIDAS libraries.
 
@@ -37,7 +36,7 @@ sequences simulation by invoking commands defined in MIDAS libraries.
 In MIDAS, the target design is specified as a synchronous dataflow(SDF)-like
 network of \emph{models}, connected with FIFO \emph{channels}, that carry
 simulation \emph{tokens}. This is akin to the model of target description used in
-RAMP~\cite{ramp} and APorts~\cite{APortNetworks}). This description is sufficient
+RAMP~\cite{ramp} and APorts~\cite{APortNetworks}. This description is sufficient
 to capture the RTL behavior of the target, while still enabling a wide range of
 optimizations that make FPGAs more effective accelerators for simulation. An
 example MIDAS SDF network is shown in figure~\ref{fig:adder-example}.
@@ -49,13 +48,11 @@ example MIDAS SDF network is shown in figure~\ref{fig:adder-example}.
 	\label{fig:adder-example}
 \end{figure}
 
-\emph{Models} capture the behavior of a synchronous block of digital logic (an
-ALU, a processor pipeline, a cache, etc...). A model advances one cycle in
-target-time -- it \emph{fires} -- by dequeuing a single token from each of its
-input channels, and has enqueuing a single token into each of its output
+\emph{Models} capture the behavior of a synchronous block of digital logic. A model advances one cycle in
+target time -- it \emph{fires} -- by dequeuing a single token from each of its
+input channels, and enqueuing a single token into each of its output
 channels.  Models must dequeue from each input and enqueue each output
-exactly once before they may dequeue younger inputs tokens: models may never
-``peek" ahead.
+exactly once before they may dequeue younger inputs tokens.
 
 \emph{Tokens} are the basic quantum of data in the simulation. A token is
 defined by a type, corresponding to the target wire that carries it, and a
@@ -63,11 +60,10 @@ value, representing the state of that wire after it has ``settled" for that
 cycle.
 
 \emph{Channels} carry tokens between models in FIFO order and simulate the
-target interconnect between those models. MIDAS has a single primitive type of
-channel --  the \emph{pipe} -- which represents a pipeline with zero more
-register stages (figure~\ref{fig:pipe}). A wire is a degenerate pipe; it has
-zero register stages. In MIDAS, channels implement clock domain crossing (CDC).
-Channels accomplish this by duplicating or destroying tokens based on the
+target interconnect. MIDAS has a single primitive type of
+channel --  the \emph{pipe} -- which represents a pipeline with zero or more
+register stages (figure~\ref{fig:pipe}). A wire is a degenerate pipe: it has
+zero register stages. In MIDAS, channels implement clock domain crossing (CDC) by duplicating or destroying tokens based on the
 relative clock frequency of the models they connect.\footnote{The channel
 differs from a classical SDF channel in two ways.  Firstly, to implement CDC in
 an SDF, an intermediate process would need to be placed between two channels.
@@ -76,7 +72,7 @@ finite channel in an SDF with a bidirectional pair of channels: one carrying
 the original tokens from source to sink, and the second carrying credit tokens
 from sink to source.)} To help describe latency-insensitive interconnect in a
 target, MIDAS also has a \emph{queue}-type channel (figure~\ref{fig:queue}).
-Using queue-type channels permits simulation optimizations that would be
+Using queue-type channels enables simulation optimizations that would be
 impossible by describing the same interconnect with some combination of pipes
 and models.
 
@@ -94,14 +90,13 @@ and models.
     \end{subfigure}
 \end{figure}
 
-At time zero, each of the channels is initialized with a sequence of tokens
-based on the type of target interconnect they model. A pipe, for instance, is
-initialized with tokens equal to its latency. After initialization, target-time
-advances in a decoupled fashion with models firing as they may do so legally
+To simulate a MIDAS SDF, at time zero, each of the channels is initialized with a sequence of tokens
+based on their target-interconnect type. A pipe, for instance, is
+initialized with tokens equal to its latency. After initialization, target time
+advances in a decoupled fashion with models firing as soon as they may do so legally
 (all of their input tokens are available and all their output channels are not
 full). The figures~\ref{fig:adder-execution}a~-~\ref{fig:adder-execution}d
-illustrate this with the example SDF in figure~\ref{fig:adder-example} over two
-target cycles.
+illustrate this over two target cycles with the example SDF in figure~\ref{fig:adder-example}.
 
 \begin{sidewaysfigure}
     \begin{subfigure}[t]{0.45\textwidth}
@@ -113,7 +108,7 @@ target cycles.
     \begin{subfigure}[t]{0.45\textwidth}
 	    \centering
         \includegraphics[width=\linewidth]{figures/adder-ex2.pdf}
-        \caption{After having advanced to the next cycle, the adder model stalls as
+        \caption{Having advanced to the next cycle, the adder model stalls as
         it cannot proceed until there is another B input token.}
     \end{subfigure}
     \begin{subfigure}[t]{0.45\textwidth}
@@ -131,7 +126,7 @@ target cycles.
     \label{fig:adder-execution}
 \end{sidewaysfigure}
 
-\emph{Deadlock} occurs when no model can advance. Generally, this occurs when
+\emph{Deadlock} occurs when no model can advance. Generally, this happens when
 the SDF network includes a cycle of wire-type channels -- it need not model a
 combinational loop.  A common example of this involves connecting a decoupled
 source to a decoupled sink with wire-type channels (shown in
@@ -166,13 +161,13 @@ insensitive this should not change the functional behavior of the target.
         behavior of target -- there's extra latency moving from source to sink.
         However, in addition to requiring no changes to the models, using a queue may also
         permit both models to fire concurrently as a queue may generate
-        ready-tokens early if knows it will have space its buffer.}
+        ready tokens early if knows it will have space its buffer.}
         \label{fig:queue-decoupled-example}
     \end{subfigure}
 \end{figure}
 
 A simulator that faithfully implements an SDF network of this form decouples
-target-time from host-time. In this \emph{host-decoupled} simulation, it may
+target-time from host-time. In this \emph{host-decoupled} simulation~(refer again to \ref{sec:fame1}), it may
 take an arbitrary (but finite) host-time for tokens to pass through channels,
 or for models to fire. A model that is host-decoupled may optimized by
 performing transformations maintain their token input-output behavior.
@@ -184,8 +179,8 @@ multi-ported RAMs, can instead be simulated over multiple host-cycles with
 fewer resources and greater host frequency.
 
 To help quantify this time-area trade-off it is useful to define FPGA-cycle to
-Model-Cycle Ratio~\cite{APorts}, the mean number of FPGA-cycles required to
-execute a single target-cycle: $$ FMR = \frac{Cycles_{FPGA}}{Cycles_{Target}}
+Model-Cycle Ratio~\cite{APorts}, the mean number of FPGA-host cycles required to
+execute a single target cycle: $$ FMR = \frac{Cycles_{FPGA}}{Cycles_{Target}}
 $$
 
 \noindent Assuming one FPGA-clock, the FMR of a connected subgraph in a target
@@ -202,16 +197,16 @@ $$ f_{model} = \frac{f_{FPGA}}{FMR} $$
 In order to integrate source RTL into a MIDAS simulation, it must be
 transformed to a host-decoupled model.  To do this, MIDAS uses a
 FIRRTL compiler pass that adds an additional enable, \emph{target-fire}, to all
-registers and to the write ports of sequential memories. A model generated in
+registers and to the write ports of memories. A model generated in
 this way can achieve an FMR of one, assuming its input tokens are always
 available and its output queues are never full.  However, this model is FPGA
 resource inefficient as it is effectively implementing the RTL directly.
 Additionally, target-fire that may adversely affect cycle time for sufficiently
-large blocks of RTL.
+large blocks of RTL, as it is both high-fanout and often on the critical path\TODO{citation?}.
 
 MIDAS also supports optional transformations to add scan chains and I/O trace
 buffers for debugging and for use with Strober~\cite{strober}. These passes
-are shown in~\ref{fig:midas-passes}.
+are shown in figure~\ref{fig:midas-passes}.
 
 \begin{figure}
 	\centering
@@ -238,14 +233,14 @@ During this process, MIDAS also emits \emph{widgets}, memory-mapped modules
 that provide simulation utilities but do not simulate target-time (they are not
 models). These widgets include scan chain and I/O trace buffer controllers, a
 ``loadmem" widget used to initialize or dump FPGA-local DRAM, and a master,
-that can reset simulation to time zero and regulates the advance of target-time
+that regulates the advance of target-time
 on the FPGA.
 
 Once all of the simulation components (widgets, models, endpoints. etc...) have
-been generated, the simulation interconnect is generated and bound to an AXI4
+been producted, the simulation interconnect is generated and bound to an AXI4
 slave port. All simulation memory-mapped components are managed with MMIO
 through this interface. Similarly, components that require FPGA-local DRAM are
-bound a single AXI4 master port.\footnote{We recognize this is an unneeded serialization but have only had to support single-channel FPGA-host-memory systems to date.}
+bound a single AXI4 master port.\footnote{We recognize this is an unneeded serialization but have only had to support single-channel FPGA-host memory systems to date.}
 
 \subsection{Platform Mapping}
 
@@ -256,16 +251,15 @@ interconnect, and provide a clock and synchronous reset to drive the
 MIDAS-generated RTL.  During platform mapping, MIDAS bridges out the interfaces
 exposed in simulation-mapping to the interfaces presented by this project.
 
-Finally, MIDAS emits a ``*Shim.v" that can be compiled into the aforementioned
-FPGA project, and a C++ header ``*const.h" that describes the memory map of the
-part of the simulation residing on the FPGA.
+Finally, MIDAS emits a ``<HostName>-Shim.v" that can be compiled into the aforementioned
+FPGA project, and a C++ header ``<HostName>-const.h" that describes the memory map of the simulator.
 
 \section{MIDAS Software Libraries \& User Main}
 
 To control the simulator, the user must build a main and link in the MIDAS C++
 libraries, the compiler-generated header and a simulation MMIO driver.  The
 MIDAS libraries implement basic commands used to control simulation such as
-\emph{step K} and \emph{reset}(these commands will eventually constitute a
+\emph{step K} and \emph{reset}~(these commands will eventually constitute a
 ``MIDAS API"). Widgets, endpoints, and models instantiated on the FPGA have
 their own drivers that extend the basic set of simulation commands. For
 example, the default I/O model has \emph{peek}, which reads the value of the
@@ -281,22 +275,22 @@ on the host.
 While MIDAS has preliminary support for other host-platforms, all the
 experiments of this report are run on Xilinx ZC706 development boards, which
 feature a Zynq XC7Z045 FPGA. This FPGA has a processing system (PS),
-consisting of hardened ARM A9 with 512 MiB of DRAM, connected to the
+consisting of hardened ARM A9 with 1 GiB of DRAM, connected to the
 programmable logic(PL), which implements the Kintex-7 fabric architecture with
 19.1Mb of BRAM and 350K logic cells. The PS is connected to the PL though a
 number of interfaces; we use AXI-GP0, a general purpose 32-bit wide AXI4 master port.
 Linux processes running on the PS interact with the PL with MMIO over this
-interface. Finally, the PL is connected to a configurable DDR PHY, which on the
+interface. Additionally, the PL is connected to a configurable DDR PHY, which on the
 ZC706, drives a DDR3 SODIMM (upgraded to 8GiB).
 
 All target designs used in this report are single-core, tethered, RISC-V
 processors with single-channel DRAM subsystems.  They share the MIDAS SDF
 shown in figure~\ref{fig:default-target}. This SDF includes: a transformed-RTL
-model, sourced with RTL generated by Rocket Chip, that instantiates the
+model, sourced with RTL generated by Rocket-Chip, that instantiates the
 processor pipeline (Rocket or BOOM), L1 caches, and an uncore containing the
-TileLink agent that manages the tether. A software model, which wraps the
-RISC-V front-end server (\texttt{riscv-fesvr}) that facilitates tethered boot
-and to which console I/O is proxied from the target. And a memory-timing
+TileLink agent that manages the tether; a software model, which wraps the
+RISC-V front-end server (\texttt{riscv-fesvr}) to facilitate tethered boot
+and to handle console I/O from the target; and a memory-timing
 model instance, which connects to an AXI4 port presented by the processor.
 All unconnected I/O of the transformed model, including reset, is bound to the
 default I/O model.
@@ -305,7 +299,7 @@ default I/O model.
 	\centering
 	\includegraphics[width=\textwidth]{figures/masters-target.pdf}
     \caption{The MIDAS SDF of the target design used in this report. Channel
-    details and initial tokens are omitted for simplicity. Both the tether I/O
+    details and initial tokens have been omitted for simplicity. Both the tether I/O
     and AXI4 have bidirectional decoupled (ready-valid) target interconnect,
     thus the channels are implemented as sets of queues. SReset channels are pipes with
     a latency of one.}

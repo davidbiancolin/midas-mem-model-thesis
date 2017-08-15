@@ -10,25 +10,25 @@ memory system the instance will model (a \emph{timing-model class}). As output,
 the generator produces an instance module and local memory map of all registers
 it will expose to the simulation interconnect. These registers control timing
 parameters can be overwritten to reconfigure the instance without needing to
-recompile an FPGA bitstream.
+recompile the FPGA bitstream.
 
 Instances operate by using the FPGA-host's off-chip memory system as a backing
-store: target-requests carried through simulation tokens are snooped by the
+store: target requests carried through simulation tokens are snooped by the
 \emph{ingress unit} and re-issued to the host-memory system. Responses from the
 host-memory system are subsequently buffered by the \emph{egress unit}. In
 parallel, a host-decoupled \emph{timing-model} explicitly consumes input tokens
 and generates output tokens. When the timing-model wishes to release a token
 with a valid target response, it fetches the matching host response from the
 egress unit. If no host response is present, the timing-model does not produce
-a token. This makes the behavior of the target-memory system reproducible, and
-independent of the behavior of host-memory system.
+a token. This makes the behavior of the target-memory system independent of the
+behavior of host-memory system, and thus, reproducible.
 
 A block diagram of an instance is shown in figure~\ref{fig:timing_model}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/memory-model-block-diagram.pdf}
-	\caption{Top-level diagram of memory system model with latency-bandwidth pipe timing-model}
+	\caption{Top-level diagram of timing-model instance with latency-bandwidth pipe timing-model}
 	\label{fig:timing_model}
 \end{figure}
 
@@ -74,7 +74,7 @@ which will be handled by the MIDAS compiler.
 
 \section{Operation}\label{sec:operation}
 
-Like most previous FPGA-simulation work using custom-RTL models, the instances
+Like most previous FPGA-simulation work using handwritten-RTL models, the instances
 split their timing and functional models.
 
 The functional model of an instance is comprised of the ingress unit, egress
@@ -85,25 +85,25 @@ functional model for an AXI4 memory-slave component in the target. This makes
 it trivial to apply target requests to the functional model; the instance need
 not worry about translating requests between different bus standards. Instead,
 the model relies on bridges and adapters in the host-memory system to manage
-that complexity instead.
+that complexity.
 
 The ingress and egress unit are the gatekeepers of the host-memory system. They
 apply target requests to the host-memory system and buffer responses so that
-they may be fetched by the timing-model without violating ordering requirements
-of the AXI4 standard. They must do this without locking up the host-memory
-system (more on this later).
+they may be fetched by the timing-model without violating AXI4 ordering
+constraints. They must do this without locking up the host-memory system (more
+on this later).
 
-The ingress unit snoops the values of input tokens and outputs tokens; when the
-timing-model handshakes on a read address, write address or write data request,
-it enqueues the payload of that request into a queue for that AXI channel. Once
+The ingress unit snoops the values of input tokens and outputs tokens. When the
+timing model handshakes on a read address, write address or write data request,
+it enqueues the payload of that request into a queue for that AXI4 channel. Once
 the ingress unit has buffered a complete read or write transaction, it issues
 it to the host-memory system. The ingress unit must wait until it has complete
 transaction to avoid locking up the host-memory system in the case that
 simulation halts during a target request, or if the target attempts to reset
 the controller.  If any of the queues of the ingress unit would overflow, the
-timing-model may not advance (it cannot dequeue the input tokens). At minimum,
+timing-model may not advance (it cannot dequeue input tokens). At minimum,
 the queues must be sized to hold a single complete request to avoid deadlocking
-simulation\footnote{The minimums are ARQueue depth of 1, WQueue depth of
+simulation.\footnote{The minimums are ARQueue depth of 1, WQueue depth of
 \emph{MaxWriteLength}, AWQueue depth of \emph{MaxWrites}, where MaxWriteLength
 and MaxWrites are set in the base
 configuration.(Section~\ref{sec:generator-parameters},
@@ -115,7 +115,7 @@ system.
 The egress unit is responsible for buffering the pertinent fields of host
 responses until they are requested by the timing-model. The egress unit must
 rectify reorderings made by both the host-memory system and the timing-model.
-In AXI4, there are two ordering constraints of concern for egress unit
+In AXI4, there are two ordering constraints of concern for design of the  egress unit
 design(see~\cite{amba}, section A6.4 for greater detail):
 
 \begin{enumerate}
@@ -129,16 +129,16 @@ design(see~\cite{amba}, section A6.4 for greater detail):
 
 \end{enumerate}
 
-To adhere to these constraints, the egress unit implements a ``virtual queue"
+To adhere to these constraints, the egress unit implements a \emph{virtual queue}
 for each AXI4 ID, with separate sets both read and write responses. As host
 responses are presented they are enqueued into the virtual queue with the
 corresponding AXI ID. For read responses, the egress unit only buffers the data
-and last fields of a read response payload \footnote{The user signal (RUSER)
-and read response status (RRESP) fields are dropped}. For writes, none of the
+and last fields of a read response payload.\footnote{The user signal (RUSER)
+and read response status (RRESP) fields are dropped.} For writes, none of the
 payload fields are enqueued; the queue degenerates into a up-down counter of
-write acknowledgments it has received for each ID\footnote{Write
+write acknowledgments it has received for each ID.\footnote{Write
 acknowledgments do have WUSER and WRESP fields but, as above, they are
-dropped.}. The implementation of the virtual queues depends on generator
+dropped.} The implementation of the virtual queues depends on generator
 parameters described in section~\ref{sec:generator-parameters}. Details of the
 various egress unit implementations are described in section~\ref{sec:egress}.
 
@@ -148,8 +148,8 @@ both the backpressure (ready) on request channels as well as the valid bits and
 payloads of response channels. The timing-model is free to drive signals in the
 read and write response payloads as it sees fit; it may wish to return custom
 errors or hints, or even return incorrect data. Generally, for read responses
-the timing-model fetches missing fields beat-by-beat from the egress unit, where
-as for write responses, it consumes a credit ensuring that the host write
+the timing-model fetches missing fields beat-by-beat from the egress unit,
+whereas for write responses, it consumes a credit ensuring that the host write
 response has been received.
 
 To this end, the egress unit exposes ready-valid request and response
@@ -159,10 +159,10 @@ After a request handshake, the egress unit returns the beats of the transaction
 at the head of that ID's virtual queue through the response interface. The
 timing-model then handshakes on each beat to dequeue them from the egress unit.
 The egress unit will only accept a new request once it has presented the final
-beat of the previous one \footnote{This is a natural restriction, as the AXI4
+beat of the previous one.\footnote{This is a natural restriction, as the AXI4
 specification does not permit read-response interleaving. In the future this
 could be changed, to have the model request individual beats instead of whole
-transactions}.
+transactions.}
 
 In the event that the host-memory system is slow, the egress unit cannot return
 a valid response and thus the timing-model cannot populate a complete output
@@ -189,14 +189,13 @@ MMIO through its configuration-side interface. Simulation time configurability
 permits the designer to perform parameter sweeps without needing to recompile
 the simulator bitstream -- at the expense of FPGA resources. Since both timing
 and functional components of an instance are provisioned pessimistically,
-giving hints to generator can greatly reduce FPGA resource utilization.
+giving hints to generator can greatly reduce FPGA-resource utilization.
 
 The generator's input configuration consists of a \emph{base} configuration
-that is extended with a timing-model configuration .The parameters of the base
+that is extended with a timing-model configuration. The parameters of the base
 configuration are described in the table~\ref{tbl:base-config}. Timing-model
-configurations are described section \label{sec:timing-model}.  Note, ingress
-and egress unit generation depends only on parameters of the base
-configuration.
+configurations are described section~\ref{sec:timing-model}. Note, ingress and
+egress unit generation depends only on parameters of the base configuration.
 
 \begin{table}
 \begin{center}
@@ -210,15 +209,15 @@ configuration.
     \hline
     \textit{MaxReads} & N/A & The number of maximum outstanding reads the instance can support.  \\
     \hline
-    \textit{MaxWrites} & N/A & As above, for write transactions. \\
+    \textit{MaxWrites} & N/A & As above, but for write transactions. \\
     \hline
-    \textit{MaxReadLength} & 256 & The maximum number of beats in a read transaction. (Defaults to AXI4 limit.) \\
+    \textit{MaxReadLength} & 256 & The maximum number of beats in a read transaction. (Defaults to AXI4 limit of 256.) \\
     \hline
-    \textit{MaxWriteLength} & 256 & As above, for write transactions. \\
+    \textit{MaxWriteLength} & 256 & As above, but for write transactions. \\
     \hline
     \textit{MaxReadIDs} & $2^{IDWidth}$ & Specifies a bound on the maximum number of AXI4 read channel IDs that will be used by in-flight requests. \\
     \hline
-    \textit{MaxWriteIDs} & $2^{IDWidth}$ & As above, for write transactions. \\
+    \textit{MaxWriteIDs} & $2^{IDWidth}$ & As above, but for write transactions. \\
     \hline
 \end{tabular}}
 \end{center}
@@ -241,7 +240,7 @@ save FPGA resources where possible. To describe the trade off we define virtual
 state $VS$ as the total state required to directly implement each virtual
 queue:
 
-$$VS = ID_{max}*R{ID,max}*L_{max}*B$$
+$$VS = ID_{max}*R_{ID,max}*L_{max}*B$$
 
 Where $B$ are the number of bits per beat. We also define ideal state, $IS$,
 the state required to store the maximum number of responses of maximum length.
@@ -254,22 +253,20 @@ responses may share a single ID and thus,
 $$VS = IS*ID_{max}$$
 
 The conventional wisdom in design for FPGAs is that BRAM is cheap. Instead of
-trying to be clever, for small degrees of virtual state, and the egress unit
-physical implements each of those queues in BRAM, in a structure called a
-SRAMMultiFIFO (SMF)~\cite{smf}. Naturally, this requires $VS$ bits. Since there the egress unit only ever enqueues
-into one queue and dequeues from one queue, a 1R-1W port BRAM can be used to
+trying to be clever, for small degrees of virtual state the egress unit
+directl implements each of those queues in BRAM, in a structure called a
+SRAMMultiFIFO~(SMF)~\cite{LIFPGADesign}. Since the egress unit only ever enqueues into
+and dequeues from a single queue, a 1R-1W port BRAM can be used to
 co-locate the entries of multiple queues.  Read and write pointers for each
-queue are maintained separately in registers. The AXI IDs and read or write
-pointer associated with it's queue are simply concatenated to fetch a beat from
-BRAM.
+queue are maintained separately in registers. To address a beat, the AXI ID and
+the matching read or write pointer are concatenated.
 
 For large virtual state, and when $VS > IS$, directly implementing each virtual
 queue in BRAM becomes too expensive. Consider the case in which we assume AXI4
-specification maximums of 256 unique IDs and 256 beat transactions, an egress
-unit with 64 bit data beats supporting a only 16 responses would have $VS =
-8MiB$, but only $IS = 32 KiB$.
+ maximums of 256 unique IDs and 256 beat transactions, a 64-bit data width, and an egress unit provisioned to hold 16 responses. Here, $VS =
+8MiB$ but $IS = 32 KiB$.
 
-Instead, here egress uses a level of indirection, and dynamically assigns
+In this case, the egress uses a level of indirection and dynamically assigns
 entries in an SMF, with $R_{max}$ queues of depth $L_{max}$, to responses as
 they are received. A translation unit contains a free list and a mapping table,
 which for each SMF entry has a valid bit, a head bit, an AXI ID and a next
@@ -279,21 +276,20 @@ given AXI channel.
 
 When a response from the host is received, it requests an entry in the SMF from
 the translation unit. The granted entry is marked valid, and the next youngest
-transaction sharing that AXI ID, updates it's next pointer.  The response
-proceeds to enqueues into the SMF. When the model requests a response, the
-translation unit matches on the head of the linked list of the requested AXI
-ID; returning an entry index if there is a hit. The response is then dequeued
-from the SMF beat-by-beat as the model handshakes on the egress response port.
-Once the final beat has been read from the SMF, the entry is freed, and the
-next youngest entry for the AXI ID is marked as the head.
+transaction sharing that AXI ID updates its next pointer.  The response is then
+enqueued into the SMF. When the model requests a response, the translation unit
+matches on the head of the linked list of the requested AXI ID, returning an
+entry index if there is a hit. The response is then dequeued from the SMF
+beat-by-beat as the model handshakes on the egress response port.  Once the
+final beat has been read from the SMF, the entry is freed, and the next
+youngest entry for the AXI ID is marked as the head.
 
 This translation unit is an associative structure that produces an translation
 combinationally, and thus tends to be LUT intensive, and may adversely affect
 cycle time. To date, our simulations have never been resource constrained, the
 critical paths lie in transformed-RTL models, and run with FMR of 1. In the
-future, there are many optimizations that could be made to trade time for
-area.\footnote{In retrospect, implementing the CAM in BRAM paying an extra
-cycle for translation is definitely a better design point.}
+future, there are many optimizations that could be made to trade host-cycles for
+FPGA-resource savings.
 
 Regardless of egress implementation, selecting the right base configuration
 parameters can dramatically save resources. Consider the default configuration
@@ -301,7 +297,7 @@ of Rocket-Chip, which has an AXI ID width of 4 bits, data width of 64 bits, and
 a block size of 64 bytes. Here, a cache refill served in 8 beats -- one eighth
 of the AXI4 maximum length -- and can reduce $VS$ from 0.5 MiB to 16
 KiB.\footnote{In a Xilinx 7 series architecture, this is 4 36Kb BRAMs ($<$ 1\%
-of the BRAM available on the XC7Z045)} Furthermore, in many cases masters do not
+of the BRAM available on the XC7Z045).} Furthermore, in many cases masters do not
 issue multiple requests using the same transaction ID to maximize the
 flexibility of the slave to reorder requests. Using the same example, and
 setting $R_{ID,max}$ to one, sets $VS = IS = 1 KiB$ permitting a direct
@@ -309,7 +305,7 @@ implementation to fit in a single BRAM of any modern FPGA architecture.
 
 Presently, the generator uses a direct implementation if $VS <= 32 KiB$ or $VS
 = IS$. We leave defining a better heuristic to future work. Ultimately, how
-custom-RTL models should be optimized is a system-level question that
+handwritten-RTL models should be optimized is a system-level question that
 depends on the resource utilization the project, desired FMR, and
 the host-FPGA architecture. Indeed, simulators under BRAM pressure may wish to use
 translation logic when the generator by default may choose otherwise. At time
@@ -319,14 +315,19 @@ desired.
 
 \section{Generic Timing-Model Classes}
 
+We provide two classes of \emph{generic} timing-models: a latency-bandwidth
+pipe and a bank-conflict model. These can be used to abstractly model DRAM or
+any other large AXI4 memory-slave device that may be backed by a different
+memory technology.
+
 \subsection{Latency-Bandwidth Pipe}
 
-The latency-bandwidth pipe model applies independently programmable latencies
-to read and write requests. It does not accept any new requests beyond a
-programmable limit; this serves as a coarse-grain bandwidth bound via Little's
-law. Note, for systems that make requests of varying lengths, the simulated
-DRAM bandwidth will be reduced when making shorter requests. This model never
-reorders target requests.
+The latency-bandwidth pipe timing-model class applies independently
+programmable latencies to read and write requests. It does not accept any new
+requests beyond a programmable limit; this serves as a coarse-grain bandwidth
+bound via Little's law. Note, for systems that make requests of varying
+lengths, the simulated memory bandwidth will be reduced when making shorter
+requests. This model never reorders target requests.
 
 \noindent Runtime parameters are shown in table~\ref{tbl:lbp-programmable-registers}.
 
@@ -338,7 +339,7 @@ reorders target requests.
     \textbf{Name} & \textbf{Description} \\
     \hline
     \hline
-    \textit{ReadMaxRequests} & Sets the maximum number of in-flight write
+    \textit{ReadMaxRequests} & Sets the maximum number of in-flight read
         requests the timing-model will accept, before apply backpressure to
         request channels. \\
     \hline
@@ -346,7 +347,7 @@ reorders target requests.
     \hline
     \textit{ReadLatency} & Sets the latency of a read-request. \\
     \hline
-    \textit{WriteLatency} & As above, for write transactions. Note, this length
+    \textit{WriteLatency} & As above, but for write transactions. Note, this length
         is measured from the cycle at which both write address and write data
         requests have been completed to the cycle at which the write
         acknowledgment is first produced. \\
@@ -358,9 +359,9 @@ reorders target requests.
 \end{table}%
 
 \clearpage
-\subsection{Bank Conflict}\label{sec:bank-conflict}
+\subsection{Bank-Conflict Model}\label{sec:bank-conflict}
 
-The bank conflict model adds a penalty of $max(0, t_{CP} - t_{\Delta})$ to a
+The bank-conflict timing-model class adds a penalty of $max(0, t_{CP} - t_{\Delta})$ to a
 base latency if a read or write request used the bank $t_{\Delta}$ cycles
 prior, where $t_{CP}$ is the maximum conflict penalty. The model has a
 reconfigurable number of banks and bank address assignment.  The bank address
@@ -428,7 +429,7 @@ scheduler, MAS, and response buffer.
 
 The transaction scheduler consists of a single unified transaction queue that
 can enqueue both a AXI4 read and write transaction in a single cycle, with reads
-given priority when only one slot is available. Transaction are passed to the
+given priority when only one slot is available. Transactions are passed to the
 MAS as they can be accepted, at a rate of one transaction per cycle.  Different
 transaction scheduling schemes are left to future work.
 
@@ -440,7 +441,7 @@ scheduling decisions. On every target-cycle, the MAS selects a legal command
 based on the available references. The selected command is broadcasted back to
 each of the bank and rank-state trackers.  Both MAS use a preemptive all-ranks
 refresh scheme, that makes no attempt to pull-in or delay refresh commands.
-When a refresh is required, commands for pending references are not considered,
+When a refresh is required, commands for pending references are not considered:
 the MAS precharges every open bank in every rank, and issues REF commands as
 soon as it may legally do so.
 
@@ -451,7 +452,7 @@ the target is not ready to accept responses, completed transactions are stored
 in seperate read and write response buffers, with capacities large enough to
 hold the maximum number of outstanding requests the model may accept.
 
-Models assume the width of the DRAM-system bus is one half of the width of the
+Presently, models assume the width of the DRAM-system bus is one half of the width of the
 target-AXI4 interface. No explicit device width is passed to the timing
 model: choice of device width trickles down into other configuration
 parameters. For example, for a given memory system capacity, using x4 devices
@@ -471,7 +472,7 @@ Each model shares generation-time configurations that describe the
 the memory organization, including the number of ranks,
 banks per rank, and rows per bank. The models accept all of the DRAM timings supported by DRAMSim2~(described in
 section \ref{sec:dram-arch}, table \ref{tbl:dram-timings}, with the exception
-of $t_{XP}$, $t_{CKE}$ and $t_{AL}$, as runtime parameters.
+of $t_{XP}$ and $t_{CKE}$, as runtime parameters.
 
 \noindent Generation and runtime parameters are shown in
 tables~\ref{tbl:common-MAS-generator-parameters}
@@ -489,7 +490,7 @@ respectively.
     \hline
     \textit{MaxBanks} & N/A & The maximum number of banks \emph{per rank}. Must be a power of two.  \\
     \hline
-    \textit{MaxRows} & N/A & The maximum number of rows per bank. Must be a power of two.\\
+        \textit{MaxRows} & N/A & The maximum number of rows \emph{per bank}. Must be a power of two.\\
     \hline
 \end{tabular}}
 \end{center}
@@ -500,11 +501,11 @@ respectively.
 \begin{table}[htb]
 \begin{center}
 \resizebox{\textwidth}{!}{%
-    \begin{tabular}{|p{0.20\textwidth}|p{0.8\textwidth}|}
+    \begin{tabular}{|p{0.25\textwidth}|p{0.75\textwidth}|}
     \hline
     \textbf{Name} & \textbf{Description} \\
     \hline
-    \textbf{DRAM Timings} & See table~\ref{tbl:dram-timings}. $t_{AL}$ is unsupported. \\
+    \textbf{DRAM Timings} & See table~\ref{tbl:dram-timings}. \\
     \hline
     \textit{ReadMaxRequests} & Same as latency-bandwidth pipe (table~\ref{tbl:lbp-programmable-registers}) \\
     \hline
@@ -514,7 +515,7 @@ respectively.
     \hline
     \textit{BankAddrMask} & Same as bank-conflict model (table~\ref{tbl:bc-programmable-registers}) \\
     \hline
-    \textit{RankAddrOffset} & Same mechanism as above for defining rank address assingment. \\
+    \textit{RankAddrOffset} & Same mechanism as above for defining rank address assignment. \\
     \hline
     \textit{RankAddrMask} & Same as bank-conflict model (table~\ref{tbl:bc-programmable-registers}) \\
     \hline
@@ -531,13 +532,13 @@ respectively.
 
 \subsection{FCFS MAS Model}
 
-This class models a FCFS DRAM MAS (see section~\ref{sec:fcfs}) with
+This class models a FCFS MAS (see section~\ref{sec:fcfs}) with
 programmable open and closed page policies. This model considers the head of
 the transaction queue and the most recently completed reference to generate
 candidate commands.  The close-page policy always issues auto-precharge CAS
 commands, which close the row without requiring an expicity precharge command,
 even if the next reference accesses the same row.  True to its name, this model
-never reorders target-requests.
+never reorders target requests.
 
 \noindent Additional runtime parameters of this timing model class are shown in
 table~\ref{tbl:fcfs-programmable-registers}.
@@ -554,23 +555,23 @@ table~\ref{tbl:fcfs-programmable-registers}.
     \hline
 \end{tabular}}
 \end{center}
-\caption{Programmable registers of the FCFS DRAM MAS model.}
+\caption{Programmable registers of the FCFS MAS model.}
 \label{tbl:fcfs-programmable-registers}
 \end{table}%
 
-\subsection{FR-FCFS DRAM MAS} This timing-class models a FR-FCFS MAS
-(section~\ref{sec:frfcfs}) with an open-page policy. The MAS considers
+\subsection{FR-FCFS MAS} This class models a FR-FCFS MAS
+(section~\ref{sec:frfcfs}) with an open or closed-page policy. The MAS considers
 references to all banks and ranks simultaenously; all references are stored in
 a single collapsing buffer, with additional bits to track if they are
-ready~(\emph{isReady}, they hit an open row buffer), and whether precharge
+ready~(\emph{isReady}, they hit an open row buffer), and whether PRE
 commands for the request may be considered~(\emph{mayPRE}, there are no other
 ready references that address the same bank). CAS, ACT, and PRE arbiters select
 the oldest legal command of that type from the legal candidates, and are
 scheduled in descending priority (CAS before ACT before PRE).
 
-This model reorders target-requests.
+This model reorders target requests.
 
-The generation and runtime parameters as the FR-FCFS DRAM MAS model are shown
+The generation and runtime parameters as the FR-FCFS MAS model are shown
 in table~\ref{tbl:frfcfs-generator-parameters}.
 
 \begin{table}[htb]
@@ -585,9 +586,18 @@ in table~\ref{tbl:frfcfs-generator-parameters}.
     \hline
 \end{tabular}}
 \end{center}
-\caption{Generation parameters of the DDR3 FR-FCFS MAS model.}
+\caption{Generation parameters of the FR-FCFS MAS model.}
 \label{tbl:frfcfs-generator-parameters}
 \end{table}%
+
+\subsection{Instrumentation \& Power Modeling}
+
+By default, both MAS timing-models include instrumentation to measure
+microarchitectural events required by Micron's power-estimation spreadsheet.
+This includes counters for: the number of cycles each rank spends with all
+banks precharged, and the number of ACTs, CASW, and CASR commands issued to
+each rank. By sampling these counters periodically, time-series plots of DRAM
+power dissipation can be generated.
 
 \subsection{Comparison to DRAMsim2}
 
@@ -605,18 +615,14 @@ compares to DRAMsim2: we enumerate some noteworthy differences here.
         in the case of an 8 beat burst. Finally, the MAS implementations differ
         slightly and thus produce command schedules for the same transaction
         trace. This introduces some variability in the latencies seen by each
-        request\footnote{MAS implementations, even of well-described
+        request.\footnote{MAS implementations, even of well-described
         algorithms, vary across software simulators too, as shown
-        in~\cite{ramulator}.}.
+        in~\cite{ramulator}.}
 
     \item \textbf{No multi-channel support.} While software DRAM simulators
         support multi-channel configurations, in MIDAS we expect the user will
         use separate model instances for each channel, just as there would be
         multiple physical controllers in an implementation.
-
-    \item \textbf{No power modeling support.} This can be easily overcome by
-        instrumenting the model instances to count the same microarchitectural events
-        as software simulators.
 
     \item \textbf{No modeling of power-down or self-refresh modes.} Will be
         added alongside power modeling support.
@@ -626,51 +632,51 @@ compares to DRAMsim2: we enumerate some noteworthy differences here.
 \section{Validation}
 
 Validation of the memory timing model was done in RTL simulation. Here, model
-instances are generated and simulated in isolation with a memory-access trace.
+instances are generated and simulated in isolation with a memory-reference trace.
 A CPP test harness binds to each of its interfaces.  The host-side interface
 connects to a C++ memory model derived from that used in Rocket-Chip. The host
 memory can be configured to be a single-cycle memory system, or a particular
 configuration of DRAMSim2.  The configuration-side interface is bound to a
-simple AXI4 driver, that programs the instance based on command-line arguments
-passed to the simulator, spoofing the intialization that would occur at the
-start of a MIDAS simulation. The driver of the target-side interface accepts, a
-memory-access trace from which generates simulation tokens to drive to the DUT.
-Memory-access traces consist of address, data, either the write data or the
+simple AXI4 driver that programs the instance based on command-line arguments
+passed to the simulator, spoofing the initialization that would occur at the
+start of a MIDAS simulation. The driver of the target-side interface accepts a
+memory-reference trace from which it generates simulation tokens to drive the instance.
+Memory-reference traces consist of address, data, either the write data or the
 expected read-response data, and target-cycle, the earliest cycle at which the
-request should be made visible to the DUT. Output tokens from the DUT are
+request should be made visible to the instance. Output tokens from the instance are
 collected, and the timing data for each transaction is dumped to a file for
-post-processing. This includes the target and host-cycles at which a request is
-first accepted, and a response is first presented by the model.
+post-processing. This includes the target- and host-cycles at which a request is
+first accepted and a response is first presented for each memory reference.
 
-We used two different approaches for validating the generic timing-model classes
+We used different approaches for validating the generic timing-model classes
 and the DRAM timing-model classes. For the prior, the per-transaction latencies
-can be determined easily a priori for a given memory-access trace\footnote{This
+can be determined easily a priori for a given memory-reference trace\footnote{This
 includes a model of the backpressure the master presents to the AXI4 read and
 write response channels, as head-of-line blocking due to backpressure on
 responses will further delay younger responses.  In our validation flow, we
 ensure the master is always ready to accept a new response.} Thus, we validate
-instances by diffing the timing dumps against those produced by a golden model
-for each memory-access trace. The timings must match or the instance fails
+instances by comparing the timing dumps against those produced by a golden model
+for each memory-reference trace. The timings must match or the instance fails
 validation.
 
 Validating DRAM timing-model classes is fundamentally more difficult as there
 is no complete specification against which to compare transaction timings.
 One could use DRAMsim2 as that specification, but this requires that the
 timing-model instances abide by all of the same modeling decisions made by
-DRAMsim2 (many of which are arbitrary). Indeed, different software models like
+DRAMsim2~(some of which are arbitrary). Indeed, different software models like
 Ramulator and USIMM exhibit different behaviors than DRAMSim2 even when
 configured to model indentical memory systems~\cite{ramulator}. Alternatively,
-writing a software golden-model, would be tantamount to writing another
-cycle-accurate DRAM simulator like DRAMsim2.
+writing a software golden-model would be tantamount to writing another
+cycle-accurate DRAM-simulator like DRAMsim2.
 
 Instead, we use same approach employed by software simulators. In
 addition to dumping transaction timing information, DRAM-timing model classes
-also dump a DRAM command schedule. This drives a RTL golden model of a
+also dump a DRAM-command schedule. This drives a RTL golden model of a
 single-device slice of the memory organization which detects DRAM timing
 violations. DDR2, DDR3, and DDR4 golden models and example testbenches are
 freely provided by Micron\cite{microngolden}. We validated against DDR3, making small
 modifications to the provided example testbench to support validation of
-multi-rank organizations, and to accept the generated command trace.
+multi-rank organizations and to accept the generated command trace.
 
 Unfortunately, this approach does not prove the model faithly models the MAS it
 purports to model, as there are still infinitely many legal schedulings of DRAM

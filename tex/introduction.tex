@@ -1,6 +1,6 @@
 For the past half century, transistor scaling has delivered incredible
 improvements in computing performance and energy efficiency. The rapid advance
-of process technology has proven to be a strong disincentive to building ASICs and custom SoCs, 
+of process technology has proven to be a strong disincentive to building ASICs,
 as the competitive advantage of a custom-silicon design would usually be lost
 to a general-purpose machine built in a newer process technology. This coupled
 with famously large and growing NRE, has limited ASIC deployment to high volume
@@ -8,10 +8,10 @@ domains where they offer a considerable advantage over a general-purpose part.
 For applications that would see enormous improvements with custom-silicon but
 lack the volume to overcome the NRE, FPGAs have proven to be an effective
 stopgap, despite being inferior to ASICs in logic density, delay, and energy
-efficiency.
+efficiency~\cite{fpgagap}.
 
-With Moore'’s law ending, the risk balance for system architects is beginning
-to change: while NRE remains high, custom-silicon may now present a lasting
+With Moore's law ending, the risk balance for system architects is beginning
+to change: while NRE remains high, custom-silicon may often present a lasting
 competitive advantage.  Application, compiler, and OS developers will be more
 inclined to support specialized devices if they can deliver a performance
 improvement that cannot foreseeably be met by a general purpose machine.
@@ -27,7 +27,7 @@ development.  Ideally, software development would proceed in parallel to
 hardware development, however, lacking fast, cycle-accurate \emph{full-system
 simulators} (simulators capable of executing the entire software stack),
 software engineers are forced to develop against a inaccurate model of the SoC
-or wait until first silicon is back.  Consequently, this also precludes
+or wait until first silicon is back. This precludes
 effective hardware-software co-design, as it difficult to reason about
 full-system design trade-offs if the software and hardware are being evaluated
 in different simulation environments. This lack of fast and accurate
@@ -51,7 +51,7 @@ available as resources in research clusters~\cite{catapultannounce} and
 datacenters~\cite{amazonf1}.  Given the lack of a competing technology that is
 both as cheap and as effective at accelerating cycle-accurate simulations, it
 appears that FPGAs remain the only vehicle capable of bridging the simulation
-gap, and thus demand a careful reconsideration.
+gap, and thus demand continued investigation.
 
 \emph{MIDAS} (Modeling Infrastructure for Debugging and Simulation) is Berkeley
 Architecture Research's answer to improving the usability of FPGA-accelerated
@@ -66,28 +66,28 @@ enough for software development.
 
 One challenge with this vision is that there are many cases in which an
 FPGA-accelerated model is required but there is not yet RTL available to be
-transformed. Here custom-RTL models are required and are subject to the same
+transformed. Here, handwritten-RTL models are required but are subject to the same
 pitfalls of prior FPGA-accelerated simulation work. For MIDAS to
 succeed, models like this must be flexible enough to be reusable across a wide
 range of simulations in order to amortize the high cost of writing them.
 Generally, we propose that using a hardware \emph{generator} to synthesize
 timing-model \emph{instances} can address this challenge. To demonstrate this, the
 generator described herein synthesizes models for an important component of
-nearly all SoCs: DRAM off-chip memory systems. These model instances use the
+nearly all computer systems: DRAM memory systems. Model instances use the
 available FPGA off-chip memory system as a backing store for a timing-model
-hosted in FPGA fabric. They are reconfigurable at runtime, allowing for
+hosted in FPGA fabric. Model instances are reconfigurable at runtime, allowing for
 design space exploration without lengthy FPGA recompilation. Instances can be
 generated with instrumentation to ease debugging and to perform non-invasive
 measurements of the simulation. Finally, since the in-fabric timing-model is
 split from the functional components that interact with the FPGA memory system,
 extending the generator with new timing-model is easy.
 
-This report builds on the work of an earlier master''s thesis by Asif
+This report builds on the work of an earlier master's thesis by Asif
 Khan~\cite{khanmasters} addressing challenge of modeling off-chip memory
-systems in RAMP~\cite{ramp}. This report differs from that work, in its use of
-a generator, its demonstration of the model interoperating with models
-automatically transformed from source RTL, and finally, in the degree to which
-off-chip memory systems are modeled.
+systems in RAMP~\cite{ramp}. This report differs from that work in its use of
+a generator, in its demonstration of the model interoperating with models
+automatically transformed from source RTL, and in the fidelity at which
+DRAM memory systems are modeled.
 
 \section{Collaboration, Previous Publications, and Funding}
 
@@ -102,7 +102,7 @@ Izraelevitz et al.) to transform source RTL into FPGA-accelerated models.
 Finally, MIDAS depends on the availability of open-source SoC IP as a source of
 transformable RTL. Here we use the Rocket-Chip~\cite{rocketchip} SoC generator
 and Chris Celio's BOOM~\cite{boom} OoO core generator which implement the free
-and open RISC-V ISA.  Our infrastructure to automatically build Linux images
+and open RISC-V ISA~\cite{riscv}.  Our infrastructure to automatically build Linux images
 containing the desired workload and submit jobs to our local FPGA cluster was
 initially written by Chris Celio. Martin Maas was responsible for all things
 Java.

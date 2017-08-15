@@ -169,79 +169,76 @@ standard to benchmarking sequential performance of general-purpose
 microprocessors, and widely used by industrial computer architects to validate
 their designs. Academic computer architects seldom run the complete
 ``reference" workload due to their length which commit between 23-25 trillion
-dynamic instructions in RISC-V (RV64G).
+dynamic instructions in RISC-V (RV64G).  It would take at least eight days to run
+the test workloads on a single instance of a very fast microarchitectural
+cycle-accurate software simulator (400~KIPS)~\cite{marssx86}, and nearly two
+years to run the reference workloads. For comparison, a single MIDAS simulator,
+assuming ($f_{fpga} = 40 MHz, FMR = 1.25, CPI_{target} = 2)$ takes
+approximately 5 hours and 17 days to run test and reference workloads
+respectively.
 
-Table~\ref{tbl:spec} shows the dynamic instruction counts and the cache and TLB
-misses per 1000 instructions~(MPKI) for each benchmark executed with its test
-inputs. It would take at least 8 days to run the test workloads on a single
-instance of a very fast microarchitectural cycle-accurate software simulator
-(400~KIPS)~\cite{marssx86}, and nearly two years to run the reference
-workloads. For comparison, a single MIDAS simulator, assuming ($f_{fpga} = 40
-MHz, FMR = 1.25, CPI_{target} = 2)$ takes approximately 5 hours and 17 days to
-run test and reference workloads respectively.
-
-\begin{table}[t]
-	\begin{center}
-    \resizebox{0.6\textwidth}{!}{
-        \begin{tabular}{|c|S[table-format=3.1]|S[table-format=3.1]|}
-        \hline
-        \textbf{Benchmarks} & \textbf{Instructions~(B)} & \textbf{MPKI} \\
-        \hline
-		\textit{400.perlbench} & 2.6 & 49.5 \\
-		\textit{401.bzip2} & 34.4 & 27.5 \\
-		\textit{403.gcc} & 5.4 & 37.2 \\
-		\textit{429.mcf} & 3.5 & 274.6\\
-		\textit{445.gobmk} & 66.4 & 36.4 \\
-		\textit{456.hmmer} & 16.5 & 4.3 \\
-		\textit{458.sjeng} & 18.9 & 23.1 \\
-		\textit{462.libquantum} & 0.3 & 32.0 \\
-		\textit{464.h264ref} & 104.2 & 7.5 \\
-		\textit{471.omnetpp} & 1.9 & 61.0 \\
-		\textit{473.astar} & 22.8 & 45.8 \\
-		\textit{483.xalancbmk} & 0.4 & 64.3 \\ 
-		\hline
-		\end{tabular}
-		\label{tbl:spec_test}
-    }%
-	\caption{Dynamic instruction counts and MPKI for the SPECint2006 benchmarks with test inputs}
-    \vspace{0.2cm}
-
-    \resizebox{0.6\textwidth}{!}{%
-        \begin{tabular}{|c|S[table-format=3.1]|S[table-format=3.1]|}
-        \hline
-        \textbf{Benchmarks} & \textbf{Instructions~(B)} & \textbf{MPKI} \\
-        \hline
-		\textit{403.gcc} & 1366.5 & 54.2 \\
-		\hline
-		\end{tabular}
-    }%
-	\end{center}
-    \caption{Dynamic instruction count and MPKI for SPECint2006 gcc with its reference input (all workloads)}
-	\label{tbl:spec}
-\end{table}
+%\begin{table}[t]
+%	\begin{center}
+%    \resizebox{0.6\textwidth}{!}{
+%        \begin{tabular}{|c|S[table-format=3.1]|S[table-format=3.1]|}
+%        \hline
+%        \textbf{Benchmarks} & \textbf{Instructions~(B)} & \textbf{MPKI} \\
+%        \hline
+%		\textit{400.perlbench} & 2.6 & 49.5 \\
+%		\textit{401.bzip2} & 34.4 & 27.5 \\
+%		\textit{403.gcc} & 5.4 & 37.2 \\
+%		\textit{429.mcf} & 3.5 & 274.6\\
+%		\textit{445.gobmk} & 66.4 & 36.4 \\
+%		\textit{456.hmmer} & 16.5 & 4.3 \\
+%		\textit{458.sjeng} & 18.9 & 23.1 \\
+%		\textit{462.libquantum} & 0.3 & 32.0 \\
+%		\textit{464.h264ref} & 104.2 & 7.5 \\
+%		\textit{471.omnetpp} & 1.9 & 61.0 \\
+%		\textit{473.astar} & 22.8 & 45.8 \\
+%		\textit{483.xalancbmk} & 0.4 & 64.3 \\ 
+%		\hline
+%		\end{tabular}
+%		\label{tbl:spec_test}
+%    }%
+%	\caption{Dynamic instruction counts and MPKI for the SPECint2006 benchmarks with test inputs}
+%    \vspace{0.2cm}
+%
+%    \resizebox{0.6\textwidth}{!}{%
+%        \begin{tabular}{|c|S[table-format=3.1]|S[table-format=3.1]|}
+%        \hline
+%        \textbf{Benchmarks} & \textbf{Instructions~(B)} & \textbf{MPKI} \\
+%        \hline
+%		\textit{403.gcc} & 1366.5 & 54.2 \\
+%		\hline
+%		\end{tabular}
+%    }%
+%	\end{center}
+%    \caption{Dynamic instruction count and MPKI for SPECint2006 gcc with its reference input (all workloads)}
+%	\label{tbl:spec}
+%\end{table}
 
 \subsection{DaCapo Benchmarks}
 
-\begin{table}
-\begin{center}
-\resizebox{0.6\textwidth}{!}{%
-	\begin{tabular}{|c|S[table-format=3.1]|S[table-format=3.1]|}
-	\hline
-	\textbf{Benchmarks} & \textbf{Instructions~(B)} & \textbf{MPKI} \\
-	\hline
-	\textit{avrora} & 216.5 & 51.2 \\
-	\textit{luindex} & 72.5 & 30.5 \\
-	\textit{lusearch} & 131.5 & 34.1 \\
-	\textit{pmd} & 109.6 & 34.1 \\
-	\textit{sunflow} & 124.5 & 41.6 \\
-	\textit{xalan} & 152.9 & 37.9 \\
-	\hline
-	\end{tabular}
-}%
-\end{center}
-\caption{Dynamic instruction counts and MPKI for the DaCapo benchmarks with the ``small'' input size}
-\label{tbl:dacapo}
-\end{table}
+%\begin{table}
+%\begin{center}
+%\resizebox{0.6\textwidth}{!}{%
+%	\begin{tabular}{|c|S[table-format=3.1]|S[table-format=3.1]|}
+%	\hline
+%	\textbf{Benchmarks} & \textbf{Instructions~(B)} & \textbf{MPKI} \\
+%	\hline
+%	\textit{avrora} & 216.5 & 51.2 \\
+%	\textit{luindex} & 72.5 & 30.5 \\
+%	\textit{lusearch} & 131.5 & 34.1 \\
+%	\textit{pmd} & 109.6 & 34.1 \\
+%	\textit{sunflow} & 124.5 & 41.6 \\
+%	\textit{xalan} & 152.9 & 37.9 \\
+%	\hline
+%	\end{tabular}
+%}%
+%\end{center}
+%\caption{Dynamic instruction counts and MPKI for the DaCapo benchmarks with the ``small'' input size}
+%\label{tbl:dacapo}
+%\end{table}
 
 The DaCapo benchmarks are widely used Java benchmarks that represent full Java
 applications, including the Lucene search engine and a raytracer. We use
@@ -252,8 +249,7 @@ on recent versions of JikesRVM. Specifically, we run \emph{avrora},
 For each benchmark, we ran one full pass of the ``small'' input size,
 accounting for both class loading and Just-in-Time compilation. We believe that
 this gives a comprehensive and realistic view of the full execution of a Java
-program. Figure~\ref{tbl:dacapo} shows the dynamic instruction counts and MPKI
-for each benchmark with the ``small'' input size.
+program.
 
 JikesRVM is configured to use the \emph{MarkSweep} garbage collector and the
 default settings. MarkSweep is a non-relocating Mark \& Sweep Garbage Collector
