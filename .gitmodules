@@ -1,0 +1,3 @@
+[submodule "midas-graphics"]
+	path = midas-graphics
+	url = git@github.com:davidbiancolin/midas-graphics.git

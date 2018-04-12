@@ -23,13 +23,15 @@ egress unit. If no host response is present, the timing-model does not produce
 a token. This makes the behavior of the target-memory system independent of the
 behavior of host-memory system, and thus, reproducible.
 
-A block diagram of an instance is shown in figure~\ref{fig:timing_model}.
+A block diagram of an instance is shown in figure~\ref{fig:timing-model}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/memory-model-block-diagram.pdf}
-	\caption{Top-level diagram of timing-model instance with latency-bandwidth pipe timing-model}
-	\label{fig:timing_model}
+     % graffle2pdf -c full midas-graphics/graffle/memory-model-block-diagram.graffle figures/memory-model-block-diagram.pdf
+    \caption{A block diagram of a \PNAME instance, with all control signals
+    that may stall timing model execution illustrated.}
+	\label{fig:timing-model}
 \end{figure}
 
 \section{Interfaces}\label{sec:interfaces}
@@ -173,12 +175,41 @@ target time to advance.  In this way, host-decoupling is maintained. This
 permits an instance to model physically unrealizable memory systems. For
 example, one could model single cycle memory system to perform studies of the
 target design with an ideal memory system. The operation of such a model in
-figure~\ref{fig:model_operation}.
+figure~\ref{fig:model-operation}.
 
-\begin{figure} \centering
-\includegraphics[width=0.8\textwidth]{figures/memory-model-operation.pdf}
-\caption{Operation of a single-cycle memory system.}
-\label{fig:model_operation} \end{figure}
+\begin{figure*}
+	\centering
+    \begin{subfigure}[t]{0.23\textwidth}
+        \includegraphics[width=\columnwidth]{figures/model-operation-1.pdf}
+        % graffle2pdf -c 1 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-1.pdf
+        \caption{}
+        \label{fig:model-operation-1}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.24\textwidth}
+        \includegraphics[width=\columnwidth]{figures/model-operation-2.pdf}
+        % graffle2pdf -c 2 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-2.pdf
+        \caption{}
+        \label{fig:model-operation-2}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.24\textwidth}
+        \includegraphics[width=\columnwidth]{figures/model-operation-3.pdf}
+        % graffle2pdf -c 3 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-3.pdf
+        \caption{}
+        \label{fig:model-operation-3}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.23\textwidth}
+        \includegraphics[width=\columnwidth]{figures/model-operation-4.pdf}
+        % graffle2pdf -c 4 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-4.pdf
+        \caption{}
+        \label{fig:model-operation-4}
+    \end{subfigure}
+	\centering
+    \caption{A \PNAME instance simulating a single-target-cycle read. Data
+    tokens carry target transactions~(their target-valid bit is set) whereas
+    empty tokens do not carry a target transaction.}
+    \label{fig:model-operation}
+\end{figure*}
+
 
 \section{Generator Configuration}\label{sec:generator-parameters}
 
