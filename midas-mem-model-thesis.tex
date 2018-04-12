@@ -10,6 +10,7 @@
 \usepackage{listings}
 \usepackage{rotating}
 \usepackage{multirow}
+\usepackage{xspace}
 
 % To compile this file, run "latex thesis", then "biber thesis"
 % (or "bibtex thesis", if the output from latex asks for that instead),
@@ -26,8 +27,14 @@
 % Helpful commands
 \newcommand{\TODO}[1]{{\color{red}\textbf{TODO: #1}}}
 \newcommand{\RISCV}{\mbox{RISC-V}}
-\bibliography{refs}
+\newcommand{\wunits}[2]{\mbox{#1\,#2}}
 
+% Paper name
+\newcommand{\PNAME}{FASED\xspace}
+% Simulation framework name
+\newcommand{\SIMNAME}{MIDAS\xspace}
+
+\bibliography{refs}
 
 % Increase the depth of numbering sections
 
@@ -36,7 +43,7 @@
 
 % Declarations for Front Matter
 
-\title{An FPGA-Hosted Reconfigurable Timing-Model For DDR SDRAM Memory Systems}
+\title{An FPGA-Hosted Reconfigurable Timing-Model For Joint Last Level Cache And DDR SDRAM Memory Systems}
 \author{David Thomas Biancolin}
 \degreesemester{Winter}
 \degreeyear{2017}
@@ -110,11 +117,8 @@
 \chapter{Methodology}
 \input{tex/methodology}
 
-%\chapter{Evaluation}
-%\input{tex/evaluation}
-
-%\chapter{Java Case Study}
-%\input{tex/java}
+\chapter{Sample Experiments}
+\input{tex/evaluation}
 
 \chapter{Conclusion}
 \input{tex/conclusion}

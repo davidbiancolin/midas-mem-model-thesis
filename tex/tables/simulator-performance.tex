@@ -1,0 +1,36 @@
+\begin{table*}[t]
+\tabcolsep=0.10cm
+\centering
+    \begin{tabular}{l|rr|rr|rr|rr|rr|rr|rr|rr|rr|rr|}
+        Benchmark & \multicolumn{2}{c}{perlbench} & \multicolumn{2}{c}{gcc} & \multicolumn{2}{c}{mcf} & \multicolumn{2}{c}{omnetpp} & \multicolumn{2}{c}{xalancbmk} & \multicolumn{2}{c}{x264} & \multicolumn{2}{c}{deepsjeng} & \multicolumn{2}{c}{leela} & \multicolumn{2}{c}{exchange2} & \multicolumn{2}{c}{xz} \\
+Model &      hrs &   MHz &  hrs &   MHz &  hrs &   MHz &    hrs &   MHz &      hrs &   MHz &  hrs &   MHz &      hrs &   MHz &  hrs &   MHz &      hrs &   MHz &  hrs &  MHz \\
+\hline
+\hline
+Single Cycle &      14.4 &   95.8 &  20.4 &   73.3 &  24.7 &   62.1 &    13.8 &   67.4 &      14.0 &   68.6 &  12.9 &  123.0 &      13.4 &   87.5 &   8.6 &  119.0 &       6.9 &  153.3 &  50.5 &  90.5 \\
+        FCFS, 256KB LLC     &      14.7 &  100.4 &  20.8 &  91.4 &  25.6 &  102.7 &    14.1 &  86.1 &      14.5 &  88.4 &  13.1 &  125.2 &      13.6 &  91.5 &   8.6 &  121.2 &       6.9 &  153.0 &  51.8 &  105.8 \\
+        FCFS, No LLC     &      14.7 &  126.4 &  20.9 &  113.1 &  25.7 &  112.2 &    14.3 &  119.6 &      14.7 &  118.1 &  13.2 &  137.7 &      13.6 &  117.6 &   8.7 &  135.3 &       7.0 &  152.2 &  52.1 & 110.6 \\
+\hline
+\end{tabular}
+    \caption{Simulation times and rates for SPEC2017 intspeed running on a
+    single-core Rocket Chip target. The models are sorted by
+    target-memory-system latency. }
+    \label{tbl:intspeed-simtimes}
+\vspace{-0.1in}
+\end{table*}
+\begin{table*}[t]
+\tabcolsep=0.10cm
+\centering
+\begin{tabular}{l|rr|rr|rr|rr|rr|rr|rr|rr|rr|rr|rr|}
+Benchmark & \multicolumn{2}{c}{perlbench} & \multicolumn{2}{c}{gcc} & \multicolumn{2}{c}{mcf} & \multicolumn{2}{c}{omnetpp} & \multicolumn{2}{c}{xalancbmk} & \multicolumn{2}{c}{x264} & \multicolumn{2}{c}{deepsjeng} & \multicolumn{2}{c}{leela} & \multicolumn{2}{c}{exchange2} & \multicolumn{2}{c}{xz} \\
+Model &      hrs &   MHz &  hrs &  MHz &  hrs &   MHz &    hrs &  MHz &      hrs &   MHz &  hrs &   MHz &      hrs &   MHz &  hrs &   MHz &      hrs &   MHz &  hrs &   MHz \\
+\hline
+\hline
+Single Cycle &      31.6 &   50.5 &  28.5 &  38.5 &  33.3 &   36.0 &    37.1 &  35.5 &      36.6 &   37.6 &  20.8 &   79.8 &      25.8 &   44.4 &  14.9 &   73.3 &       7.0 &  151.3 &  22.6 &   51.8 \\
+FR-FCFS, 1MB LLC  &      31.2 &  54.9 &  24.4 &  57.1 &  23.9 &  72.0 &    32.5 &  49.9 &      31.4 &  54.6 &  20.4 &  84.0 &      24.8 &  48.7 &  14.3 &  78.0 &       7.1 &  150.3 &  20.7 &  62.7 \\
+FR-FCFS, No LLC  &      21.6 &  111.7 &  19.6 &  98.8 &  20.2 &  104.8 &    27.3 &  96.8 &      22.8 &  110.6 &  15.9 &  125.6 &      15.4 &  110.5 &  11.4 &  120.6 &       7.0 &  152.3 &  16.4 &  107.3 \\ \hline
+\end{tabular}
+    \caption{Simulation times and rates for SPEC2017 intrate benchmarks with
+    four copies running on a quad-core Rocket Chip target.}
+    \label{tbl:intrate-simtimes}
+\vspace{-0.1in}
+\end{table*}

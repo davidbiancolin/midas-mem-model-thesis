@@ -1,128 +1,93 @@
-In this section, I present a series of mini-experiments demonstrating the use
-of timing-model in a MIDAS simulation. There is an unfortunate dearth of
-experiments using the FRFCFS model, as there are still bugs in either BOOM,
-MIDAS, or the model itself that cause many of the simulations to fail deep into
-simulation.
+\subsection{Working Set Study}
+Caches help insulate processors against long and variable latencies to DRAM.
+Unfortunately, large LLCs are difficult to implement directly on FPGAs due to
+area limitations. \PNAME enables the architect to explore cache sizes that
+would otherwise be impossible to host on a single FPGA. We explore this by
+sweeping LLC-cache sizes from \wunits{64}{KiB} to \wunits{1}{MiB} in size. In
+Figure~\ref{fig:llc-speedup} we show the speed up provided by different cache
+sizes and contrast them against a cache-less and single-cycle memory-system.
 
-\section{Latency-Bandwidth Pipe}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/cache_size_bar_plot.pdf}
+    \caption{Speedup in SPEC2017 intspeed~(reference inputs) due to different LLC sizes. All caches are 8-way set associative.}
+    \label{fig:llc-speedup}
+\vspace{-0.15in}
+\end{figure}
+
+\subsection{Effects of DRAM Limitations}
+
+In this experiment, we quantify the extent to which specific timing details
+affect execution time. We start with the validated model, \emph{Full}, and
+gradually strip out features: \emph{No Refresh} disables refresh, \emph{No ACT
+Limits} sets $t_{FAW}$ and $t_{RRD}$ to zero, and finally, \emph{Ideal} removes
+all other timing considerations\footnote{$t_{RTP}$, $t_{WTR}$,
+$t_{RTRS}$, $t_{RTP}$=0; $t_{RAS} = t_{RCD} + t_{CS}$ $t_{RC} =
+t_{CS} + t_{RCD} + t_{RP}$.}.
 
 \begin{figure*}
-\begin{subfigure}[t]{0.33\textwidth}
-	\includegraphics[width=\textwidth]{figures/ccbench_lat1.pdf}
-	\caption{DRAM Latency = 1}
-\end{subfigure}
-\begin{subfigure}[t]{0.33\textwidth}
-	\includegraphics[width=\textwidth]{figures/ccbench_lat30.pdf}
-	\caption{DRAM Latency = 30}
-\end{subfigure}
-\begin{subfigure}[t]{0.33\textwidth}
-	\includegraphics[width=\textwidth]{figures/ccbench_lat100.pdf}
-	\caption{DRAM Latency = 100}
-\end{subfigure}
-\caption{Latency Validation}
-\label{fig:lat_val}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \includegraphics[width=\columnwidth]{figures/dram_fidelity_speed_slowdown.pdf}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \includegraphics[width=\columnwidth]{figures/dram_fidelity_rate_slowdown.pdf}
+    \end{subfigure}
+    \caption{Target-execution time of SPEC2017 intspeed and intrate~(4 copies)
+    with reference inputs for DRAM models with and without refresh enabled.
+    Runtime is normalized to that of a single-cycle memory system. LLCs, if
+    present, are \wunits{256}{KiB} and \wunits{1}{MiB} large for intspeed and
+    intrate respectively and are 8-way set associative.}
+    \label{fig:model-fidelity-sweep}
 \end{figure*}
 
-Figure~\ref{fig:lat_val} shows the results of cache hierarchy tests in \textit{ccbench}
-for BOOM-2w, assuming its frequency is 1GHz. We can see that the amount of
-the time per iteration with arrays bigger than the cache size observed by the target system
-increases by the delay of the off-chip memory as the DRAM latency increases.
-In this case, 1 cycle is 1ns, and thus, the time per iteration with large arrays
-increases by 30ns and 100ns as the DRAM latency increases by 30 cycles and 100 cycles,
-respectively.
+The slowdowns of these models relative to a single-cycle memory system are
+shown in Figure~\ref{fig:model-fidelity-sweep}. Without an LLC, the largest
+source of slowdown is refresh, which contributes a $1.01\times$ and
+$1.11\times$ slowdown for intspeed and intrate, respectively.  Eliminating $t_{RRD}$ and $t_{FAW}$ had almost no effect; we
+suspect reducing rank count and increasing device density would further induce these
+effects.  Remaining DRAM non-idealities contribute $1.02\times$ slowdown.  Once
+a cache is included, these effects are effectively mitigated: refresh
+contributes a only $1.01\times$ slowdown in intrate.
 
-Figure~\ref{fig:gcc_ref} shows how CPI varies over time for \textit{403.gcc} with the reference
-input set running on the Rocket processor. We first measure the performance with a
-magic memory with a one-cycle latency to determine the maximum performance the Rocket processor can
-achieve. Next, we increase the memory latency to 30 cycles and see how much the Rocket processor
-slows down.
+\subsection{Simulation Performance}
 
-This experiment demonstrates that our simulation methodology enables ``what-if'' experiments
-regarding memory parameter configurations for very long-running applications, which is
-practically impossible with software simulators. Note that the dynamic instruction count for
-\textit{403.gcc} with the reference input is 1.3 trillion (Table~\ref{tbl:spec_ref}). The
-effective simulation rate is 29 MHz on the FPGA, whose operating frequency is 40 MHz. The
-simulation slow-down is due to the communication overhead between the software components and the
-FPGA-based simulator.
+\input{tex/tables/simulator-performance.tex}
+
+Table~\ref{tbl:intspeed-simtimes} and Table~\ref{tbl:intrate-simtimes} give the
+host-execution times and execution speeds for a handful of SPEC2017 runs. The
+targets with DDR3 models consistently run at a simulation rate above \wunits{100}{MHz}. Theoretically,
+our models can operate at unity FMR~(160 MHz) if the target memory system is
+slower than the host-memory system. On our host, reads and writes take on average 47
+and 37 cycles, respectively, when unloaded.  Although these latencies have
+a significant effect on simulator performance when modeling a single-cycle memory
+system, they have relatively little impact when modeling a realistic DRAM system
+whose latency is comparable to that of the host.
+Instances with LLCs fall between these extremes, since LLC hits are fast
+in target time but require a DRAM access on the host side.
+For our DDR3-2133
+target memory system, reads take 20, 34, and 48 cycles for row hits, closed
+row, and row misses, respectively; for the accesses that take longer in
+target time than host time, the simulator incurs no stalls.  Ironically,
+modeling a slower DDR-speed-grade, say DDR3-800, results in lower simulation
+rate: since $t_{CS}$ is smaller, reads complete in fewer target \emph{cycles}
+despite taking more target \emph{time}.
 
 \begin{figure*}
-	\centering
-	\includegraphics[width=0.95\textwidth]{figures/403-gcc-ref.pdf}
-	\caption{CPI and D\$ MPKI for 403.gcc with the reference input running on the Rocket processor}
-	\label{fig:gcc_ref}
+    \centering
+    \includegraphics[width=\textwidth]{figures/leela-time-series.pdf}
+    \caption{CPI, D\$ MPKI, and row buffer and LLC hit rates running
+    641.leela\_s with on Rocket with \wunits{256}{KiB} of LLC and a FCFS MAS
+    model. These plots use a rolling average of 10 samples spaced a billion
+    cycles apart.}.
+    \label{fig:leela-time-series}
+\vspace{-0.1in}
 \end{figure*}
 
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=0.8\columnwidth]{figures/boom-bw.pdf}
-	\caption{CPIs for BOOM-2w with various bandwidths}
-	\label{fig:bandwidths}
-\end{figure}
-
-Our next experiment highlights how various memory bandwidths affect the performance of
-a superscalar out-of-order processor, assuming the DRAM latency is 100 cycles.
-Figure~\ref{fig:bandwidths} shows CPIs for BOOM-2w with various bandwidth 
-running \textit{401.bzip2}, \textit{462.libquantum}, and \textit{471.omnetpp}
-with the test inputs.
-We expect BOOM-2w to be able to issue more memory requests in flight than Rocket,
-and thus, we believe memory bandwidth is an important parameter for this case study.
-As seen in Figure~\ref{fig:bandwidths}, there is a significant performance
-advantage when we increase the memory bandwidth from 1 to 2. However,
-the performance benefits diminish as we increase the bandwidth further,
-due to lack of memory-level parallelism in the benchmarks.
-
-\section{Bank Conflict Model}
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=0.8\columnwidth]{figures/boom-bc.pdf}
-	\caption{Performance degradation from bank conflicts with 8 banks and a 20-cycle penalty}
-	\label{fig:bank_conflict}
-\end{figure}
-
-Figure~\ref{fig:bank_conflict} shows how bank conflicts degrade the processor performance.
-We run the benchmarks on BOOM-2w with a 8-bank DRAM by varying the bank conflict penalty 
-from 1 cycle to 20 cycles. We can see the benchmarks suffer from performance degradation
-due to bank conflicts as expected.
-
-\section{FCFS MAS Model}
-
-\begin{figure}[t]
-		\centering
-		\includegraphics[width=\columnwidth]{figures/rocket-fifomas.pdf}
-		\caption{Speedup of the open-page FCFS MAS policy over the close-page policy for Rocket}
-		\label{fig:rocket_fifo_mas}
-\end{figure}
-
-This section shows the performance impacts of the page policies with the FCFS MAS model
-(Section~\ref{sec:timing_model}). This represents a more complex policy, and we contrast variants with open and close row policies.
-
-\begin{table}[t]
-\centering
-\resizebox{0.5\textwidth}{!}{%
-\begin{tabular}{|c|c c|}
-\hline
-\textbf{Parameter} & \textbf{Open Policy} & \textbf{Close Policy} \\
-\hline
-\textit{number of banks} & 8 & 8 \\
-\textit{bank address offset} & \textbf{13} & \textbf{6} \\
-\textit{row address offsets} & 16 & 16 \\
-\textit{bandwidth} & 8 & 8 \\
-\textit{tRC} & 7 cycles & 7 cycles \\
-\textit{tRCD} & 7 cycles & 7 cycles\\
-\textit{tCAS} & 7 cycles & 7 cycles \\
-\hline
-\end{tabular}}
-\caption{FIFO MAS Parameters}
-\label{tbl:fifo_mas}
-\end{table}
-
-Table~\ref{tbl:fifo_mas} lists the parameter values used in this experiment.
-Figure~\ref{fig:rocket_fifo_mas} shows the speedup of the open page policy over
-the close page policy for the SPEC benchmarks and the DaCapo benchmarks running
-on Rocket, along with the row hit rate for each benchmark. Overall, the open
-page policy has perfomance benefits for the SPEC CPU integer benchmarks except
-for \textit{402.bzip2} and \textit{473.astar}. As indicated in
-Figure~\ref{fig:rocket_fifo_mas}, the memory requests of \textit{402.bzip2} and
-\textit{473.astar} lack locality (resulting in low row hit rates), which
-explains these results.
+\subsection{Instrumentability}
+\PNAME allows the user to instrument timing models without changing target
+behavior. Coupled with fast simulation speeds, this allows a \PNAME instance to
+provide insight into system-wide behavior that would be difficult to collect
+otherwise. We demonstrate this in Figure~\ref{fig:leela-time-series}, where we
+see how row buffer and LLC hit rate are inversely correlated through each of
+641.leela's games of Go.
