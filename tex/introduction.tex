@@ -66,28 +66,44 @@ enough for software development.
 
 One challenge with this vision is that there are many cases in which an
 FPGA-accelerated model is required but there is not yet RTL available to be
-transformed. Here, handwritten-RTL models are required but are subject to the same
-pitfalls of prior FPGA-accelerated simulation work. For MIDAS to
-succeed, models like this must be flexible enough to be reusable across a wide
-range of simulations in order to amortize the high cost of writing them.
-Generally, we propose that using a hardware \emph{generator} to synthesize
-timing-model \emph{instances} can address this challenge. To demonstrate this, the
-generator described herein synthesizes models for an important component of
-nearly all computer systems: DRAM memory systems. Model instances use the
-available FPGA off-chip memory system as a backing store for a timing-model
-hosted in FPGA fabric. Model instances are reconfigurable at runtime, allowing for
-design space exploration without lengthy FPGA recompilation. Instances can be
-generated with instrumentation to ease debugging and to perform non-invasive
-measurements of the simulation. Finally, since the in-fabric timing-model is
-split from the functional components that interact with the FPGA memory system,
-extending the generator with new timing-model is easy.
+transformed. Here, handwritten-RTL models are required but are subject to the
+same pitfalls of prior FPGA-accelerated simulation work. For MIDAS to succeed,
+models like this must be flexible enough to be reusable across a wide range of
+simulations in order to amortize the high cost of designing them.
 
-This report builds on the work of an earlier master's thesis by Asif
+To this end, we propose two complementary approaches.  First, we propose using
+a hardware \emph{generators} to synthesize timing-model \emph{instances}. This
+permits reusing complex timing and functional models over a larger space of
+designs with less development effort, than would be possible using a
+conventional HDL.  Second, we propose separating the concerns of
+host-platform-mapping from target modeling, by writing the timing-model of a
+split-timing-functional model as \emph{target-time} RTL. During generation, the
+timing model can be transformed using the same passes applied to processor.
+This approach makes it considerably easier to describe detailed timing-model
+generators and allows new users to add new timing models without a detailed
+understanding of how the model will be mapped to the host.
+
+To demonstrate this, we present \PNAME~(FPGA-Accelerated Simulation and
+Evaluation of DRAM), a parameterized generator of composable, high-fidelity,
+FPGA-hosted, combined last-level-cache and DRAM models.  \PNAME instances are
+highly performant -- they can simulate one target clock cycle per host clock
+cycle -- yet maintain timing faithfulness independently of the behavior of the
+host-FPGA memory system.  \PNAME instances are reconfigurable at runtime,
+allowing for design space exploration without lengthy FPGA recompilation.  For
+a given memory access scheduling policy, a single A \PNAME instance can model
+nearly the entire space of realizable single-channel DDR3 memory organizations,
+without resynthesizing the simulator RTL. Finally, \PNAME instances can be
+generated with instrumentation to ease debugging and to perform non-invasive
+measurements of the simulation.
+
+\PNAME builds on the work of an earlier master's thesis by Asif
 Khan~\cite{khanmasters} addressing challenge of modeling off-chip memory
-systems in RAMP~\cite{ramp}. This report differs from that work in its use of
-a generator, in its demonstration of the model interoperating with models
-automatically transformed from source RTL, and in the fidelity at which
-DRAM memory systems are modeled.
+systems in RAMP~\cite{ramp}. \PNAME differs from that work in, its use of a
+generator, in its use of a target-time timing model, and in its demonstration
+of the model interoperating with models automatically transformed from source
+RTL. Finally, \PNAME intances are more detailed~(DDR3 models generate DRAM
+command traces that been validated against industrial models) and include a
+composable LLC model that reuses the same functional model.
 
 \section{Collaboration, Previous Publications, and Funding}
 
