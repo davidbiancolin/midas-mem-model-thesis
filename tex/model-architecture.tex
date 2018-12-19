@@ -140,16 +140,16 @@ BRAM~\cite{LIFPGADesign}. For greater numbers of AXI IDs or greater degrees of I
 reuse, it dynamically assigns entries within block RAMs, and maintains a
 hardware linked list to track to read-response order in a given ID.
 
-%\section{Providing Deterministic Functional-Model Behavior}
-%By default, instances forward target requests directly to the host-memory
-%system, under the assumption there will never be reads and writes to the same
-%address in flight\footnote{In AXI4, the value a read returns when a write to
-%the same address is in-flight is implementation defined.}. When a buggy target
-%exhibits this behavior, the host memory-system is free to reorder these
-%requests, introducing non-determinism. To help debug targets that behave this
-%way, the host-request scheduler provides a strict mode in which it orders reads
-%and writes---issuing writes only when no reads are in flight, and reads only
-%when there are no writes in flight.
+\section{Providing Deterministic Functional-Model Behavior}
+By default, instances forward target requests directly to the host-memory
+system, under the assumption there will never be reads and writes to the same
+address in flight\footnote{In AXI4, the value a read returns when a write to
+the same address is in-flight is implementation defined.}. When a buggy target
+exhibits this behavior, the host memory-system is free to reorder these
+requests, introducing non-determinism. To help debug targets that behave this
+way, the host-request scheduler provides a strict mode in which it orders reads
+and writes---issuing writes only when no reads are in flight, and reads only
+when there are no writes in flight.
 
 \section{General-Purpose Timing-Model Classes}\label{sec:timing_model}
 
