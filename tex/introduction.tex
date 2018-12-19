@@ -79,12 +79,15 @@ simulators.
 
 \section{Collaboration, Previous Publications, and Funding}
 
+This work was previously published as \emph{FASED: FPGA-Accelerated Simuation
+and Evaluation of DRAM} at the 2019 ACM/SIGDA International
+Symposium on Field-Programmable Gate Arrays~(FPGA'19)~\cite{fased}.
+
 This report builds on the work of current and previous students of our group.
-The MIDAS project is a multi-student collaboration between myself, Jack Koenig,
-Sagar Karandikar, and Donggyu Kim, whose Chisel3 port of Strober~\cite{strober}
-constitutes the bulk of the MIDAS code base at the time of writing. The
+The MIDAS project is a multi-student collaboration which began as the fusion of
+this work and Donggyu Kim's Chisel3 port of Strober~\cite{strober}. The
 generator presented here and the RTL libraries used in MIDAS are written in
-Chisel3~\cite{Chisel} which remains under active development. MIDAS leans
+Chisel3~\cite{Chisel} which remains under development. MIDAS leans
 heavily on FIRRTL~\cite{firrtl} to transform source RTL into FPGA-accelerated
 models.  Finally, MIDAS depends on the availability of open-source SoC IP as a
 source of transformable RTL. Here we use the Rocket-Chip~\cite{rocketchip} SoC
@@ -93,20 +96,19 @@ implement the free and open RISC-V ISA~\cite{riscv}.
 
 Work on this memory model began in the fall of 2015, as a course project for
 CS252 for which Jack Koenig was my partner. Thereafter, development of the
-memory model was driven by MICRO submissions attempts in 2017 and 2018. For the
+memory model was driven by MICRO submission attempts in 2017 and 2018. For the
 2017 iteration we had only nascent forms of the DDR models presented herein. I
-have my co-authors, Jack Koenig, Chris Celio and especially Martin Maas, who
-engineered the DaCapo on Jikes case study, Donggyu Kim, who was reponsible for
-running most of the experiments and instrumenting MIDAS so as to make the case
-study possible, to thank for getting that half-baked submission out the door.
+have my co-authors, Jack Koenig, Chris Celio, Martin Maas, who
+engineered the DaCapo on Jikes case study, and Donggyu Kim, who was reponsible for
+running most of the experiments and instrumenting MIDAS for the case study, to thank for getting that half-baked submission out the door.
 It proved to be an invaluable source of feedback.  In 2018, FireSim had just
 been accepted to ISCA, and Sagar had finished rewriting the manager, which made
 collecting the results for the evaluation of this report possible. We'd just
 reorganized FireSim, and other repos using MIDAS as a library --- Donggyu Kim
-play a key role in getting everything running again.  Howard Mao wrote the
+played a key role in getting everything running.  Howard Mao wrote the
 block device and maintained much of the system software.  Jack Koenig wrote
 many of the plotting scripts used in the evaluation, and made an eleventh hour
-push to get command-trace driven power analysis working, which ultimately
+push to get command-trace-driven power analysis working, which ultimately
 didn't make the paper. Finally, Andrew Waterman had instrumental role in
 editing the paper~(and this report) and really helped me keep the whole
 operation on track.
