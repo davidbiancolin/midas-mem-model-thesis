@@ -24,13 +24,15 @@
 % be indented (like the others), then include this line:
 % \usepackage{indentfirst}
 
-% Helpful commands
+% commands
+\newcommand{\ignore}[1]{}
 \newcommand{\TODO}[1]{{\color{red}\textbf{TODO: #1}}}
 \newcommand{\RISCV}{\mbox{RISC-V}}
 \newcommand{\wunits}[2]{\mbox{#1\,#2}}
 
+% commands use to alias tbd names
 % Paper name
-\newcommand{\PNAME}{FASED\xspace}
+\newcommand{\PNAME}{\mbox{\textsc{fased}}\xspace}
 % Simulation framework name
 \newcommand{\SIMNAME}{MIDAS\xspace}
 
@@ -99,30 +101,38 @@
 
 % (Optional) \part{First Part}
 
-\chapter{Introduction}
+\section{Introduction}
+
 \input{tex/introduction}
 
-\chapter{A Renewed Case for FPGA-Accelerated Simulation}
+% Sagar: stylistic, but I don't like this section title vs just "Background" or something
+\section{On FPGA-based Simulation}
+
 \input{tex/fpga-simulation}
 
-\chapter{A Primer on MIDAS}
+\section{The Simulation Framework}\label{sec:framework}
+
 \input{tex/midas}
 
-\chapter{An Overview of DRAM Off-Chip Memory Systems}
+\section{Memory Model Architecture}
+
+\input{tex/model-architecture}
+
+\section{On DRAM Memory Systems}
+
 \input{tex/dram}
 
-\chapter{Timing-Model Design}
-\input{tex/model-design}
+\section{DRAM Timing Models}\label{sec:dram-timing-model}
 
-\chapter{Methodology}
+\input{tex/dram-timing-model}
+
 \input{tex/methodology}
 
-\chapter{Sample Experiments}
 \input{tex/evaluation}
 
-\chapter{Conclusion}
+\section{Conclusion}
+
 \input{tex/conclusion}
-% \appendix
 
 \printbibliography
 

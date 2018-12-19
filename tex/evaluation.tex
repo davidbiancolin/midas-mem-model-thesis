@@ -1,4 +1,37 @@
+\section{Demonstrating \PNAME}\label{sec:evaluation}
+In this section we demonstrate \PNAME in a series of small experiments and
+study its performance characteristics.
+
+\vspace{-0.05in}
 \subsection{Working Set Study}
+
+\begin{figure*}[t]
+    \vspace{-0.15in}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \includegraphics[width=\columnwidth]{figures/dram_fidelity_speed_slowdown.pdf}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \includegraphics[width=\columnwidth]{figures/dram_fidelity_rate_slowdown.pdf}
+    \end{subfigure}
+    \vspace{-0.20in}
+    \caption{Target-execution time of SPEC2017 intspeed and intrate~(4 copies)
+    with reference inputs for DRAM models with and without refresh enabled.
+    Runtime is normalized to that of a single-cycle memory system. LLCs, if
+    present, are \wunits{256}{KiB} and \wunits{1}{MiB} large for intspeed and
+    intrate respectively and are 8-way set associative.}
+    \label{fig:model-fidelity-sweep}
+    \vspace{-0.10in}
+\end{figure*}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/cache_size_bar_plot.pdf}
+    \vspace{-0.35in}
+    \caption{Speedup in SPEC2017 intspeed~(reference inputs) vs LLC model size. All caches are 8-way set associative.}
+    \label{fig:llc-speedup}
+    \vspace{-0.15in}
+\end{figure}
+
 Caches help insulate processors against long and variable latencies to DRAM.
 Unfortunately, large LLCs are difficult to implement directly on FPGAs due to
 area limitations. \PNAME enables the architect to explore cache sizes that
@@ -7,87 +40,69 @@ sweeping LLC-cache sizes from \wunits{64}{KiB} to \wunits{1}{MiB} in size. In
 Figure~\ref{fig:llc-speedup} we show the speed up provided by different cache
 sizes and contrast them against a cache-less and single-cycle memory-system.
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/cache_size_bar_plot.pdf}
-    \caption{Speedup in SPEC2017 intspeed~(reference inputs) due to different LLC sizes. All caches are 8-way set associative.}
-    \label{fig:llc-speedup}
-\vspace{-0.15in}
-\end{figure}
-
 \subsection{Effects of DRAM Limitations}
 
 In this experiment, we quantify the extent to which specific timing details
-affect execution time. We start with the validated model, \emph{Full}, and
+affect target execution time. We start with the validated model, \emph{Full}, and
 gradually strip out features: \emph{No Refresh} disables refresh, \emph{No ACT
 Limits} sets $t_{FAW}$ and $t_{RRD}$ to zero, and finally, \emph{Ideal} removes
 all other timing considerations\footnote{$t_{RTP}$, $t_{WTR}$,
 $t_{RTRS}$, $t_{RTP}$=0; $t_{RAS} = t_{RCD} + t_{CS}$ $t_{RC} =
 t_{CS} + t_{RCD} + t_{RP}$.}.
 
-\begin{figure*}
-    \centering
-    \begin{subfigure}[t]{0.49\textwidth}
-        \includegraphics[width=\columnwidth]{figures/dram_fidelity_speed_slowdown.pdf}
-    \end{subfigure}
-    \begin{subfigure}[t]{0.49\textwidth}
-        \includegraphics[width=\columnwidth]{figures/dram_fidelity_rate_slowdown.pdf}
-    \end{subfigure}
-    \caption{Target-execution time of SPEC2017 intspeed and intrate~(4 copies)
-    with reference inputs for DRAM models with and without refresh enabled.
-    Runtime is normalized to that of a single-cycle memory system. LLCs, if
-    present, are \wunits{256}{KiB} and \wunits{1}{MiB} large for intspeed and
-    intrate respectively and are 8-way set associative.}
-    \label{fig:model-fidelity-sweep}
-\end{figure*}
-
 The slowdowns of these models relative to a single-cycle memory system are
 shown in Figure~\ref{fig:model-fidelity-sweep}. Without an LLC, the largest
 source of slowdown is refresh, which contributes a $1.01\times$ and
 $1.11\times$ slowdown for intspeed and intrate, respectively.  Eliminating $t_{RRD}$ and $t_{FAW}$ had almost no effect; we
-suspect reducing rank count and increasing device density would further induce these
-effects.  Remaining DRAM non-idealities contribute $1.02\times$ slowdown.  Once
-a cache is included, these effects are effectively mitigated: refresh
+suspect reducing rank count and increasing device density would induce a perceptible slowdown.
+Remaining DRAM non-idealities contribute a $1.02\times$ slowdown.  Once
+a cache is included, these slowdowns are effectively mitigated: refresh
 contributes a only $1.01\times$ slowdown in intrate.
 
+\vspace{-0.05in}
 \subsection{Simulation Performance}
 
 \input{tex/tables/simulator-performance.tex}
 
-Table~\ref{tbl:intspeed-simtimes} and Table~\ref{tbl:intrate-simtimes} give the
+Table~\ref{tbl:intrate-simtimes} gives the
 host-execution times and execution speeds for a handful of SPEC2017 runs. The
-targets with DDR3 models consistently run at a simulation rate above \wunits{100}{MHz}. Theoretically,
-our models can operate at unity FMR~(160 MHz) if the target memory system is
-slower than the host-memory system. On our host, reads and writes take on average 47
-and 37 cycles, respectively, when unloaded.  Although these latencies have
+targets with DDR3 models consistently run at rates above \wunits{100}{MHz}. Theoretically,
+\PNAME instances can operate at the host frequency~(160 MHz) if the functional model can always serve timing model requests in time.
+On our host, reads and writes take on average 47
+and 37 cycles, respectively, when unloaded.  These latencies have
 a significant effect on simulator performance when modeling a single-cycle memory
-system, they have relatively little impact when modeling a realistic DRAM system
-whose latency is comparable to that of the host.
-Instances with LLCs fall between these extremes, since LLC hits are fast
-in target time but require a DRAM access on the host side.
-For our DDR3-2133
-target memory system, reads take 20, 34, and 48 cycles for row hits, closed
-row, and row misses, respectively; for the accesses that take longer in
-target time than host time, the simulator incurs no stalls.  Ironically,
-modeling a slower DDR-speed-grade, say DDR3-800, results in lower simulation
-rate: since $t_{CS}$ is smaller, reads complete in fewer target \emph{cycles}
-despite taking more target \emph{time}.
+system as that host latency is fully exposed to the simulator, but
+they have relatively little impact
+when modeling a realistic DRAM system
+whose latency~(cycles) is similar to that of the host.
+Instances with LLCs fall between these extremes: LLC hits are fast in
+target time and thus expose the host-DRAM latency to simulator, while
+misses present sufficient target-latency to hide the host-DRAM access.
+For our DDR3-2133 target memory system, reads take 20, 34, and 48 cycles for
+row hits, closed row, and row misses, respectively. These latencies are large enough that many accesses can be
+served by the functional model before the timing model requires them, eliding simulator stalls.
+Ironically, modeling a slower DDR-speed-grade slows down the simulator: since $t_{CS}$ is smaller, reads complete in fewer target
+\emph{cycles} despite taking more target \emph{time}.
 
-\begin{figure*}
-    \centering
-    \includegraphics[width=\textwidth]{figures/leela-time-series.pdf}
-    \caption{CPI, D\$ MPKI, and row buffer and LLC hit rates running
-    641.leela\_s with on Rocket with \wunits{256}{KiB} of LLC and a FCFS MAS
-    model. These plots use a rolling average of 10 samples spaced a billion
-    cycles apart.}.
-    \label{fig:leela-time-series}
-\vspace{-0.1in}
-\end{figure*}
-
+\vspace{-0.05in}
 \subsection{Instrumentability}
 \PNAME allows the user to instrument timing models without changing target
 behavior. Coupled with fast simulation speeds, this allows a \PNAME instance to
 provide insight into system-wide behavior that would be difficult to collect
 otherwise. We demonstrate this in Figure~\ref{fig:leela-time-series}, where we
-see how row buffer and LLC hit rate are inversely correlated through each of
+see how row-buffer and LLC hit rates are inversely correlated through each of
 641.leela's games of Go.
+
+\begin{figure*}
+    \vspace{-0.15in}
+    \centering
+    \includegraphics[width=\textwidth]{figures/leela-time-series.pdf}
+    \vspace{-0.30in}
+    \caption{CPI, D\$ MPKI, and row buffer and LLC hit rates running
+    641.leela\_s with on Rocket with \wunits{256}{KiB} of LLC and a FCFS MAS
+    model. These plots use a rolling average of 10 samples spaced a billion
+    cycles apart.}.
+    \label{fig:leela-time-series}
+\vspace{-0.25in}
+\end{figure*}
+

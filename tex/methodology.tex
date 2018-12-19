@@ -1,12 +1,115 @@
-In section~\ref{sec:framework}, we described how MIDAS takes a target and
+\begin{table*}[t]
+\centering
+    \begin{tabular}{c@{\hskip 0.3in}
+        S[table-format=6.0]@{\hskip 0.1in}S[table-format=2.1]@{\hskip 0.2in}S[table-format=6.0]@{\hskip 0.1in}S[table-format=2.1]@{\hskip 0.3in}
+        S[table-format=6.0]@{\hskip 0.1in}S[table-format=2.1]@{\hskip 0.2in}S[table-format=6.0]@{\hskip 0.1in}S[table-format=2.1]@{\hskip 0.3in}
+        S[table-format=5.0]@{\hskip 0.1in}S[table-format=2.1]@{\hskip 0.2in}S[table-format=5.0]@{\hskip 0.1in}S[table-format=2.1]@{\hskip 0.3in}
+    }
+	\hline
+        & \multicolumn{4}{c}{Logic LUTs} &
+        \multicolumn{4}{c}{Registers} &
+        \multicolumn{4}{c}{36K BRAM} \\
+        \textbf{Target Design} &
+        \multicolumn{2}{c}{\hspace{-0.10in}Simulator} &
+        \multicolumn{2}{c}{\hspace{-0.10in}Memory Model} &
+        \multicolumn{2}{c}{\hspace{-0.10in}Simulator} &
+        \multicolumn{2}{c}{\hspace{-0.05in}Memory Model} &
+        \multicolumn{2}{c}{\hspace{-0.00in}Simulator} &
+        \multicolumn{2}{c}{\hspace{-0.05in}Memory Model} \\
+	\hline
+    \input{tex/tables/simulator-utilization.tex}
+	\hline
+	\end{tabular}
+    \caption{XCVU9P resource utilization for a space of different targets.
+    Percentages indicate the share of total FPGA resources consumed by that
+    design partition. Simulator totals are inclusive of the memory model.}
+\label{tbl:utilization}
+\vspace{-0.15in}
+\end{table*}
+
+\section{Experimental Setup}
+
+In Section~\ref{sec:framework}, we described how \SIMNAME takes a target and
 maps it to a host. Here, we describe the microarchitecture of the target
 machines we simulate, give an overview of the SPEC2017 Integer benchmarks that
 we run in our evaluation, and explain how we instrument our target designs.
 
-\subsection{Target Designs}\label{sec:target-parameters} Our target designs 
+\begin{table}[t]
+\centering
+    \begin{tabular}{c@{\hskip 0.1in}
+        S[table-format=3.2]@{\hskip 0in}S[table-format=3.2]
+        S[table-format=3.2]@{\hskip 0in}S[table-format=3.2]
+        S[table-format=3.2]@{\hskip 0in}S[table-format=3.2]}
+    \hline
+        \textbf{Benchmarks} & \multicolumn{2}{c}{\textbf{Insns~(T)}} & \multicolumn{2}{c}{\textbf{D\$ MPKI}} & \multicolumn{2}{c}{\textbf{I\$ MPKI}} \\
+    \hline
+        perlbench & 2.98 & 2.99 & 9.0 &  8.9 & 10.0 & 10.1 \\
+        gcc & 2.43 & 1.35 & 36.6 & 29.5 & 9.7 &  11.1 \\
+        mcf & 1.60 & 0.91 & 97.9 & 80.9 & 0.1 &  0.1 \\
+        omnetpp & 1.11 & 1.11 & 56.9 & 56.6 & 9.3 &  10.4 \\
+        xalancbmk & 1.21 & 1.21 & 62.9 & 62.9 & 7.9 &  7.6 \\
+        x264 & 4.55 & 4.55 & 3.0 &  3.0 & 2.9 &  3.0 \\
+        deepsjeng & 2.51 & 2.14 & 8.7 &  8.2 & 15.4 & 15.3 \\
+        leela & 2.59 & 2.59 & 5.8 &  5.8 & 1.5 &  1.5 \\
+        exchange2 & 3.24 & 3.24 & 0.0 &  0.0 & 0.1 &  0.1 \\
+        xz & 9.41 & 2.25 & 19.8 & 15.7 & 0.2 &  0.1 \\
+    \hline
+    \end{tabular}
+    \caption{Dynamic instruction counts and L1 MPKIs of SPEC2017int rate and speed~(single threaded), respectively.}
+    \label{tbl:spec-insns}
+\vspace{-0.35in}
+\end{table}
+
+%\begin{table}[t]
+%\centering
+%    \begin{tabular}{|c|c|c|c|}
+%    \hline
+%        \textbf{Benchmarks} & \textbf{Instructions~(T)} & \textbf{D\$ MPKI} & \textbf{I\$ MPKI} \\
+%    \hline
+%        perlbench & 2.98 & 9.0 & 10.0 \\
+%        gcc & 2.43 & 36.6 & 9.7 \\
+%        mcf & 1.60 & 97.9 & 0.1 \\
+%        omnetpp & 1.11 & 56.9 & 9.3 \\
+%        xalancbmk & 1.21 & 62.9 & 7.9 \\
+%        x264 & 4.55 & 3.0 & 2.9 \\
+%        deepsjeng & 2.51 & 8.7 & 15.4 \\
+%        leela & 2.59 & 5.8 & 1.5 \\
+%        exchange2 & 3.24 & 0.0 & 0.1 \\
+%        xz & 9.41 & 19.8 & 0.2 \\
+%    \hline
+%    \end{tabular}
+%    \caption{Dynamic instruction counts and MPKI on Rocket running SPEC2017 intspeed benchmark~(single threaded).}
+%    \label{tbl:spec-intspeed}
+%\vspace{-0.1in}
+%\end{table}
+%
+%\begin{table}[t]
+%\centering
+%    \begin{tabular}{|c|c|c|c|}
+%    \hline
+%        \textbf{Benchmarks} & \textbf{Instructions~(T)} & \textbf{D\$ MPKI} & \textbf{I\$ MPKI} \\
+%    \hline
+%        500.perlbench & 2.99 & 8.9 & 10.1 \\
+%        502.gcc & 1.35 & 29.5 & 11.1 \\
+%        505.mcf & 0.91 & 80.9 & 0.1 \\
+%        520.omnetpp & 1.11 & 56.6 & 10.4 \\
+%        523.xalancbmk & 1.21 & 62.9 & 7.6 \\
+%        525.x264 & 4.55 & 3.0 & 3.0 \\
+%        531.deepsjeng & 2.14 & 8.2 & 15.3 \\
+%        541.leela & 2.59 & 5.8 & 1.5 \\
+%        548.exchange2 & 3.24 & 0.0 & 0.1 \\
+%        557.xz & 2.25 & 15.7 & 0.1 \\
+%    \hline
+%    \end{tabular}
+%    \caption{Dynamic instruction counts and MPKI on running the SPEC2017 intrate benchmark~(single copy).}
+%    \label{tbl:spec-intrate}
+%\vspace{-0.1in}
+%\end{table}
+%
+\subsection{Target Designs}\label{sec:target-parameters} Our target designs
 are derived from the Rocket Chip generator~\cite{rocketchip}, which contains
 Rocket, a single-issue in-order scalar core implementing the RISC-V
-ISA~\cite{Waterman:EECS-2016-118, Waterman:EECS-2016-161}~(RV64IMAFDC). Rocket Chip
+ISA~(RV64IMAFDC). Rocket Chip
 has been taped out over a dozen times for both research and commercial
 purposes. In our
 experiments, we use the default
@@ -15,49 +118,22 @@ a \wunits{16}{KiB} L1 I\$, a blocking \wunits{16}{KiB} L1 D\$, and 32-entry
 fully-associative L1 I and D TLBs. We only change the default configuration to
 increase the number of performance counters and deepen the L2 TLB to 1024 entries.
 
-At the system level, our targets consist of single or quad-core instantiations
-of Rocket Chip (labeled SC or QC), composed with either a latency-bandwidth
-pipe~(labeled LBP), or a quadruple rank DDR3-2133~(14-14-14) FCFS or FR-FCFS
+At the system level, our targets consist of single or quad-core instances
+of Rocket Chip (labeled SC or QC), composed with either a latency-bandwidth pipe
+or a quadruple-rank DDR3-2133~(14-14-14) FCFS or FR-FCFS
 DRAM models over a 64-bit AXI4 bus. In all targets, the simulated system has
 16 GiB of DRAM capacity. Additionally, two targets include a 4 MiB
 LLC model~(labeled LLC). In the target's periphery, we have a UART and block
 device that interact with simulation models co-hosted in software.
 
-\begin{table*}
-\centering
-    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-	\hline
-        \textbf{Resource} & \multicolumn{4}{|c|}{Logic LUTs} &
-        \multicolumn{4}{|c|}{Registers} &
-        \multicolumn{4}{|c|}{36K BRAMs} \\
-	\hline
-	\hline
-        \textbf{Target Design} &
-        \multicolumn{2}{|c|}{Simulator} &
-        \multicolumn{2}{|c|}{Memory Model} &
-        \multicolumn{2}{|c|}{Simulator} &
-        \multicolumn{2}{|c|}{Memory Model} &
-        \multicolumn{2}{|c|}{Simulator} &
-        \multicolumn{2}{|c|}{Memory Model} \\
-	\hline
-    \input{tex/tables/simulator-utilization.tex}
-	\hline
-	\end{tabular}
-
-    \caption{XCVU9P resource utilization for a space of different targets.
-    Percentages indicate the share of total FPGA resources consumed by that
-    design partition. Simulator totals are inclusive of the memory model.}
-\label{tbl:utilization}
-\vspace{-0.1in}
-\end{table*}
-
 We report the utilization of several host-mapped targets in
 Table~\ref{tbl:utilization}.  We separate the utilization contributions into ``Simulator''~(the
-component of the design generated by MIDAS, including the \PNAME instance),
+component of the design generated by \SIMNAME, including the \PNAME instance),
 and Memory Model~(only the \PNAME instance). Not shown is the contribution of the
-AWS shell, which consumes a constant 14.5\%, 10\%, and 16.7\%  of the XCVU9P's
+F1 shell, which consumes a constant 14.5\%, 10\%, and 16.7\%  of the XCVU9P's
 Logic LUT, Register, and 36K BRAM resources respectively.
 
+\vspace{-0.05in}
 \subsection{System Software}
 
 All benchmarks were run on Linux kernel version 4.15.0-rc6. We built base Linux
@@ -68,6 +144,7 @@ script. During simulation, target processes pipe standard out to the target
 filesystem. We retrieve these files by remounting the filesystem on the
 host-CPU after the simulation has completed.
 
+\vspace{-0.05in}
 \subsection{Instrumentation}
 To measure core-side performance counters, we run a target program that, on a
 one-target-second timer interrupt~(1 billion cycles), reads a core's
@@ -77,57 +154,12 @@ we pause the simulator every one-billion target cycles and read out the
 memory-mapped instrumentation registers. Unlike using a target program to
 obtain these values, this approach does not alter the target's behavior.
 
+\vspace{-0.05in}
 \subsection{An Overview SPEC2017int On Rocket}
 In our experiments, we run SPEC2017 intrate and intspeed suites with reference
 inputs, cross-compiled for RISC-V systems with the \texttt{-O2} flag.
 Intspeed benchmarks require as much as \wunits{16}{GB} of memory, while intrate
-benchmarks require \wunits{2}{GB} per copy.  In Table~\ref{tbl:spec-intspeed}
-and Table~\ref{tbl:spec-intrate}, we give each suites' dynamic instruction
-count and L1 MPKIs when running on the Rocket configuration described in
+benchmarks require \wunits{2}{GB} per copy.  In Table~\ref{tbl:spec-insns}, we give each suite's dynamic instruction
+count and L1 MPKIs when running on the Rocket configuration of
 Section~\ref{sec:target-parameters}
 
-\begin{table}[t]
-\centering
-    \begin{tabular}{|c|c|c|c|}
-    \hline
-        \textbf{Benchmarks} & \textbf{Instructions~(T)} & \textbf{D\$ MPKI} & \textbf{I\$ MPKI} \\
-    \hline
-        600.perlbench & 2.98 & 9.0 & 10.0 \\
-        602.gcc & 2.43 & 36.6 & 9.7 \\
-        605.mcf & 1.60 & 97.9 & 0.1 \\
-        620.omnetpp & 1.11 & 56.9 & 9.3 \\
-        623.xalancbmk & 1.21 & 62.9 & 7.9 \\
-        625.x264 & 4.55 & 3.0 & 2.9 \\
-        631.deepsjeng & 2.51 & 8.7 & 15.4 \\
-        641.leela & 2.59 & 5.8 & 1.5 \\
-        648.exchange2 & 3.24 & 0.0 & 0.1 \\
-        657.xz & 9.41 & 19.8 & 0.2 \\
-    \hline
-    \end{tabular}
-    \caption{Dynamic instruction counts and MPKI on Rocket running SPEC2017 intspeed benchmark~(single threaded).}
-    \label{tbl:spec-intspeed}
-\vspace{-0.1in}
-\end{table}
-
-\begin{table}[t]
-\centering
-    \begin{tabular}{|c|c|c|c|}
-    \hline
-        \textbf{Benchmarks} & \textbf{Instructions~(T)} & \textbf{D\$ MPKI} & \textbf{I\$ MPKI} \\
-    \hline
-        500.perlbench & 2.99 & 8.9 & 10.1 \\
-        502.gcc & 1.35 & 29.5 & 11.1 \\
-        505.mcf & 0.91 & 80.9 & 0.1 \\
-        520.omnetpp & 1.11 & 56.6 & 10.4 \\
-        523.xalancbmk & 1.21 & 62.9 & 7.6 \\
-        525.x264 & 4.55 & 3.0 & 3.0 \\
-        531.deepsjeng & 2.14 & 8.2 & 15.3 \\
-        541.leela & 2.59 & 5.8 & 1.5 \\
-        548.exchange2 & 3.24 & 0.0 & 0.1 \\
-        557.xz & 2.25 & 15.7 & 0.1 \\
-    \hline
-    \end{tabular}
-    \caption{Dynamic instruction counts and MPKI on running the SPEC2017 intrate benchmark~(single copy).}
-    \label{tbl:spec-intrate}
-\vspace{-0.1in}
-\end{table}
