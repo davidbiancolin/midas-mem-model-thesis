@@ -1,5 +1,5 @@
 
-\subsection{Effects of DRAM Limitations}
+\section{Effects of DRAM Limitations}
 In this experiment, we quantify the extent to which specific DRAM limitations
 affect execution time. We started with the validated model, \emph{Full}, and
 gradually stripped out features: \emph{No Refresh} disables refresh, \emph{No
@@ -35,7 +35,7 @@ otherwise; late arriving reads must wait on inflight writes instead of being
 scheduled ahead, increasing average read latency, even though data-bus
 utilization is locally greater.
 
-\subsection{Working Set Study}
+\section{Working Set Study}
 Caches help insulate processors against long and variable latencies to DRAM;
 unfortunately, large LLCs are difficult to implement directly on FPGAs due to
 area limitations. \PNAME enables the architect to explore cache sizes that
@@ -51,7 +51,7 @@ and constrast them against a cacheless and single-cycle memory-system.
     \label{fig:llc-speedup}
 \end{figure}
 
-\subsection{Simulation Performance}
+\section{Simulation Performance}
 
 \input{tex/tables/simulator-performance.tex}
 

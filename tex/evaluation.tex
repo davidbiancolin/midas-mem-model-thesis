@@ -1,9 +1,8 @@
-\section{Demonstrating \PNAME}\label{sec:evaluation}
 In this section we demonstrate \PNAME in a series of small experiments and
 study its performance characteristics.
 
 \vspace{-0.05in}
-\subsection{Working Set Study}
+\section{Working Set Study}
 
 \begin{figure*}[t]
     \vspace{-0.15in}
@@ -40,7 +39,7 @@ sweeping LLC-cache sizes from \wunits{64}{KiB} to \wunits{1}{MiB} in size. In
 Figure~\ref{fig:llc-speedup} we show the speed up provided by different cache
 sizes and contrast them against a cache-less and single-cycle memory-system.
 
-\subsection{Effects of DRAM Limitations}
+\section{Effects of DRAM Limitations}
 
 In this experiment, we quantify the extent to which specific timing details
 affect target execution time. We start with the validated model, \emph{Full}, and
@@ -60,7 +59,7 @@ a cache is included, these slowdowns are effectively mitigated: refresh
 contributes a only $1.01\times$ slowdown in intrate.
 
 \vspace{-0.05in}
-\subsection{Simulation Performance}
+\section{Simulation Performance}
 
 \input{tex/tables/simulator-performance.tex}
 
@@ -85,7 +84,7 @@ Ironically, modeling a slower DDR-speed-grade slows down the simulator: since $t
 \emph{cycles} despite taking more target \emph{time}.
 
 \vspace{-0.05in}
-\subsection{Instrumentability}
+\section{Instrumentability}
 \PNAME allows the user to instrument timing models without changing target
 behavior. Coupled with fast simulation speeds, this allows a \PNAME instance to
 provide insight into system-wide behavior that would be difficult to collect

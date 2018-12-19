@@ -11,7 +11,7 @@ the simulation host.  The host is the hardware that
 executes~(\emph{hosts}) the simulation.  In this paper, a host
 consists of one or more CPUs connected to one or more FPGAs.
 
-\subsection{FPGA Prototyping}
+\section{FPGA Prototyping}
 FPGAs have long been used to \emph{prototype} ASICs by implementing
 the ASIC RTL directly in FPGA logic.  While FPGA prototypes are both
 fast~(10s to 100s of MHz) and detailed, they require a complete RTL
@@ -22,7 +22,7 @@ considerably slower~(100s of KHz to 1s of MHz). Nonetheless, FPGAs are used wide
 in industry, as they allow software development and hardware
 validation to proceed months before silicon is available.
 
-\subsection{FPGA-Accelerated Simulation}
+\section{FPGA-Accelerated Simulation}
 
 Prior work has explored techniques to make FPGAs more usable and
 powerful simulation hosts.  Motivated by the dawn of the multicore
@@ -58,7 +58,7 @@ decoupling} is what differentiates an FPGA-accelerated simulator from
 an FPGA prototype. We expand on this property in
 Section~\ref{sec:fame1}.
 
-\subsection{Adoption Challenges}
+\section{Adoption Challenges}
 
 Despite their promise, FPGA-accelerated simulators have only been
 successfully employed by those who designed them. We attribute their
@@ -88,7 +88,7 @@ limited appeal to several factors:
      even more laborious to use.
 \end{enumerate}
 
-\subsection{Recent Technological Advances}
+\section{Recent Technological Advances}
 
 Even as Moore's law wanes, FPGA capacity continues to scale. The largest FPGAs
 have over \wunits{50}{MiB} of BRAM and millions of logic cells.
@@ -110,7 +110,7 @@ published experiments, instead, it is now possible to spin up identical
 simulations on FPGAs in the cloud.  This development promises to foster more
 collaboration around FPGA-accelerated simulation.
 
-\subsection{Usability Through Automation}
+\section{Usability Through Automation}
 
 While the trends described in the previous section solve the
 \emph{availability} and \emph{FPGA capacity} challenges, usability remains a

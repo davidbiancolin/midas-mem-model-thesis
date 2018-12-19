@@ -5,7 +5,7 @@ RTL. MIDAS is not standalone; FireSim provides a development
 environment, with RTL and software models for complete target designs, as well
 and powerful utilities to batch out FPGA builds and simulations across Amazon EC2.
 
-\subsection{Host-Target Decoupling}\label{sec:target-decoupling}
+\section{Host-Target Decoupling}\label{sec:target-decoupling}
 Generally, host-target decoupling begins with a \emph{target abstraction} that
 represents the target and its environment as a dataflow graph of actors~\cite{LIBDN,APortNetworks}.  The target abstraction we use in this paper
 derives from the one used in RAMP~\cite{RAMP} and resembles a
@@ -61,7 +61,7 @@ of a simulator is variable: it is a function of both application-dependent
 behavior in the target and variable latencies in host services.
 $$ FMR = \frac{Cycles_{FPGA}}{Cycles_{Target}}$$
 
-\subsection{The \SIMNAME Compilation Flow}\label{sec:fame1}
+\section{The \SIMNAME Compilation Flow}\label{sec:fame1}
 \SIMNAME-generated simulators compose three types of models in their target graphs:
 \begin{enumerate}
     \item \emph{Transformed RTL} models generated from ASIC RTL.
@@ -73,7 +73,7 @@ The next three sections give an overview of how \SIMNAME, with the help of the
 user, maps a target graph composed of these models into an FPGA-accelerated
 simulator.
 
-\subsubsection{ASIC-RTL-to-Model Transformation}\label{sec:fame1}
+\subsection{ASIC-RTL-to-Model Transformation}\label{sec:fame1}
 We transform a synchronous block of RTL into a model using a FIRRTL~\cite{FIRRTL} transformation called a \emph{FAME-1}
 transform. The transformation gates state update of the RTL with a model-global
 signal, \emph{targetFire}, which is driven with the AND-reduction of the valid
@@ -81,7 +81,7 @@ signals of all input ports and the ready signals of all output ports.  Thus, in
 these models, state update, output token enqueue, and input token dequeue occur
 simultaneously in a single host-clock-cycle.
 
-\subsubsection{FPGA-Host Mapping}
+\subsection{FPGA-Host Mapping}
 
 Once ASIC-RTL has been transformed into models, \SIMNAME creates a host-agnostic
 mapping of the target graph. This is also the point where \SIMNAME links in
@@ -118,14 +118,14 @@ user instantiates the \SIMNAME-generated Verilog in a skeleton FPGA project
 that exposes AXI4 interfaces to the FPGA's off-chip memory systems and
 interconnect to the host CPU.
 
-\subsubsection{Software Simulation Driver \& Software Models}
+\subsection{Software Simulation Driver \& Software Models}
 To control the simulator, the user writes a C++ program that links against the
 \SIMNAME C++ libraries and the generated header. The \SIMNAME libraries implement
 basic commands used to control simulation.  These commands are decomposed into
 memory-mapped I/O issued over the simulation interconnect.  To complete
 the simulator, the user links in software models into this program.
 
-\subsection{Targets \& Hosts of This Paper}\label{sec:targetandhostmachines}
+\section{Targets \& Hosts of This Paper}\label{sec:targetandhostmachines}
 
 All target designs used in this work are tethered RISC-V processors with a
 single-channel DRAM subsystem.  They share the target graph shown in

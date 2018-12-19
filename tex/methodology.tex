@@ -27,9 +27,8 @@
 \vspace{-0.15in}
 \end{table*}
 
-\section{Experimental Setup}
 
-In Section~\ref{sec:framework}, we described how \SIMNAME takes a target and
+In Chapter~\ref{sec:framework}, we described how \SIMNAME takes a target and
 maps it to a host. Here, we describe the microarchitecture of the target
 machines we simulate, give an overview of the SPEC2017 Integer benchmarks that
 we run in our evaluation, and explain how we instrument our target designs.
@@ -106,7 +105,7 @@ we run in our evaluation, and explain how we instrument our target designs.
 %\vspace{-0.1in}
 %\end{table}
 %
-\subsection{Target Designs}\label{sec:target-parameters} Our target designs
+\section{Target Designs}\label{sec:target-parameters} Our target designs
 are derived from the Rocket Chip generator~\cite{rocketchip}, which contains
 Rocket, a single-issue in-order scalar core implementing the RISC-V
 ISA~(RV64IMAFDC). Rocket Chip
@@ -134,7 +133,7 @@ F1 shell, which consumes a constant 14.5\%, 10\%, and 16.7\%  of the XCVU9P's
 Logic LUT, Register, and 36K BRAM resources respectively.
 
 \vspace{-0.05in}
-\subsection{System Software}
+\section{System Software}
 
 All benchmarks were run on Linux kernel version 4.15.0-rc6. We built base Linux
 distributions with Buildroot and BusyBox. As part of our FPGA batch-job submission
@@ -145,7 +144,7 @@ filesystem. We retrieve these files by remounting the filesystem on the
 host-CPU after the simulation has completed.
 
 \vspace{-0.05in}
-\subsection{Instrumentation}
+\section{Instrumentation}
 To measure core-side performance counters, we run a target program that, on a
 one-target-second timer interrupt~(1 billion cycles), reads a core's
 performance counters and dumps them to the target filesystem. We pin an
@@ -155,7 +154,7 @@ memory-mapped instrumentation registers. Unlike using a target program to
 obtain these values, this approach does not alter the target's behavior.
 
 \vspace{-0.05in}
-\subsection{An Overview SPEC2017int On Rocket}
+\section{An Overview SPEC2017int On Rocket}
 In our experiments, we run SPEC2017 intrate and intspeed suites with reference
 inputs, cross-compiled for RISC-V systems with the \texttt{-O2} flag.
 Intspeed benchmarks require as much as \wunits{16}{GB} of memory, while intrate

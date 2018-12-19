@@ -3,17 +3,17 @@ DDR3 timing models have a runtime-configurable address assignment, speed grade,
 page policy, and rank, bank, and row count. The timing models generate legal
 DDR3 command traces that have been validated against Verilog golden models.
 
-\subsection{Timing Model Design}
+\section{Timing Model Design}
 Both timing-model classes consist of four components: transaction
 scheduler, DRAM state trackers, MAS, and backend.
 
-\subsubsection{Transaction Scheduler}
+\subsection{Transaction Scheduler}
 The transaction scheduler consists of a single, unified, configurable-depth
 queue that can accept an AXI4 read and write transaction simultaneously. Reads
 are given priority when only one slot is available.  Transactions are passed to
 the MAS as they can be accepted at a rate of one transaction per cycle.
 
-\subsubsection{DRAM State Trackers}
+\subsection{DRAM State Trackers}
 We decoupled the MAS model design from structures that track the state
 of DRAM devices. The DRAM state tracker is arranged hierarchically into rank and
 bank state trackers. State trackers present to the MAS a bit vector indicating
@@ -22,7 +22,7 @@ type, which indicate the next earliest cycle that the tracker can legally accept
 that type. When the MAS issues a command, it informs the associated state tracker,
 which updates its counters accordingly.
 
-\subsubsection{Memory Access Scheduler}
+\subsection{Memory Access Scheduler}
 Each MAS maintains a data structure of memory references it is scheduling across.
 When a new transaction is received, a record in this structure is populated with the decoded rank, bank, and row addresses, along with
 MAS-specific metadata to ease scheduling decisions.
@@ -36,12 +36,12 @@ is to be opened. The closed-page policy always issues auto-precharged CAS
 commands. To maintain a global age-order of memory references, the FR-FCFS MAS
 uses a single collapsing buffer with a runtime-programmable depth.
 
-\subsubsection{Refresh Policy}
+\subsection{Refresh Policy}
 Both MAS use an interrupting, all-ranks refresh scheme that makes no attempt to
 pull-in or delay refresh commands.  When a refresh is requested, the MAS
 precharges all banks in all ranks, and issues REF commands as soon as possible.
 
-\subsubsection{Backend}
+\subsection{Backend}
 The backend receives read and write references from the MAS and drives the AXI4
 response channels back to the target. If no LLC is being used, read response data is fetched from the host-response staging unit.
 The backend can apply an additional runtime-configurable latency to simulate
@@ -68,7 +68,7 @@ instances in Table~\ref{tbl:dram-model-resources}.
 \vspace{-0.35in}
 \end{table}
 
-\subsection{Validation}
+\section{Validation}
 Since our DRAM-timing models generate DRAM-command traces, we validated
 traces collected in RTL simulation against a Micron DDR3 golden model. The golden
 model simulates a single-device slice of the memory organization and detects
@@ -81,7 +81,7 @@ which we could estimate bandwidth and row buffer hit rates a priori. The traces
 were tailored to expose different memory-access scheduling behavior in the MAS
 models.
 
-\subsection{Selecting Legal Runtime Configurations}
+\section{Selecting Legal Runtime Configurations}
 Our most sophisticated DDR3 timing-model instances expose over thirty
 runtime-programmable settings that specify the low-level DRAM timings,
 address-assignment scheme, LLC-model configuration, and MAS-structure sizes.
@@ -94,7 +94,7 @@ device DQ width, number of ranks, and total DRAM capacity. Our utility
 then searches for a DDR3 device in a database and chooses one with an appropriate
 density and speed grade for that memory system.
 
-\subsection{Comparison to DRAMSim2} \PNAME models nearly all of the same
+\section{Comparison to DRAMSim2} \PNAME models nearly all of the same
 aspects of DRAM as DRAMSim2, but it is lacking support for burst
 chopping and for power-down and self-refresh modes.
 We plan to add these features in the future. \PNAME does not natively model

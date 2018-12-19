@@ -1,7 +1,7 @@
 Before describing \PNAME's DRAM timing-models~(Section~\ref{sec:dram-timing-model}), we review some relevant background
 on DRAM memory systems.
 
-\subsection{DRAM Device Architecture}\label{sec:dram-arch}
+\section{DRAM Device Architecture}\label{sec:dram-arch}
 In a DRAM IC, arrays of bit cells are hierarchically arranged into multiple
 parallel \textit{banks}. Banks provide the primitive level of concurrency in a
 DRAM memory system: they can service independent requests assuming they do not
@@ -39,7 +39,7 @@ in all banks concurrently. DRAM manufacturers generally have kept the number of
 refresh commands required to iterate through the entire array constant: 8192
 commands per 64 ms interval, or one every 7.8 $\mu s$.
 % is there a citation for this ^
-\subsection{DRAM Controller Architecture}\label{sec:dram-mas}
+\section{DRAM Controller Architecture}\label{sec:dram-mas}
 A DRAM controller is responsible for responding to memory
 requests from one or more requesters by scheduling those requests over its
 memories as a judicious stream of DRAM commands.
@@ -99,7 +99,7 @@ utilization considerably.
 %than powered-up ranks~(CKE high).
 
 
-\subsection{DRAM Memory System Simulators}
+\section{DRAM Memory System Simulators}
 
 The current state of the art in DRAM simulation in academia is cycle-accurate
 software simulators like~\cite{dramsim, ramulator, usimm}. These simulators
@@ -124,7 +124,7 @@ hundreds of KHz to ones of MHz~(reported in \cite{ramulator}).
 %characteristics of DRAM memory-systems that we model in our initial set of
 %timing models.
 %
-%\subsubsection{DRAM Device Architecture and Organization}
+%\subsection{DRAM Device Architecture and Organization}
 %
 %In a DRAM IC, arrays of bit cells are hierarchically arranged into multiple
 %parallel \textit{banks}. Banks provide the primitive level of concurrency in a
@@ -141,7 +141,7 @@ hundreds of KHz to ones of MHz~(reported in \cite{ramulator}).
 %row not stored in the buffer, a PRE command must be issued to \textit{close} the row and charge
 %the bit-lines for a new access.
 %
-%\subsubsection{DRAM Controller Architecture}
+%\subsection{DRAM Controller Architecture}
 %
 %At the highest level, a DRAM controller is responsible for responding to memory
 %requests from one or more requestors by scheduling those requests over its
@@ -158,13 +158,13 @@ hundreds of KHz to ones of MHz~(reported in \cite{ramulator}).
 %industrial patents on the subject. We outline some of the most popular MAS policies
 %here.
 %
-%\subsubsection{First-Come First-Serve (FCFS) Policy}\label{fcfs}
+%\subsection{First-Come First-Serve (FCFS) Policy}\label{fcfs}
 %Commands for the oldest pending memory reference are always issued first. This
 %is the simplest MAS policy, but one that grossly under-utilizes available DRAM
 %bandwidth. FCFS schedulers are common in older machines, and those that present
 %few concurrent memory requests.
 %
-%\subsubsection{First-Ready FCFS (FR-FCFS)\cite{frfcfs} Policy}\label{frfcfs}
+%\subsection{First-Ready FCFS (FR-FCFS)\cite{frfcfs} Policy}\label{frfcfs}
 %First, column access commands that hit in an open row-buffer are prioritized,
 %then row and precharge commands from the oldest pending reference are
 %considered.  FR-FCFS is a relatively simple scheme that achieves far higher BW
@@ -172,7 +172,7 @@ hundreds of KHz to ones of MHz~(reported in \cite{ramulator}).
 %machines with a single stream of memory references (like single-core
 %out-of-order machines), are compared.
 %
-%\subsubsection{DRAM Software Simulation}
+%\subsection{DRAM Software Simulation}
 %
 %The current state of the art in DRAM simulation in academia are cycle-accurate
 %software simulators like DRAMSim2\cite{dramsim}, Ramulator\cite{ramulator} and
@@ -183,6 +183,6 @@ hundreds of KHz to ones of MHz~(reported in \cite{ramulator}).
 %cycle-accurate models simulate at frequencies ranging from 100s of KHz to ones
 %of MHz\cite{ramulator}.
 
-%\subsubsection{DRAM Power Modeling}
+%\subsection{DRAM Power Modeling}
 
 %In order to model power, Ramulator relies on DRAMPower\cite{drampower}, to which it passes its command trace. Micron describes strategies in their technical notes for estimating DRAM power\cite{micronpower} (which DRAMSim2 employs). They also made these calculations accessible by providing spreadsheets that take micro-architectural event frequencies as input. These approaches can carry over to FPGA simulation, as sufficiently detailed FPGA models can add instrumentation for these events, while simpler models can save the memory access trace to a buffer and compute power out-of-band\cite{strober}.

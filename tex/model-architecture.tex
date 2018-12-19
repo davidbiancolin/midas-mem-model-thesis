@@ -14,7 +14,7 @@ an instance RTL module and memory map of its host configuration registers. These
 registers control timing parameters; their values can be modified at runtime
 to reconfigure the instance without needing to recompile the FPGA bitstream.
 
-\subsection{Instance Organization}
+\section{Instance Organization}
 
 \begin{figure}[t]
 	\centering
@@ -106,7 +106,7 @@ conditions hold:
 \end{enumerate}
 
 \vspace{-0.251in}
-\subsection{Operation}\label{sec:memory-model-operation}
+\section{Operation}\label{sec:memory-model-operation}
 To demonstrate how \PNAME instances operate, let us consider an instance with a
 single-cycle-memory timing-model. This is depicted in Figures~\ref{fig:model-operation-1}-\ref{fig:model-operation-4}.
 
@@ -134,7 +134,7 @@ target increases, FMR decreases and approaches unity.  If the
 target memory system is strictly slower the host memory system, the instance
 executes at unity FMR.
 \vspace{-0.10in}
-\subsection{Functional Model Configuration}\label{egress}
+\section{Functional Model Configuration}\label{egress}
 Our design allows both the host memory system and the timing model to reorder
 responses; the host-staging unit implements a set of virtual queues for each
 AXI4 channel. Each queue represents the FIFO ordering within a single channel
@@ -147,7 +147,7 @@ BRAM~\cite{LIFPGADesign}. For greater numbers of AXI IDs or greater degrees of I
 reuse, it dynamically assigns entries within block RAMs, and maintains a
 hardware linked list to track to read-response order in a given ID.
 
-%\subsection{Providing Deterministic Functional-Model Behavior}
+%\section{Providing Deterministic Functional-Model Behavior}
 %By default, instances forward target requests directly to the host-memory
 %system, under the assumption there will never be reads and writes to the same
 %address in flight\footnote{In AXI4, the value a read returns when a write to
@@ -159,7 +159,7 @@ hardware linked list to track to read-response order in a given ID.
 %when there are no writes in flight.
 
 \vspace{-0.05in}
-\subsection{General-Purpose Timing-Model Classes}\label{sec:timing_model}
+\section{General-Purpose Timing-Model Classes}\label{sec:timing_model}
 
 \PNAME provides two simple, general-purpose timing-model-classes that can be used to
 model large off-chip memory systems. The first is a \emph{latency-bandwidth
@@ -197,7 +197,7 @@ LUTs~(lightly used) and DSP48s~(unused).}.
 \end{table}
 
 \vspace{-0.05in}
-\subsection{Composable Last-Level-Cache Model}
+\section{Composable Last-Level-Cache Model}
 All timing model classes can be generated with a single-banked, write-back,
 last level cache~(LLC) model with a random replacement policy.  Since we can
 reuse the same functional model, the model only instantiates tag and metadata
