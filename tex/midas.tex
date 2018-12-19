@@ -74,7 +74,7 @@ user, maps a target graph composed of these models into an FPGA-accelerated
 simulator.
 
 \subsection{ASIC-RTL-to-Model Transformation}\label{sec:fame1}
-We transform a synchronous block of RTL into a model using a FIRRTL~\cite{FIRRTL} transformation called a \emph{FAME-1}
+We transform a synchronous block of RTL into a model using a FIRRTL~\cite{firrtl} transformation called a \emph{FAME-1}
 transform. The transformation gates state update of the RTL with a model-global
 signal, \emph{targetFire}, which is driven with the AND-reduction of the valid
 signals of all input ports and the ready signals of all output ports.  Thus, in
