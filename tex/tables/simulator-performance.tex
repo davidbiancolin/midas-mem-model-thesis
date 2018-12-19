@@ -102,6 +102,7 @@
 \begin{table*}[t]
 \tabcolsep=0.10cm
 \centering
+    \resizebox{\textwidth}{!}{%
     \begin{tabular}{l@{\hskip -0.03in}l
         S[table-format=2.0]@{\hskip 0.14in}S[table-format=3.0]@{\hskip 0.15in}
         S[table-format=2.0]@{\hskip 0.14in}S[table-format=3.0]@{\hskip 0.15in}
@@ -150,7 +151,7 @@
         &Single Cycle &      31.6 &   50 &  28.5 &  38 &  33.3 &   36 &    37.1 &  35 &      36.6 &   37 &  20.8 &   79 &      25.8 &   44 &  14.9 &   73 &       7.0 &  151 &  22.6 &   51 \\
         &FRFCFS-1MB  &      31.2 &  54 &  24.4 &  57 &  23.9 &  72 &    32.5 &  49 &      31.4 &  54 &  20.4 &  84 &      24.8 &  48 &  14.3 &  78 &       7.1 &  150 &  20.7 &  62 \\
         &FRFCFS  &      21.6 &  111 &  19.6 &  98 &  20.2 &  104 &    27.3 &  96 &      22.8 &  110 &  15.9 &  125 &      15.4 &  110 &  11.4 &  120 &       7.0 &  152 &  16.4 &  107 \\ \hline
-\end{tabular}
+    \end{tabular}}
     \caption{Simulation times (hours) and rates ($f$, MHz) for SPEC2017 intspeed and intrate~(four copies) running on single and quad-core Rocket Chip targets. In all cases, the FPGA-host frequency is 160 MHz.} 
     \label{tbl:intrate-simtimes}
 \vspace{-0.1in}

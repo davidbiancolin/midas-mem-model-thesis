@@ -98,14 +98,11 @@ simulation control and instrumentation. These include a DRAM-initialization
 module and a master that governs the advance of target time on the FPGA.
 
 \begin{figure}[t]
-\vspace{-0.1in}
     \centering
     \includegraphics[width=\columnwidth]{figures/target-graph.pdf}
     % graffle2pdf -c target-graph midas-graphics/graffle/masters-target.graffle figures/target-graph.pdf
-    \vspace{-0.10in}
     \caption{The graph of target designs studied in this paper.}
     \label{fig:default-target}
-    \vspace{-0.15in}
 \end{figure}
 
 Once all of the simulation components have been generated, the simulation
@@ -139,16 +136,13 @@ of the transformed-RTL model, including reset, is bound to the default I/O
 model.
 
 \begin{figure}[t]
-\vspace{-0.1in}
     \centering
     \includegraphics[width=\columnwidth]{figures/mapped-simulator.pdf}
     % graffle2pdf -c f1 midas-graphics/graffle/masters-target.graffle figures/mapped-simulator.pdf
-    \vspace{-0.25in}
     \caption{The target mapped to an F1 host. The contribution of this work is
     the \PNAME instance, which replaces a crude latency-pipe model provided
     by the prior work.}
     \label{fig:mapped-simulator}
-\vspace{-0.10in}
 \end{figure}
 
 While \SIMNAME supports other FPGA hosts, currently FireSim only has support for

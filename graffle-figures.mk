@@ -4,7 +4,8 @@ graffle_figures := figures/target-graph.pdf \
 	figures/model-operation-1.pdf \
 	figures/model-operation-2.pdf \
 	figures/model-operation-3.pdf \
-	figures/model-operation-4.pdf
+	figures/model-operation-4.pdf \
+	figures/dram-device.pdf
 
 figures/target-graph.pdf:midas-graphics/graffle/masters-target.graffle
 	omnigraffle-export -c target-graph midas-graphics/graffle/masters-target.graffle figures/target-graph.pdf
@@ -26,3 +27,6 @@ figures/model-operation-3.pdf:midas-graphics/graffle/memory-model-operation.graf
 
 figures/model-operation-4.pdf:midas-graphics/graffle/memory-model-operation.graffle
 	omnigraffle-export -c 4 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-4.pdf
+
+figures/dram-device.pdf:midas-graphics/graffle/dram-diagrams.graffle
+	omnigraffle-export -c device midas-graphics/graffle/dram-diagrams.graffle figures/dram-device.pdf

@@ -1,34 +1,29 @@
 In this section we demonstrate \PNAME in a series of small experiments and
 study its performance characteristics.
 
-\vspace{-0.05in}
 \section{Working Set Study}
 
 \begin{figure*}[t]
-    \vspace{-0.15in}
     \centering
-    \begin{subfigure}[t]{0.49\textwidth}
+    \begin{subfigure}[t]{\textwidth}
         \includegraphics[width=\columnwidth]{figures/dram_fidelity_speed_slowdown.pdf}
     \end{subfigure}
-    \begin{subfigure}[t]{0.49\textwidth}
+    \vspace{0.20in}
+    \begin{subfigure}[t]{\textwidth}
         \includegraphics[width=\columnwidth]{figures/dram_fidelity_rate_slowdown.pdf}
     \end{subfigure}
-    \vspace{-0.20in}
     \caption{Target-execution time of SPEC2017 intspeed and intrate~(4 copies)
     with reference inputs for DRAM models with and without refresh enabled.
     Runtime is normalized to that of a single-cycle memory system. LLCs, if
     present, are \wunits{256}{KiB} and \wunits{1}{MiB} large for intspeed and
     intrate respectively and are 8-way set associative.}
     \label{fig:model-fidelity-sweep}
-    \vspace{-0.10in}
 \end{figure*}
 \begin{figure}[t]
     \centering
     \includegraphics[width=\columnwidth]{figures/cache_size_bar_plot.pdf}
-    \vspace{-0.35in}
     \caption{Speedup in SPEC2017 intspeed~(reference inputs) vs LLC model size. All caches are 8-way set associative.}
     \label{fig:llc-speedup}
-    \vspace{-0.15in}
 \end{figure}
 
 Caches help insulate processors against long and variable latencies to DRAM.
@@ -58,7 +53,6 @@ Remaining DRAM non-idealities contribute a $1.02\times$ slowdown.  Once
 a cache is included, these slowdowns are effectively mitigated: refresh
 contributes a only $1.01\times$ slowdown in intrate.
 
-\vspace{-0.05in}
 \section{Simulation Performance}
 
 \input{tex/tables/simulator-performance.tex}
@@ -83,7 +77,6 @@ served by the functional model before the timing model requires them, eliding si
 Ironically, modeling a slower DDR-speed-grade slows down the simulator: since $t_{CS}$ is smaller, reads complete in fewer target
 \emph{cycles} despite taking more target \emph{time}.
 
-\vspace{-0.05in}
 \section{Instrumentability}
 \PNAME allows the user to instrument timing models without changing target
 behavior. Coupled with fast simulation speeds, this allows a \PNAME instance to
@@ -93,15 +86,12 @@ see how row-buffer and LLC hit rates are inversely correlated through each of
 641.leela's games of Go.
 
 \begin{figure*}
-    \vspace{-0.15in}
     \centering
     \includegraphics[width=\textwidth]{figures/leela-time-series.pdf}
-    \vspace{-0.30in}
     \caption{CPI, D\$ MPKI, and row buffer and LLC hit rates running
     641.leela\_s with on Rocket with \wunits{256}{KiB} of LLC and a FCFS MAS
     model. These plots use a rolling average of 10 samples spaced a billion
     cycles apart.}.
     \label{fig:leela-time-series}
-\vspace{-0.25in}
 \end{figure*}
 

@@ -18,16 +18,15 @@ read or write; data is bursted over successive clock edges. While the row
 buffer remains \textit{open}, the row can be accessed by issuing new CAS
 commands. To access a different row, a PRE command must be
 issued to \textit{close} the row and recharge the bit-lines.
-%The organization of a typical DRAM device is shown in Figure~\ref{fig:dram-device}.
+The organization of a typical DRAM device is shown in Figure~\ref{fig:dram-device}.
 
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=\columnwidth]{figures/dram-device.pdf}
-%     % graffle2pdf -c device midas-graphics/graffle/dram-diagrams.graffle figures/dram-device.pdf
-%    \caption{The organization of a typical DRAM device.}
-%	\label{fig:dram-device}
-%\vspace{-0.12in}
-%\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\textwidth]{figures/dram-device.pdf}
+     % graffle2pdf -c device midas-graphics/graffle/dram-diagrams.graffle figures/dram-device.pdf
+    \caption{The organization of a typical DRAM device.}
+	\label{fig:dram-device}
+\end{figure}
 
 DRAM gradually loses its stored state over time as bit cell capacitors leak. To
 maintain their state, DRAM cells must be periodically refreshed. In the DDR

@@ -18,51 +18,12 @@ to reconfigure the instance without needing to recompile the FPGA bitstream.
 
 \begin{figure}[t]
 	\centering
-    \vspace{-0.10in}
-	\includegraphics[width=\columnwidth]{figures/memory-model-block-diagram.pdf}
+	\includegraphics[width=0.8\textwidth]{figures/memory-model-block-diagram.pdf}
      % graffle2pdf -c full midas-graphics/graffle/memory-model-block-diagram.graffle figures/memory-model-block-diagram.pdf
-    \vspace{-0.45in}
     \caption{A block diagram of a \PNAME instance, with all signals
     that may stall timing model execution illustrated.}
 	\label{fig:timing-model}
-\vspace{-0.25in}
 \end{figure}
-
-\begin{figure*}[t]
-    \vspace{-0.25in}
-	\centering
-    \begin{subfigure}[t]{0.23\textwidth}
-        \includegraphics[width=\columnwidth]{figures/model-operation-1.pdf}
-        % graffle2pdf -c 1 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-1.pdf
-        \caption{}
-        \label{fig:model-operation-1}
-    \end{subfigure}
-    \begin{subfigure}[t]{0.24\textwidth}
-        \includegraphics[width=\columnwidth]{figures/model-operation-2.pdf}
-        % graffle2pdf -c 2 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-2.pdf
-        \caption{}
-        \label{fig:model-operation-2}
-    \end{subfigure}
-    \begin{subfigure}[t]{0.24\textwidth}
-        \includegraphics[width=\columnwidth]{figures/model-operation-3.pdf}
-        % graffle2pdf -c 3 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-3.pdf
-        \caption{}
-        \label{fig:model-operation-3}
-    \end{subfigure}
-    \begin{subfigure}[t]{0.23\textwidth}
-        \includegraphics[width=\columnwidth]{figures/model-operation-4.pdf}
-        % graffle2pdf -c 4 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-4.pdf
-        \caption{}
-        \label{fig:model-operation-4}
-    \end{subfigure}
-	\centering
-    \vspace{-0.15in}
-    \caption{A \PNAME instance simulating a single-target-cycle read. Data
-    tokens carry target transactions~(their target-valid bit is set) whereas
-    empty tokens do not carry a target transaction.}
-    \label{fig:model-operation}
-\vspace{-0.20in}
-\end{figure*}
 
 The block diagram of an instance is shown in Figure~\ref{fig:timing-model}.
 Instances operate by using the FPGA host's DRAM as a backing store.  Target
@@ -102,11 +63,43 @@ conditions hold:
     \item All output queues are ready~(\textit{outputs ready}).
     \item The host-request scheduler can accept a request~(\textit{HRQ ready}).
     \item All host-response tokens are present~(\textit{fTokens valid}).
-    \vspace{-0.05in}
 \end{enumerate}
 
-\vspace{-0.251in}
 \section{Operation}\label{sec:memory-model-operation}
+
+\begin{figure*}[t]
+	\centering
+    \begin{subfigure}[t]{0.23\textwidth}
+        \includegraphics[width=\columnwidth]{figures/model-operation-1.pdf}
+        % graffle2pdf -c 1 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-1.pdf
+        \caption{}
+        \label{fig:model-operation-1}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.24\textwidth}
+        \includegraphics[width=\columnwidth]{figures/model-operation-2.pdf}
+        % graffle2pdf -c 2 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-2.pdf
+        \caption{}
+        \label{fig:model-operation-2}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.24\textwidth}
+        \includegraphics[width=\columnwidth]{figures/model-operation-3.pdf}
+        % graffle2pdf -c 3 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-3.pdf
+        \caption{}
+        \label{fig:model-operation-3}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.23\textwidth}
+        \includegraphics[width=\columnwidth]{figures/model-operation-4.pdf}
+        % graffle2pdf -c 4 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-4.pdf
+        \caption{}
+        \label{fig:model-operation-4}
+    \end{subfigure}
+	\centering
+    \caption{A \PNAME instance simulating a single-target-cycle read. Data
+    tokens carry target transactions~(their target-valid bit is set) whereas
+    empty tokens do not carry a target transaction.}
+    \label{fig:model-operation}
+\end{figure*}
+
 To demonstrate how \PNAME instances operate, let us consider an instance with a
 single-cycle-memory timing-model. This is depicted in Figures~\ref{fig:model-operation-1}-\ref{fig:model-operation-4}.
 
@@ -133,7 +126,7 @@ the cycle was executed with an FMR of $K+2$.  As the latency of the
 target increases, FMR decreases and approaches unity.  If the
 target memory system is strictly slower the host memory system, the instance
 executes at unity FMR.
-\vspace{-0.10in}
+
 \section{Functional Model Configuration}\label{egress}
 Our design allows both the host memory system and the timing model to reorder
 responses; the host-staging unit implements a set of virtual queues for each
@@ -158,7 +151,6 @@ hardware linked list to track to read-response order in a given ID.
 %and writes---issuing writes only when no reads are in flight, and reads only
 %when there are no writes in flight.
 
-\vspace{-0.05in}
 \section{General-Purpose Timing-Model Classes}\label{sec:timing_model}
 
 \PNAME provides two simple, general-purpose timing-model-classes that can be used to
@@ -179,7 +171,6 @@ LUTs~(lightly used) and DSP48s~(unused).}.
 
 \begin{table}[htb]
 \centering
-    \vspace{-0.05in}
     \begin{tabular}{c c c c c }
 	\hline
         \textbf{Example Instance} & Logic LUTs & FFs & BRAM & $f_{MAX}$ \\
@@ -192,11 +183,9 @@ LUTs~(lightly used) and DSP48s~(unused).}.
     \caption{Resource counts and best-case $f_{MAX}$~(MHz) for three different
     LBP models (maximum AXI4 burst length of 8 beats). Supporting more concurrent transactions~(row 2) requires a larger
     functional model; this can be mitigated by giving the generator hints~(row 3).}
-\vspace{-0.3in}
 \label{tbl:lbp-model-resources}
 \end{table}
 
-\vspace{-0.05in}
 \section{Composable Last-Level-Cache Model}
 All timing model classes can be generated with a single-banked, write-back,
 last level cache~(LLC) model with a random replacement policy.  Since we can
@@ -212,7 +201,6 @@ handful of LBP-backed LLC instances in
 Table~\ref{tbl:llc-model-resources}.
 \begin{table}[htb]
 \centering
-    \vspace{-0.05in}
     \begin{tabular}{c c c c c}
 	\hline
         \textbf{Example Instance} & Logic LUTs & FFs & BRAM & $f_{MAX}$ \\
@@ -226,7 +214,6 @@ Table~\ref{tbl:llc-model-resources}.
     \caption{Resource counts and best-case $f_{MAX}$~(MHz) for four different
     LBP-backed LLC models, labeled with the largest capacity and associativity they can model~(128B cache lines).}
 \label{tbl:llc-model-resources}
-\vspace{-0.3in}
 \end{table}
 
 We validated the LLC model in RTL simulation backed with a latency bandwidth
