@@ -1,0 +1,37 @@
+% in this section we review the design of a modern SOC with particular focus on
+% it's clocking and reset structures, to motivate the design of our simulation
+% infrastructure described later in this dissertation.
+
+% Intro paragraph: Leave to introduction.
+% - Talk about size
+%  - 2.5 - 3D integration
+%  - Give examples of large GPUs, CPUs
+% - Heterogeneity
+%   - Talk about specialization
+%
+% Combination of enormous size and increasing heterogenity leads to more complex
+% clocking structures. Jump into this section assuming this has been established.
+%
+
+%  Overview of clock use in a modern SoC
+%  - GALs
+%  - Example SoC (eagle)
+% Section: Clock domain crossings
+% - Metastability, synchronizer chains
+% - Fully asynchronous crossings
+% - Rational crossings
+% - Other types; see Ben Keller
+% Section: Clock generation and selection structures
+% - Clock Muxes
+% - Clock Dividers
+% - PLLs and DLLs
+% Section: Reset sequences
+% - How does a chip come out of reset, how do the clocks come up. Ordering considerations.
+% Section: Clock gating
+% Section: Dynamic frequency scaling
+% - Explain what and why (DVFS)
+% - Refer back to previous section RE: how clocks are reconfigured
+% - Given an example system from Berkeley
+% - Study an example system from not berkeley
+% Clocks and EDA
+% - SDC

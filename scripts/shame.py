@@ -53,7 +53,7 @@ est_days_to_completion = float(pages_remaining) / current_rate
 
 projection_x_end = min(max_days, float(target_page_count) / current_rate)
 projection_x = [len(pages)-1, projection_x_end]
-projection_y = [pages[-1], target_page_count]
+projection_y = [pages[-1], float(current_rate) * days_remaining + pages[-1]]
 
 
 if len(pages) > int(max_days):
@@ -62,6 +62,9 @@ if len(pages) > int(max_days):
 
 #plt.ylim(0.0, 100.0)
 print pages
+print current_rate
+print required_rate
+print days_remaining
 print interp_x
 print interp_y
 print projection_x
@@ -70,6 +73,7 @@ print remaining_x
 print remaining_y
 plt.figure(figsize = (8,4))
 plt.plot(pages, 'bo-', projection_x, projection_y, 'bo--', remaining_x, remaining_y, 'go--')
+#plt.plot(pages, 'bo-', projection_x, projection_y, 'bo--')
 #plt.plot(pages, 'bo', interp_x, interp_y, 'b-', remaining_x, remaining_y, 'go--')
 
 hacky_rot_scale = 1.65
@@ -78,7 +82,7 @@ current_degrees = (float(180) / np.pi) * np.arctan(hacky_rot_scale * current_rat
 
 text_x_offset = (projection_x_end - (len(pages) - 1))/2
 
-text_orth_displacement = 3
+text_orth_displacement = 2.5
 
 def text_y(slope, above_the_line = True):
     sign = 1 if above_the_line else -1
@@ -104,7 +108,7 @@ text_props = {'ha': 'center', 'va': 'center'}
 # Required pages per day annotation
 plt.text(len(pages) - 1 + text_x_required,
          pages[-1] + text_y_required,
-         '{0:1.1f} pages/day'.format(required_rate),
+         '{0:1.2f} pages/day'.format(required_rate),
          text_props,
          rotation=required_degrees,
          color = 'g')
@@ -112,7 +116,7 @@ plt.text(len(pages) - 1 + text_x_required,
 # Current pages per day annotation
 plt.text(len(pages) - 1 + text_x_curr,
          pages[-1] + text_y_curr,
-         '{0:1.1f} pages/day'.format(current_rate),
+         '{0:1.2f} pages/day'.format(current_rate),
          text_props,
          rotation=current_degrees,
          color = 'b')
