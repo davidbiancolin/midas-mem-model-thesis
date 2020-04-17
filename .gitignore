@@ -9,7 +9,8 @@
 *.out
 *.toc
 *.run.xml
-midas-mem-model-thesis.pdf
+*.dat
+davidbiancolin-dissertation.pdf
 
 .*.swp
 .*.swo

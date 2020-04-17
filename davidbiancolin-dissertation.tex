@@ -1,7 +1,7 @@
 %
 % The Current Maintainer of this work is Paul Vojta.
 
-\documentclass[masters]{ucbthesis}
+\documentclass[phd]{ucbthesis}
 \usepackage{biblatex}
 \usepackage{color}
 \usepackage{graphicx}
@@ -18,7 +18,7 @@
 
 % Double spacing, if you want it.  Do not use for the final copy.
 \def\dsp{\def\baselinestretch{1.5}\large\normalsize}
-\dsp
+%\dsp
 
 % If the Grad. Division insists that the first paragraph of a section
 % be indented (like the others), then include this line:
@@ -45,14 +45,14 @@
 
 % Declarations for Front Matter
 
-\title{An FPGA-Hosted Reconfigurable Timing-Model For Joint Last-Level-Cache And DDR-SDRAM Memory Systems}
+\title{FPGA-Accelerated Simulation of ASICs with Dynamically Scaling Clocks}
 \author{David Thomas Biancolin}
 \degreesemester{Spring}
 \degreeyear{2019}
-\degree{Master of Science}
+\degree{Doctor of Philosophy}
 \chair{Professor Krste Asanovi\'c}
-\othermembers{Professor Jonathan Bachrach}
-\numberofmembers{2}
+\cochair{Adjunct Professor Jonathan Richard Bachrach}
+\othermembers{Professor Sanjit Seshia \\ Professor Robert Leachman }
 % Previous degrees are no longer to be listed on the title page.
 % \prevdegrees{B.A. (University of Northern South Dakota at Hoople) 1978 \\
 %   M.S. (Ed's School of Quantum Mechanics and Muffler Repair) 1989}
@@ -71,16 +71,18 @@
 
 % A slightly modified template of the ms thesis to reuse the title variables
 \clearpage
-\input{tex/cover}
+%\input{tex/cover}
 \maketitle
 % Delete (or comment out) the \approvalpage line for the final version.
 %\approvalpage
-%\copyrightpage
+\copyrightpage
+% (Optional) \part{First Part}
 
+\begin{abstract}
 %\input{tex/abstract}
+\end{abstract}
 
 \begin{frontmatter}
-
 % You can delete the \clearpage lines if you don't want these to start on
 % separate pages.
 
@@ -91,58 +93,52 @@
 \listoffigures
 \clearpage
 \listoftables
-
-    \begin{acknowledgements}
-
-I'd like to thank my advisors, Jonathan Bachrach and Krste Asanovi\'c, for
-their guidance and immesurable patience; my collaborators for their assistance in
-bringing this work to fruition; and finally, my girlfriend and family for their steadfast belief in me.
-
-    \end{acknowledgements}
+\begin{acknowledgements}
+\end{acknowledgements}
 \end{frontmatter}
 
 \pagestyle{headings}
 
-% (Optional) \part{First Part}
-\begin{abstract}
-\input{tex/abstract}
-\end{abstract}
 
-\chapter{Introduction}
+%\chapter{Introduction}
+%
+%%\input{tex/introduction}
 
-\input{tex/introduction}
+\chapter{Anatomy Of A Modern SoC}
 
-\chapter{On FPGA-based Simulation}
+\input{tex/modern-soc-design}
+
+\chapter{On FPGA-based Simulation of ASICs}
 
 \input{tex/fpga-simulation}
-
-\chapter{The Simulation Framework}\label{sec:framework}
-
-\input{tex/midas}
-
-\chapter{Memory Model Architecture}
-
-\input{tex/model-architecture}
-
-\chapter{On DRAM Memory Systems}
-
-\input{tex/dram}
-
-\chapter{DRAM Timing Models}\label{sec:dram-timing-model}
-
-\input{tex/dram-timing-model}
-
-\chapter{Experimental Setup}
-
-\input{tex/methodology}
-
-\chapter{Demonstrating \textsc{FASED}}\label{sec:evaluation}
-
-\input{tex/evaluation}
-
-\chapter{Conclusion}
-
-\input{tex/conclusion}
+%
+%\chapter{The Simulation Framework}\label{sec:framework}
+%
+%%\input{tex/midas}
+%
+%\chapter{Memory Model Architecture}
+%
+%%\input{tex/model-architecture}
+%
+%\chapter{On DRAM Memory Systems}
+%
+%%\input{tex/dram}
+%
+%\chapter{DRAM Timing Models}\label{sec:dram-timing-model}
+%
+%%\input{tex/dram-timing-model}
+%
+%\chapter{Experimental Setup}
+%
+%\input{tex/methodology}
+%
+%%\chapter{Demonstrating \textsc{FASED}}\label{sec:evaluation}
+%
+%\input{tex/evaluation}
+%
+%\chapter{Conclusion}
+%
+%%\input{tex/conclusion}
 
 \printbibliography
 
