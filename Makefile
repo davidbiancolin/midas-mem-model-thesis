@@ -9,10 +9,14 @@ paper:
 	pdflatex $(PAPER).tex </dev/null >/dev/null
 	pdflatex $(PAPER).tex </dev/null
 	./run-shame.sh $(PAPER).log
-	rm shame.png
 
 clean:
 	rm -f *.aux	*.log *.lof *.bcf *.run.xml *.toc *.lot *.bbl
+
+shame:
+	./run-shame.sh $(PAPER).log
+	scp shame.png a4:~/public_html/shame.png
+
 
 .PHONY: clean
 
