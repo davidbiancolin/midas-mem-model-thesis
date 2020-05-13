@@ -1,148 +1,393 @@
-% This section describes historical and related FPGA simulation work, and aims
-% to call out techniques employed by this paper, in addition to describing
-% problems with those works
+To avoid confusion when speaking of computers simulating computers, the
+literature commonly makes a distinction between the \emph{target}, the system
+being simulated, and the \emph{host} or \emph{host-platform}, the system
+executing the simulation. The host-platform is often not a single machine but
+a collection of interconnected machines, which may include CPUs,
+GPUs, and FPGAs.
 
-We first review the use of FPGAs for architecture studies.  Throughout
-this paper, we make a distinction between the \emph{target} and
-the \emph{host}.  The target is the design under study.  Combining the
-target with a model of the environment in which it executes forms a
-determinate closed system whose behavior is defined independently of
-the simulation host.  The host is the hardware that
-executes~(\emph{hosts}) the simulation.  In this paper, a host
-consists of one or more CPUs connected to one or more FPGAs.
+\section{A Tour of Full-System Simulation}
 
-\section{FPGA Prototyping}
-FPGAs have long been used to \emph{prototype} ASICs by implementing
-the ASIC RTL directly in FPGA logic.  While FPGA prototypes are both
-fast~(10s to 100s of MHz) and detailed, they require a complete RTL
-description of the target design. Furthermore, larger designs must be
-painstakingly partitioned across multiple FPGAs. Since these
-multi-FPGA prototypes advance in lockstep, cycle by cycle, they are
-considerably slower~(100s of KHz to 1s of MHz). Nonetheless, FPGAs are used widely
-in industry, as they allow software development and hardware
-validation to proceed months before silicon is available.
-
-\section{FPGA-Accelerated Simulation}
-
-Prior work has explored techniques to make FPGAs more usable and
-powerful simulation hosts.  Motivated by the dawn of the multicore
-era, the multi-university RAMP project~\cite{RAMP} made large strides
-in improving FPGA-accelerated simulators by improving resource
-efficiency, developing FPGA partitioning techniques, and avoiding FPGA
-recompilation by using reconfigurable models.
-
-ProtoFlex~\cite{ProtoFlex} was an architecture-level simulator that
-demonstrated 16-way host-multithreading of a single FPGA-hosted functional model.
-ProtoFlex could switch between FPGA-hosted and CPU-hosted modes via
-\emph{transplantation}. FAST~\cite{FAST}, a cycle-accurate simulator, was
-split into CPU-hosted functional and FPGA-hosted timing models.  RAMP
-Gold~\cite{RAMPGold} used FPGA-hosted timing and functional models
-with 64-way host-multithreading to model a larger target on a single
-FPGA.  HAsim~\cite{HASim} also used FPGA-hosted timing and functional
-models, but provided more detailed pipeline and memory hierarchy
-models.
-
-Other work studied partitioning targets over multiple FPGAs.
-\cite{LIFPGADesign} showed that by partitioning HAsim over two FPGAs, they
-could model eight times as many cores, due to improved resource sharing between
-virtual instances. To model a datacenter-scale target, DIABLO~\cite{Diablo}
-leveraged RAMP Gold's multithreading to simulate 3072 servers on 24 FPGAs.
-
-A unifying theme of FPGA-accelerated simulators is that one clock-cycle of
-target time is executed over a variable number of FPGA-host
-cycles.  This lets an FPGA-hosted simulator hide
-variable host latencies to DRAM and CPU-hosted components, enables
-optimizations that trade host time for host resources, and, crucially,
-facilitates deterministic simulation.  This \emph{host-target
-decoupling} is what differentiates an FPGA-accelerated simulator from
-an FPGA prototype. We expand on this property in
-Section~\ref{sec:fame1}.
-
-\section{Adoption Challenges}
-
-Despite their promise, FPGA-accelerated simulators have only been
-successfully employed by those who designed them. We attribute their
-limited appeal to several factors:
+Simulation is central in performing three fundamental tasks of SoC design.
 
 \begin{enumerate}
 
-    \item \textbf{Availability.} Much of the early FPGA-accelerated
-    simulator research relied on boutique FPGA-emulation
-    platforms or custom board designs, whose high cost and
-    limited availability prevented adoption.
+    \item \textbf{Prototyping:} ``What thing should we
+        build?" Prototyping serves as a means to rapidly evaluate different
+        design points with an imperfect model of a proposed design.
 
-    \item \textbf{FPGA Capacity.} Common ASIC structures, such as CAMs and
-        multi-ported RAMs, map poorly to FPGA
-        fabrics~\cite{FPGAGap2}, making it difficult to host large
-        ASIC designs on FPGAs.
+    \item \textbf{Verification:} ``Did we build the thing right?" Verification
+        serves to check, or prove, that a particular implementation
+        correctly executes.
 
-    \item \textbf{Ease of Use.} To avoid partitioning across multiple
-     FPGAs, previous work focused on efficiently mapping more of the
-     target to a single FPGA. The abstract, multithreaded models these
-     simulators typically employ can be more difficult to implement
-     than the machines they model, greatly undermining their
-     usability. This complexity limits configurability, forcing users
-     to modify a sophisticated piece of RTL to make larger
-     changes. Furthermore, these abstract models must, like their
-     software counterparts, be validated and calibrated, making them
-     even more laborious to use.
+    \item \textbf{Validation:} ``Did we build the right thing?" Validation
+        serves to show that the implementation fulfills the objectives set out
+        for the system.
+
 \end{enumerate}
 
-\section{Recent Technological Advances}
+Both prototyping and verification can be applied at all levels of the design
+hierarchy.  For example, given a specification of the system into which an
+accelerator is integrated, one could prototype different design points and
+verify an implementation of that accelerator. Validation, however, seeks to
+answer a system-level question that spans the entire computing stack.  The
+surest way to validate a system is not in simulation, but at-speed with a
+physical prototype or the final product itself. However, waiting for a silicon
+prototype pushes validation late into the design cycle making it challenging or
+impossible to pivot the design of the system based on validation results. To
+perform \emph{pre-silicon} validation, a fast and accurate full-system
+simulator is required.
 
-Even as Moore's law wanes, FPGA capacity continues to scale. The largest FPGAs
-have over \wunits{50}{MiB} of BRAM and millions of logic cells.
-%\footnote{Scaling RAMP
-%Gold~\cite{RAMPGold} to use the largest Xilinx UltraScale+
-%FPGA~\cite{Ultrascale} would permit modeling more than 5000 cores!}
-As they
-have scaled, FPGAs have become more heterogeneous, adding features that make
-them better hosts for full-system simulators.  Both Intel and Xilinx sell FPGAs
-with embedded microprocessors, making it easier to co-simulate tightly coupled
-hardware and software models. Modern FPGAs include dedicated DRAM
-controllers that support memory bandwidths rivaling those of ASICs.
+Here, SoC designers are confronted with a fidelity-performance-cost trade-off,
+and are forced use multiple different simulation technologies at different
+points in this space. A summary of these technologies can be found in
+Table~\ref{tbl:full-system-simulation-tech}.
 
-Lower cost and increased on-chip integration have also made FPGAs more
-accessible to researchers.  Not only are commercial off-the-shelf development
-boards cheaper and more full-featured, FPGAs are now available as a cloud service~\cite{amazonf1}.
-Where in the past academics would have to purchase their own FPGAs to reproduce
-published experiments, instead, it is now possible to spin up identical
-simulations on FPGAs in the cloud.  This development promises to foster more
-collaboration around FPGA-accelerated simulation.
+\subsection{CPU-Hosted Simulation for Prototyping}
 
-\section{Usability Through Automation}
+Architecture-level simulators such as QEMU\cite{qemu}, which model the system at the
+instruction-set-architecture level and include as limited set of standard
+device models for I/O, are fast and inexpensive as they run on conventional CPUs.
+When augmented with simple timing models, they are ideal for doing initial system prototyping, as
+these models can be quickly modified and recompiled.
+However, as these timing models become more complex, they become more
+challenging to validate, and cruically, the throughput of these simulators rapidly declines.
 
-While the trends described in the previous section solve the
-\emph{availability} and \emph{FPGA capacity} challenges, usability remains a
-problem. Previous work~\cite{fabscalarfpga, strober} has shown that much of an
-FPGA-accelerated simulator can be automatically generated from source RTL. This RTL
-can be written in an HDL like Verilog, generated by a high-level synthesis
-tool, or emitted by languages like Chisel~\cite{Chisel} or Bluespec.
+Continuing in the direction of increasing fidelity, microarchitecture-level
+simulators such as Gem5~\cite{gem5}, and MARSSx86~\cite{marssx86}. are CPU-hosted 
+simulators that provide configurable, "cycle-level" timing models of a complete systems, including CPU pipelines,
+caches, and off-chip memory systems.  These simulators can run target workloads at hundreds of KIPS, but are
+often much slower in practice when employing more detailed or custom models. This
+makes it practically impossible to run complete workloads, such as
+multi-threaded Java applications or SPECint2006~\cite{spec} with its reference
+inputs. Here, a common remedy is to employ statistical sampling
+techniques~\cite{smarts} to fast-forward to the region of interest on an architecture-level simulator, before
+executing O(100M) instructions at the desired fidelity.
 
-Alas, it is not always practical to generate models from source
-RTL. Consider off-chip memory systems: they are too resource-intensive to host
-in the FPGA fabric, yet for reasonable simulation performance, they must be
-tightly coupled with the processor model.  Components like these require
-an abstract model to virtualize the target memory system over DRAM attached
-to the FPGA---reintroducing the problem that anything
-but a simplistic model is difficult to design, validate, modify, and reuse.
+While this approach has well-acknowledged shortcomings~\cite{gem5error},
+judicious use of cycle-level simulators can be an appropriate vehicle for
+doing initial system prototyping. For radical proposals that involve
+aggressive microarchitectural changes or traverse multiple layers of the
+computing stack, this approach is often inadequate (particularly for workloads that
+are multithreaded, or are long-running and irregular, for which it is diffcult to collect 
+meaningful samples without peturbing the system under evaluation, such as
+managed-language workloads~\cite{MicroSimPanel}).
 
-To avoid these pitfalls, we propose writing detailed memory-system
-timing models as decoupled, split-timing-and-functional models with
-the timing models written as \emph{target-time} RTL. Using this
-approach, the same RTL transformations applied automatically to the
-processor RTL are applied to the timing-model RTL before binding it to
-the functional model.  Model designers can focus on modeling detailed
-target behavior and not worry about the mapping to the host.  With our
-approach, since timing models are transformed from target-time RTL, it
-is possible to use HLS-generated RTL or even existing
-memory-controller RTL as a timing model.
 
-To improve reusability, we propose writing timing models
-as \emph{generators}.  This allows the model designer to describe a
-space of \emph{instances} with less development effort.  To
-support reconfiguring timing models without FPGA recompilation, timing
-models expose timing parameters as I/Os that are bound automatically
-to memory-mapped registers during timing-model generation.  Taken
-together, these techniques make it possible to describe
-detailed, reusable memory-system models.  We demonstrate this claim with \PNAME.
+\subsection{CPU-Hosted Simulation for Verfication}
+
+Since the aforementined simulation techniques used abstract models of the
+target system, they are useless for system verifaction and validation once
+implementation begins. (They in fact will need to be validated against the
+implementation as it is completed). Instead, here designers use CPU-hosted
+simulators that faithfully represent the implementation at a particular
+abstraction level.
+
+For simulating digital components of the SoC, a Register-Transfer Level~(RTL)
+is the tool of choice. 
+Since 
+
+While different components of the SoC will reuqire
+
+When a hardware-emulation platform is unavailable or too expensive, and when
+faster full-system simulation is desired earlier, it is common in industry to
+build FPGA prototypes. FPGA prototypes directly implement the SoC on one more
+more FPGAs, often with a custom board design that may include peripherals
+identical to those that would be deployed in the final system.  FPGA prototypes
+are fast: small prototypes that fit in a single FPGA execute at ones to hundreds of
+MHz, while larger prototypes, which must be partitioned across multiple FPGAs,
+simulate at hundreds of kHz~\cite{nehalemprototype, atomprototype}.  Compared to
+a hardware-emulation platforms, FPGA prototypes are inexpensive, and can duplicated and
+shared between hardware and software engineering teams. However, the difficulty with
+using FPGA prototypes as full-system simulators is that they require complete
+RTL implementation of the design (and, sometimes, a custom PCB). While
+FPGA prototypes can accelerate software development by months, they become
+useful too late in the design cycle to do hardware-software co-design, as the
+target hardware cannot easily be modified which limits the scope of potential
+changes.
+
+Since a complete RTL implementation precludes the use FPGA prototypes for
+design space exploration and early prototyping, they are generally unused in
+academia. Instead, full-system simulation is done entirely in software with
+frameworks such as Gem5~\cite{gem5}, and MARSSx86~\cite{marssx86}.
+These simulators can run target workloads at hundreds of KIPS, but are
+often much slower in practice when employing more detailed or custom models. This
+makes it practically impossible to run complete workloads, such as
+multi-threaded Java applications or SPECint2006~\cite{spec} with its reference
+inputs. A common remedy is to employ statistical sampling
+techniques~\cite{smarts} to fast-forward to the region of interest, before
+executing O(100M) instructions at the desired fidelity.
+
+While this approach has well-acknowledged shortcomings~\cite{gem5error},
+judicious use of cycle-level simulators can be an appropriate vehicle for
+proposing new microarchitectural ideas. But for radical proposals that involve
+aggressive microarchitectural changes or traverse multiple layers of the
+computing stack, this approach is inadequate (particularly for workloads that
+are long-running, irregular and require a large number of cores, such as
+managed-language workloads~\cite{MicroSimPanel}). \TODO{Table~\ref{tbl:full-system-simulation-tech} constrasts the speed, fidelity, and cost of the aforementioned simulation technologies.}
+
+\begin{sidewaystable}
+\begin{center}
+\resizebox{\textwidth}{!}{%
+    \begin{tabular}{|p{0.1\textwidth}|p{0.1\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
+    \hline
+        \textbf{Technology} & \textbf{Examples} & \textbf{Speed}\newline(Relative to Silicon) &
+        \textbf{Fixed Cost} \newline(\$ per simulator) &
+        \textbf{Variable Cost}\newline(\$ per target-second) & \textbf{``Compile" Time}\newline(Hours)  \\
+    \hline
+    \hline
+        Arch SW Simulator & QEMU \newline Spike & $10^{-1}$ &
+        Free + $10^3$ & \TODO{} & 0 - 0.1 \\
+    \hline
+        $\mu$Arch SW Simulator & Gem5 \newline MARSSx86 & $10^{-6} - 10^{-4}$ &
+        Free + $10^{3}$ & \TODO{} & 0 - 0.1 \\
+    \hline
+        RTL Simulation & VCS \newline Verilator  & $10^{-7} - 10^{-4}$ &
+        $10^{3} /seat/yr + 10^{3}$ \newline $10^{3}$ & \TODO{} & $10^{-2} - 10^{-1}$ \\
+    \hline
+        Single-FPGA prototype & FPGA-zynq & $10^{-2} - 10^{-1}$ & 2495~(ZC706) \newline 495~(Zedboard) &%
+        \TODO{10W (ZC706)} & 0.5 - 1 (FPGA-zynq)\newline $10^{0} - 10^{1}$ \\
+    \hline
+        Multi-FPGA prototype & \cite{nehalemprototype}, \cite{atomprototype} \newline Protium S1  &
+        $10^{-4} - 10^{-3}$ & \TODO{} & \TODO{} & \TODO{} \\
+    \hline
+        Hardware Emulation & Palladium Z1 & $10^{-3} - 10^{-2}$ &
+        $10^{6}$ & \TODO{$10^{-2}$} & 140 MG/hr \\
+    \hline
+        Silicon Test-chip & \TODO{} & 1 & $10^{5} - 10^{7}$ & \TODO{$10^{-5} - 10^{-4}$} & $10^3 - 10^4$ \\
+    \hline
+\end{tabular}}
+\end{center}
+    \caption{Constrasting different technologies for building full-system
+    simulators; ordered approximately from top-to-bottom in descending
+    fidelity. We define ``compile time" to be the time it takes to make one
+    design iteration less the time spent in simulation and implementing a design
+    change; the time to generate a simulator from a specification of the
+    target.}
+\label{tbl:full-system-simulation-tech}
+\end{sidewaystable}%
+The ideal full-system simulator -- sufficient for both academic and industrial
+uses -- would be inexpensive, fast and as accurate as desired throughout the
+whole design process; it would always possible to run the software stack on a
+model of the target hardware at speeds fast enough for software development.
+Initially, this simulator could be used for system-level prototyping and design
+space exploration, but as desired, more detailed models or RTL implementations
+of target components would be integrated. Ultimately, once all of the target
+RTL has been integrated, the simulator subsume the role of an FPGA prototype.
+Academics need not completely implement an SoC: they may simply stop adding
+fidelity to the simulation once they are content with the quality of their
+results.
+
+Presently, FPGAs are the only commercial off-the-shelf (COTS) technology
+capable of supporting fast, scalable, cycle-accurate simulation. Thus, we
+believe any attempt to build this ideal simulator must necessarily use FPGAs.
+However, this requires a more flexible perspective of how FPGAs can be deployed as
+simulation \emph{accelerators} and not merely RTL emulation devices as they are
+used in FPGA prototypes.
+
+%\section{Defining FPGA-Accelerated Simulation}
+%
+%The distinction between FPGA-accelerated simulation and FPGA prototyping can be
+%nebulous: we argue that FPGA prototyping represents a narrow subset of the larger
+%space of FPGA-accelerated simulation. Key to understanding the distinction is
+%first, think of simulation as any other application executing on a host, and
+%second, forget that a host may be or include one or more FPGAs.
+%
+%A simulation is an application that takes an input and produces an output.  The
+%output may be the console or file I/O of the target.  Alternatively, it may be
+%a dump of the microarchitectural state of the target as it changes over the
+%lifetime of the simulation.  As far as the user is concerned, the simulation
+%may be optimized in any way whatsoever so long as this output is the same.
+%
+%Like any other application, simulations have hot spots that account for the bulk
+%of their runtime. To improve runtime, the simulation may be parallelized over
+%the host, either over multiple homogeneous resources, or by offloading specific
+%kernels to accelerators, which may execute concurrently with the rest
+%of the application.
+%
+%%In simulations that account for time at the cycle-level, much of this runtime
+%%is dedicated to modeling the cycle-by-cycle interactions of parts of the
+%%system. These models may be written in C++ or SystemC, or implemented in an HDL
+%%like verilog or VHDL. Parts of the simulation may be divided into functional
+%%models, like an architecture simulator, and a timing-model that does some
+%%accounting of time based on a model of the microarchitecture. What's important
+%%to note, is that any cycle-level model of hardware attempts to capture the
+%%behavior of a fine-grained highly concurrent digital-circuit. Taken to the
+%%limit, a cycle-level model is an RTL model.
+%
+%In FPGA-accelerated simulation, in general, we attempt to offload parts of the
+%simulation that do cycle-level or cycle-accurate modeling of some part of the
+%target. One way to achieve this is to dissolve the simulation spatially
+%(perhaps along module boundaries): parts of the target, like an NoC or
+%processor pipeline, could be offloaded to an FPGA, while models for I/O may be
+%hosted on a CPU.  Alternatively, one could host a functional model of a module
+%on the CPU and accelerate a detailed cycle-accurate timing-model on the FPGA
+%(or vice versa).  Again, the only constraint on the implementation of the
+%simulation, and thus, the implementation of FPGA-accelerated components of the
+%simulation, is that its output remains the same. All other things equal, a
+%faster implementation is always better.
+%
+%\section{Compelling Ideas in FPGA-accelerated Simulation}
+%
+%Researchers have devised many clever techniques for using FPGAs as simulation
+%accelerators. To highlight some of these techniques, we summarize the FAME
+%taxonomy~\cite{fame}, which outlines three dimensions along which
+%FPGA-accelerated simulators may be categorized.
+%
+%\subsection{FAME-1 (XX1): Host-Target Decoupling}\label{sec:fame1}
+%
+%In host-decoupled fpga-accelerated simulators, a target-cycle of simulation
+%executes over a variable number of FPGA-host cycles. In contrast, an
+%FPGA protoype executes a single target-cycle on every FPGA-host cycle. With
+%this technique, ASIC structures that map inefficently to FPGA fabric may be replaced
+%with optimized-for-FPGA structures that take more host cycles to execute, but save
+%FPGA resources and improve host-cycle time.  One classic optimization replaces
+%multi-ported register files and CAMs with a dual-ported BRAMs pumped over
+%multiple cycles.  Additionally, host-decoupling permits the simulator to
+%tolerate variable latencies in the host-platform without sacrificing simulator
+%performance or changing the target-time behavior of the simulation. Nearly all
+%academic FPGA-accelerated simulators are FAME-xx1 simulators, though
+%ProtoFlex~\cite{protoflex} is an early example.
+%
+%\subsection{FAME-2 (X1X): Abstract RTL}
+%
+%In an abstract-RTL FPGA-accelerated simulation, components of the simulator do
+%not model the implementation RTL exactly. Abstraction permits simplifying
+%components of the simulator, trading simulation fidelity for FPGA-resource
+%savings. Additionally, abstract models can be made reconfigurable in ways the
+%implementation RTL cannot. Most academic FPGA-simulators are to some degree
+%abstract-RTL simulators.  For example, Strober~\cite{strober} used a
+%fixed-latency pipe to model the target's DRAM subsystem~(a FAME-011 model),
+%but used FAME-001 models derived directly from source RTL everywhere else.
+%Conversely, RAMPGold~\cite{rampgold} was entirely abstract.
+%
+%\subsection{FAME-4 (1XX): Multithreading}
+%
+%In a multithreaded FPGA-accelerated simulation, multiple virtual instances of a
+%block or module within the target are simulated using a single physical
+%datapath on the FPGA. The target state is duplicated according to the number of
+%virtual instances, and a scheduler selects which virtual instance should be
+%simulated in a given host-cycle. ASIC logic tends to be expensive when mapped
+%to FPGA fabric; in FPGA prototypes, designs tend to be logic~(LUT) constrained,
+%which leaves much of the FPGA's embedded BRAM left unused.  Multithreading
+%improves the mapping efficiency of the target, by reusing the expensive logic
+%over multiple copies of target state which can be mapped into abundant FPGA BRAMs and registers.
+%HASim~\cite{hasim} and RAMPGold~\cite{rampgold} are examples of simulators that
+%employ FAME-x1x multithreading.
+%
+%
+%\subsection{Split Timing-Functional Models}
+%
+%Splitting timing and functional models is ubiquitous both in software and
+%FPGA-accelerated simulators, as it permits amortizing the design effort of the
+%functional model over multiple timing models. This is especially crucial in
+%FPGA-based simulation, where the functional model can account for the bulk of
+%the complexity (e.g., 35K vs. 1K SystemVerilog LoC in RAMPGold~\cite{rampgold}. With
+%host-decoupling, it is possible to host the two models on different parts of
+%the host-platform: FAST~\cite{fast} hosted its functional model in software and its
+%timing model in fabric (ProtoFlex did the opposite~\cite{protoflex}).
+%
+%For a comphrehensive survey of FPGA-accelerated simulation work we direct
+%the reader to~\cite{fpgasimbook}.
+%
+%\section{Adoption Challenges}
+%
+%Despite their promise, FPGA-accelerated simulators have only been employed by
+%the researchers that developed them. The failure to adopt FPGA-accelerated
+%simulation methodologies more widely comes as a result of several key factors:
+%
+%\begin{enumerate}
+%
+%    \item \textbf{Availability.} Much of the early FPGA-accelerated simulation research
+%        relied on boutique FPGA-host platforms like the BEE~\cite{bee2}, or
+%        used custom board designs. The cost of these platforms disincentivizes
+%        their adoption by researchers who already have the means to run
+%        software simulations at low cost.
+%
+%    \item \textbf{FPGA Capacity.} Common ASIC structures, such as CAMs,
+%        multi-ported RAMs, and wide multiplexors are known to map poorly to
+%        FPGA fabrics~\cite{fpgagap, fpgagap2}, making it difficult to host
+%        large target designs on an FPGA.
+%
+%    \item \textbf{Configurability \& Extensibility.} Extending FPGA-accelerated
+%        simulations requires writing RTL. RTL models are less configurable and
+%        harder to extend than software models. Finally, RTL models still need
+%        to be validated, further exacerbating the challenge of building them.
+%
+%    \item \textbf{FPGA compile time.} Compiling an FPGA simulator considerably
+%        longer than compiling a software simulator (ones of hours).
+%        %To some extent this is inescapable. However, where abstract models are
+%        %employed, they can be made run-time configurable, with programmable
+%        %registers sitting on a simulation memory map. Where models are
+%        %generated from RTL, they can can be incrementally recompiled, or perhaps
+%        %partially reconfigured.
+%
+%    \item \textbf{Debuggability.} Debugging a broken FPGA-accelerated
+%        simulation is difficult due to the limited visibility the designer has
+%        over the state of the simulation. This is often more challenging than
+%        debugging an FPGA prototype of the target, as FPGA-specific
+%        optimizations make it more difficult to reason about the state of the
+%        target.
+%
+%\end{enumerate}
+%
+%\section{Why Continue With FPGA-Accelerated Simulation?}
+%
+%Even as Moore's law wanes, FPGA capacity continues to scale. The largest FPGAs
+%have over 50 MB of BRAM and millions of logic cells\footnote{Comically, scaling
+%RAMPGold~\cite{rampgold}, to use the largest Xilinx UltraScale
+%FPGA~\cite{ultrascale} by BRAM capacity would permit modeling in excess of 5000
+%cores.}. As they have scaled, FPGAs have continued to become more
+%heterogeneous, adding features that make them more amenable to hosting
+%full-system simulaions.  Both Intel and Xilinx now sell FPGAs with embedded ARM
+%cores, making it easier to co-simulate tightly coupled hardware and software
+%models of a system. Modern FPGAs include hardened DRAM controllers that are
+%comparable to those of ASICs. This trend towards greater integration looks to
+%continue. For example, upcoming Intel Stratix 10 MX parts include in-package DRAM (HBM2)
+%that can support up to 1 TBps of aggregate memory bandwidth~\cite{stratix10mx}.
+%Both DRAM capacity and bandwidth are crucial for simulating components
+%of the target that may not fit in BRAM.
+%
+%Lower cost and increased on-chip integration have also made FPGAs more
+%accessible. Not only are COTS development boards cheaper and more featureful,
+%FPGAs are now available in academic clusters, like TACC's Microsoft
+%Catapult~\cite{catapultannounce} deployment, and in datacenters, as a service
+%like Amazon Web Services' EC2 F1 instances~\cite{amazonf1}. Where in the past
+%academics would have to purchase their own FPGAs -- even to reproduce published
+%experiments -- it may soon be possible for them to instead spin up an identical
+%simulation on a shared computing resource. Companies may no longer have to
+%maintain their own FPGA prototyping clusters; they could instead batch out
+%simulations to the cloud.
+%
+%\section{Improving Usability Through Automation}
+%
+%While the trends described in the previous section solve the
+%\emph{availability} and \emph{FPGA-capacity} challenges, the remaining three
+%usability challenges persist. Previous work~\cite{fabscalarfpga, strober} has
+%shown that much of an FPGA-accelerated simulator can be automatically generated
+%from source RTL. This RTL can be written in an HDL like Verilog or emitted by
+%high-level synthesis tools or generators written in languages like
+%Chisel~\cite{chisel}. While this still requires an RTL implementation, the same
+%RTL can be passed to an EDA flow to measure physical design metrics, and,
+%best of all, no validation of the generated model is required.
+%
+%This is, unfortunately, not a panacea: perhaps the RTL is not yet
+%available, or a more abstract, reconfigurable model is desired. In this report
+%we consider off-chip DRAM memory systems as a motivating example: they have too
+%much state to be hosted in-fabric and yet they must must be tightly coupled to
+%the processor model. This makes it difficult to co-simulate DRAM in
+%software.\footnote{High-latency peripherals, like disks, can often be modeled
+%in software without any performance cost~\cite{disksim}.} These components
+%typically require an abstract model that virtualizes the target-memory system
+%over FPGA-host-memory system.
+%
+%This reintroduces the aforementioned problem that anything but a simplistic RTL
+%model is difficult to design, modify and reuse. We propose to address this
+%through \emph{generators} that synthesize abstract memory system models that
+%can be easily modified and used across a wide range of targets.  This generator
+%must provide a variety of timing models so as to enable the designer to trade
+%fidelity for FPGA-resource savings when needed. Generated models must be reconfigurable, to
+%permit sweeping memory system parameters without needing to recompile the FPGA
+%bitstream. These models must provide useful instrumentation to both aid in
+%debugging and to provide insight about memory system behavior without
+%perturbing execution. Finally, when the generator does not provide an
+%appropriate timing model, the generator should be easy to extend.
