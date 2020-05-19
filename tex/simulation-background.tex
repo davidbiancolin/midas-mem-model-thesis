@@ -75,47 +75,102 @@ managed-language workloads~\cite{MicroSimPanel}).
 
 \subsection{CPU-Hosted Simulation for Verfication}
 
-Since the aforementined simulation techniques used abstract models of the
+Since the aforementioned simulation techniques used abstract models of the
 target system, they are useless for system verifaction and validation once
-implementation begins. (They in fact will need to be validated against the
+implementation begins. (In fact, those models will need to be validated against the
 implementation as it is completed). Instead, here designers use CPU-hosted
 simulators that faithfully represent the implementation at a particular
 abstraction level.
 
-For simulating digital components of the SoC, a Register-Transfer Level~(RTL)
-is the tool of choice. 
-Since 
+For simulating digital components of the SoC, a Register Transfer Level~(RTL) ,
+like Synopsys VCS, or Verilator, is the tool of choice. Broadly speaking, RTL
+simulators model state elements and the combinational functions that update
+them at cycle boundaries. Values on wires transition instantiously, and in
+general no delay through launching registers, combinational circuits is
+modelled. Supposing the underlying digital abstraction holds, RTL simulation
+ideal for doing dynamic verification of a digital circuit. Small blocks compile
+in seconds, while complete SoCs can be compiled in 1s to 10s of minutes. RTL
+simulators are relatively easy to debug, as they provide complete visibility
+over the state of the design over the entire duration of a simulation. The
+cost~(\$) of an RTL simulator comes mainly from licensing fees, as simulators
+run on standard servers or desktop CPUs, though in many cases open-source RTL
+like Verilator can be used instead. Ultimately, the largest challenge in using
+CPU-hosted RTL simulator is that they have poor simulation throughput for large
+designs. Completely SoCs execute at hundreds to less than 1 Hz -- much too slow
+to do verification for all but small inputs (e.g., checking system boot), or
+for doing full-system validation.
 
-While different components of the SoC will reuqire
+It's important to note at this point that, higher-fidelity software simulation
+of the design is commonly used after the SoC is synthesized and implemented in
+a particular process technology.  These simulations include combinational,
+wire, and parasitic delays, and can generally include more detailed models of
+analog components of the system. The additional fidelity only exercabates the
+throughput limitation of CPU-based simulation.
 
-When a hardware-emulation platform is unavailable or too expensive, and when
-faster full-system simulation is desired earlier, it is common in industry to
-build FPGA prototypes. FPGA prototypes directly implement the SoC on one more
+To do effective full-system validation and dynamic verification, considerably
+faster simulation throughput is required. While there are many techniques that
+can improve throughput on CPUs, such as multithreading, relaxing or restricting
+the the timing sematics of the design language, ultimately the abundant
+fine-grained, often bit-level, parallelism of RTL simulation cannot exploited
+by multiprocessors to overcome the 6+ order of magnitude slow down over a
+silicon prototype.
+
+\subsection{Hardware-Accelerated Full-System Simulation -- FPGA Prototyping}
+
+To build simulators that execute a rates closer to a silicon prototype, desingers turned
+to fine-grained parallel hardware to simulate SoCs.  The earliest form of
+hardware-accelerated full-system simulation emerged in the late 1980s, and used
+programmable logic devices, specifically FPGAs, to directly implement the
+design. This is known as \textit{FPGA prototyping}.
+
+Modern FPGA prototypes directly implement the SoC on one more
 more FPGAs, often with a custom board design that may include peripherals
 identical to those that would be deployed in the final system.  FPGA prototypes
 are fast: small prototypes that fit in a single FPGA execute at ones to hundreds of
 MHz, while larger prototypes, which must be partitioned across multiple FPGAs,
-simulate at hundreds of kHz~\cite{nehalemprototype, atomprototype}.  Compared to
-a hardware-emulation platforms, FPGA prototypes are inexpensive, and can duplicated and
-shared between hardware and software engineering teams. However, the difficulty with
-using FPGA prototypes as full-system simulators is that they require complete
-RTL implementation of the design (and, sometimes, a custom PCB). While
+simulate at hundreds of kHz~\cite{nehalemprototype, atomprototype}.
+Often, FPGA prototypes are inexpensive enough that they be can readily
+duplicated and distributed across hardware and software engineering teams.
+
+Relative to software simulation, prototypes have greater fixed costs (to buy, design, and/or license the 
+prototyping platform), but more critically, are difficult to use:
+\begin{enumerate}
+    \item Poor design visibility makes it difficult to debug failing systems. Users must instantiate
+        FPGA specific debugging hardware which provides only a limited set of
+        signals for small window of time, as these tools consume considerable
+        FPGA resources.  If the bug is not found on the first iteration, the
+        process must be repeated: the design must be resynthesized with a new
+        sset of sampled signals.
+
+    \item Long compile times (ones to tens of hours) make it difficult to
+        iterate about a design point, and lengthens the aforementioned the debug cycle.
+
+    \item Large designs must be paritioned across multiple FPGAs either
+        manually, or with licensed tools. This makes the prototype hardware
+        more expensive, and decreases simulation throughput.
+
+    \item Many ASIC structures, such as ASIC memories, and clock generatiors,
+        cannot be synthesized to FPGA fabric so must be replaced with an FPGA
+        equivalent.
+
+    \item FPGA-specific I/O models are required to build out a complete system. Using hardened
+        IP on the FPGA may not be a good model of the target system. Doing software co-simulation of IO
+        often reduces simulation throughput.
+
+    \item Prototypes are not natively deterministic making it difficult to
+        reproduce certain classes of system failure, especially those that
+        involve IO.
+
+    \item Prototypes require complete RTL implementation of the design
+\end{enumerate}
+
+
+One difficulty with using FPGA prototypes as full-system simulators is that they require complete
+RTL implementation of the design. While
 FPGA prototypes can accelerate software development by months, they become
 useful too late in the design cycle to do hardware-software co-design, as the
 target hardware cannot easily be modified which limits the scope of potential
 changes.
-
-Since a complete RTL implementation precludes the use FPGA prototypes for
-design space exploration and early prototyping, they are generally unused in
-academia. Instead, full-system simulation is done entirely in software with
-frameworks such as Gem5~\cite{gem5}, and MARSSx86~\cite{marssx86}.
-These simulators can run target workloads at hundreds of KIPS, but are
-often much slower in practice when employing more detailed or custom models. This
-makes it practically impossible to run complete workloads, such as
-multi-threaded Java applications or SPECint2006~\cite{spec} with its reference
-inputs. A common remedy is to employ statistical sampling
-techniques~\cite{smarts} to fast-forward to the region of interest, before
-executing O(100M) instructions at the desired fidelity.
 
 While this approach has well-acknowledged shortcomings~\cite{gem5error},
 judicious use of cycle-level simulators can be an appropriate vehicle for
