@@ -73,9 +73,9 @@ meaningful samples without peturbing the system under evaluation, such as
 managed-language workloads~\cite{MicroSimPanel}).
 
 
-\subsection{CPU-Hosted Simulation for Verfication}
+\subsection{CPU-Hosted Simulation for Verification}
 
-Since the aforementioned simulation techniques used abstract models of the
+Since the aforementioned simulation techniques use abstract models of the
 target system, they are useless for system verifaction and validation once
 implementation begins. (In fact, those models will need to be validated against the
 implementation as it is completed). Instead, here designers use CPU-hosted
@@ -117,9 +117,9 @@ silicon prototype.
 
 \subsection{Hardware-Accelerated Full-System Simulation -- FPGA Prototyping}
 
-To build simulators that execute a rates closer to a silicon prototype, desingers turned
+To build simulators that execute a rates closer to a silicon prototype, designers turned
 to fine-grained parallel hardware to simulate SoCs.  The earliest form of
-hardware-accelerated full-system simulation emerged in the late 1980s, and used
+hardware-accelerated full-system simulation emerged in the 1980s, and used
 programmable logic devices, specifically FPGAs, to directly implement the
 design. This is known as \textit{FPGA prototyping}.
 
@@ -145,11 +145,11 @@ prototyping platform), but more critically, are difficult to use:
     \item Long compile times (ones to tens of hours) make it difficult to
         iterate about a design point, and lengthens the aforementioned the debug cycle.
 
-    \item Large designs must be paritioned across multiple FPGAs either
-        manually, or with licensed tools. This makes the prototype hardware
-        more expensive, and decreases simulation throughput.
+    \item Large designs must be partitioned across multiple FPGAs either
+        manually, or with specialized tools. This makes the prototype hardware
+        more expensive and decreases simulation throughput.
 
-    \item Many ASIC structures, such as ASIC memories, and clock generatiors,
+    \item Many ASIC structures, such as multi-ported RAMs and clock generators,
         cannot be synthesized to FPGA fabric so must be replaced with an FPGA
         equivalent.
 
@@ -164,21 +164,75 @@ prototyping platform), but more critically, are difficult to use:
     \item Prototypes require complete RTL implementation of the design
 \end{enumerate}
 
+These limitations make FPGA prototypes unproductive for doing full-system
+verification. However, in most cases FPGA prototypes are the fastest available
+full-system RTL model the target and so are used extensively for
+pre-silicon software development and for regression testing.
 
-One difficulty with using FPGA prototypes as full-system simulators is that they require complete
-RTL implementation of the design. While
-FPGA prototypes can accelerate software development by months, they become
-useful too late in the design cycle to do hardware-software co-design, as the
-target hardware cannot easily be modified which limits the scope of potential
-changes.
+\subsection{Hardware-Accelerated Full-System Simulation -- Hardware Emulation}
 
-While this approach has well-acknowledged shortcomings~\cite{gem5error},
-judicious use of cycle-level simulators can be an appropriate vehicle for
-proposing new microarchitectural ideas. But for radical proposals that involve
-aggressive microarchitectural changes or traverse multiple layers of the
-computing stack, this approach is inadequate (particularly for workloads that
-are long-running, irregular and require a large number of cores, such as
-managed-language workloads~\cite{MicroSimPanel}). \TODO{Table~\ref{tbl:full-system-simulation-tech} constrasts the speed, fidelity, and cost of the aforementioned simulation technologies.}
+Hardware emulation aims to provide productive full-system verification by
+marrying the speed FPGA prototypes with the usability software simulators.
+Hardware emulators tend to be expensive to license and run -- millions of
+dollars per unit -- making them a precious commodity that must be carefully
+shared across a company.
+
+Each of the three major CAD vendors offer hardware emulation solutions.
+Mentor Veloce~\cite{Veloce} and Cadence Palladium~\cite{Palladium} are the historical market leaders in
+hardware emulation, with the two often swapping positions with the release of updated
+emulation platforms, with Synopsys ZeBu~\cite{ZeBu} rounding out the offerings.
+Differences in the implementations of these three emulators put them at
+different points in the cost-usability-performance space -- we describe these three strategies in the following sections.
+
+\subsubsection{ASICs - Logic Processor Arrays}
+
+Perhaps the earliest form of hardware emulation traces back to IBM research's
+Yorktown Simulation Engine~(YUE, \cite{YSEHardware}) and it's industrial-strength successor project
+the Engineering Verification Engine~(EVE, \cite{EngineeringVerificationEngine}). These machines consisted of an array
+of small processors which would simulates pieces of the DUT. Processors were
+specialized for simulating logic (Logic Processors) and memory (Array
+Processors), and were interconnected with high-radix crossbars (256 x 256 in
+these early machines). A compiler~\cite{YSESoftware} would partition, map, and schedule
+the DUT onto this array. Both EVE and YUE could do gate-level simulation in zero-delay
+or unit-delay (every gate propogation incurs a constant delay) modes. Cyclist~\cite{Cyclist}
+is a recent academic work that further explores this approach; it uses a
+homogenous array of RISC-V cores attached in a 2-D mesh network.
+
+Cadence's Palladium~\cite{Palladium} emulators derive from EVE (which was for a time sold by QuickTurn Design Systems under the name CoBALT~\cite{CoBALT}, before they
+were acquired by Cadence. Relative to
+competing emulation solutions, Palladiums have lower capacity per unit, but the
+fastest compile times. Palladiums also have highest power consumption and must be
+water-cooled -- unlike the competing offerings.
+
+
+\subsubsection{Custom FPGAs}
+While a EVE-like processor arrays can provide radically improved compilation speeds since
+the compilation problem is fundamentally simpler than running FPGA place and
+route, one natural alternative is to modify conventional FPGAs for emulation.
+This might involve adding dedicated hardware to debugability (e.g., to make it
+possible to capture full-visibility waveforms), adding I/O multiplexing
+hardware to ease the FPGA-partitioning problem ~(i.e, a hardware implementation of Virtual Wires~\cite{VirtualWires}), and modifying the programmable
+fabric to better match the resources and interconnect required ASIC designs.
+
+This is the approach taken by Mentor Graphics's Veloce~\cite{Veloce} emulation platforms.
+Veloce emulators have better capacity than Palladium, but slower
+compile times. Veloce emulators are use less power and are air-cooled.
+
+
+\subsubsection{Commercial-Off-The-Shelf FPGAs}
+
+Hardware emulation large total-cost of ownership is driven to some degree
+because the leading emulators are both power-hungry and use custom silicon. To
+skirt some of the costs of those platforms, a third alternative that sees
+industrial use is to use large, commericial-off-the-shelf FPGAs but rely on
+custom tooling and system packaging to improve usability. Synopsys's
+ZeBu~\cite{ZeBu} plaform does percisely this by leveraging the largest
+available Xilinx FPGAs available at the time of its release (Virtex Ultrascale
+VU440s~\cite{ZeBu}). At time of writing, ZeBu provides the highest simulation
+throughput and the lowest power consumption but has a reduced debug feature set
+relative to other emulators.
+
+In it's use of COTS FPGAs, Synopsys ZeBu is most similar to the work presented herein. 
 
 \begin{sidewaystable}
 \begin{center}
