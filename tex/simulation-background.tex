@@ -1,3 +1,13 @@
+This work draws from two different schools of system-level simulation thought.
+In the first third of this chapter, we discuss system-level simulation in the
+context SoC design and verification. Second, we explore academic work computer
+architecture to accelerate microarchitectural simulations of future
+microprocessors. Finally, we introduce precusor work done at Berkeley
+Architecture Research group over the past decade, that attempts to build better
+full-system simulators, or in industrial parlance, hardware emulators, for SoC
+verification by applying techniques from these microarchitecture simulators as
+automatic RTL transformations.
+
 To avoid confusion when speaking of computers simulating computers, the
 literature commonly makes a distinction between the \emph{target}, the system
 being simulated, and the \emph{host} or \emph{host-platform}, the system
@@ -5,7 +15,7 @@ executing the simulation. The host-platform is often not a single machine but
 a collection of interconnected machines, which may include CPUs,
 GPUs, and FPGAs.
 
-\section{A Tour of Full-System Simulation}
+\section{A Tour of Full-System Simulation for SoC Design}
 
 Simulation is central in performing three fundamental tasks of SoC design.
 
@@ -274,6 +284,9 @@ In it's use of COTS FPGAs, Synopsys ZeBu is most similar to the work presented h
     target.}
 \label{tbl:full-system-simulation-tech}
 \end{sidewaystable}%
+
+\section{Academic Microarchitecture Simulation}
+
 The ideal full-system simulator -- sufficient for both academic and industrial
 uses -- would be inexpensive, fast and as accurate as desired throughout the
 whole design process; it would always possible to run the software stack on a
