@@ -1,4 +1,4 @@
-# Hardware Emulation
+% Hardware Emulation
 @ARTICLE{VirtualWires,
   author={J. {Babb} and R. {Tessier} and M. {Dahl} and S. Z. {Hanono} and D. M. {Hoki} and A. {Agarwal}},
   journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems}, 
@@ -75,18 +75,135 @@
    howpublished = "\url{https://news.synopsys.com/2018-06-18-Synopsys-Unveils-Next-Generation-ZeBu-Server-4}"
 }
 
-@inproceedings{fased,
- author = {Biancolin, David and Karandikar, Sagar and Kim, Donggyu and Koenig, Jack and Waterman, Andrew and Bachrach, Jonathan and Asanovi\'c, Krste},
- title = {FASED: FPGA-Accelerated Simulation and Evaluation of DRAM},
- booktitle = {The 2019 ACM/SIGDA International Symposium on Field-Programmable Gate Arrays (FPGA'19)},
- series = {FPGA '19},
- year = {2019},
- isbn = {978-1-4503-6137-8/19/02},
- location = {Seaside, CA, USA},
- numpages = {10},
+@inproceedings{WisconsinWindTunnel,
+author = {Reinhardt, Steven K. and Hill, Mark D. and Larus, James R. and Lebeck, Alvin R. and Lewis, James C. and Wood, David A.},
+title = {The Wisconsin Wind Tunnel: Virtual Prototyping of Parallel Computers},
+year = {1993},
+isbn = {0897915801},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/166955.166979},
+doi = {10.1145/166955.166979},
+booktitle = {Proceedings of the 1993 ACM SIGMETRICS Conference on Measurement and Modeling of Computer Systems},
+pages = {48–60},
+numpages = {13},
+location = {Santa Clara, California, USA},
+series = {SIGMETRICS ’93}
+}
+
+@INPROCEEDINGS{Graphite,
+  author={J. E. {Miller} and H. {Kasture} and G. {Kurian} and C. {Gruenwald} and N. {Beckmann} and C. {Celio} and J. {Eastep} and A. {Agarwal}},
+  booktitle={HPCA - 16 2010 The Sixteenth International Symposium on High-Performance Computer Architecture}, 
+  title={Graphite: A distributed parallel simulator for multicores}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={1-12},}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%% RAMP Papers
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+@inproceedings{FAME,
+author = {Tan, Zhangxi and others},
+booktitle = {ISCA},
+title = {{A Case for FAME: FPGA Architecture Model Execution}},
+year = {2010}
+}
+
+@inproceedings{FAST,
+ author = {Chiou, Derek and others},
+ title = {FPGA-Accelerated Simulation Technologies (FAST): Fast, Full-System, Cycle-Accurate Simulators},
+ booktitle = {Proceedings of the 40th Annual IEEE/ACM International Symposium on Microarchitecture},
+ series = {MICRO 40},
+ year = {2007},
+ isbn = {0-7695-3047-8},
+ pages = {249--261},
+ numpages = {13},
+ url = {http://dx.doi.org/10.1109/MICRO.2007.36},
+ doi = {10.1109/MICRO.2007.36},
+ acmid = {1331723},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+}
+
+@inproceedings{RAMPGold,
+ author = {Tan, Zhangxi and others},
+ title = {RAMP Gold: An FPGA-based Architecture Simulator for Multiprocessors},
+ booktitle = {Proceedings of the 47th Design Automation Conference},
+ series = {DAC '10},
+ year = {2010},
+ isbn = {978-1-4503-0002-5},
+ location = {Anaheim, California},
+ pages = {463--468},
+ numpages = {6},
+ url = {http://doi.acm.org/10.1145/1837274.1837390},
+ doi = {10.1145/1837274.1837390},
+ acmid = {1837390},
  publisher = {ACM},
  address = {New York, NY, USA},
- keywords = {emulation; FPGA prototyping; memory systems}
+ keywords = {FPGA, multiprocessors, simulation},
+}
+
+@INPROCEEDINGS{RAMPBlue, 
+    author={A. Krasnov and A. Schultz and J. Wawrzynek and G. Gibeling and P. Y. Droz}, 
+    booktitle={2007 International Conference on Field Programmable Logic and Applications}, 
+    title={RAMP Blue: A Message-Passing Manycore System in FPGAs}, 
+    year={2007}, 
+    pages={54-61}, 
+    keywords={Linux;distributed memory systems;field programmable gate arrays;message passing;FPGA;MicroBlaze core;RAMP Blue project;distributed-memory architecture;field programmable gate array;message-passing manycore system;research accelerator for multiple processor;software infrastructure;tree topology;uClinux;Application software;Computer architecture;Debugging;Emulation;Field programmable gate arrays;Hardware;Network topology;Prototypes;Routing;Switches}, 
+    doi={10.1109/FPL.2007.4380625}, 
+    ISSN={1946-147X}, 
+    month={Aug},}
+
+@inproceedings{LIFPGADesign,
+ author = {Fleming, Kermin Elliott and others},
+ title = {Leveraging Latency-insensitivity to Ease Multiple FPGA Design},
+ booktitle = {Proceedings of the ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
+ series = {FPGA '12},
+ year = {2012},
+ isbn = {978-1-4503-1155-7},
+ location = {Monterey, California, USA},
+ pages = {175--184},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2145694.2145725},
+ doi = {10.1145/2145694.2145725},
+ acmid = {2145725},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {DSP, FPGA, compiler, design automation, high-level synthesis, programming languages, switch architecture},
+}
+@inproceedings{HASim,
+ author = {Pellauer, Michael and others},
+ title = {HAsim: FPGA-based High-detail Multicore Simulation Using Time-division Multiplexing},
+ booktitle = {Proceedings of the 2011 IEEE 17th International Symposium on High Performance Computer Architecture},
+ series = {HPCA '11},
+ year = {2011},
+ isbn = {978-1-4244-9432-3},
+ pages = {406--417},
+ numpages = {12},
+ url = {http://dl.acm.org/citation.cfm?id=2014698.2014876},
+ acmid = {2014876},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+}
+
+@inproceedings{ProtoFlex,
+ author = {Chung, Eric S. and others},
+ title = {A Complexity-effective Architecture for Accelerating Full-system Multiprocessor Simulations Using FPGAs},
+ booktitle = {Proceedings of the 16th International ACM/SIGDA Symposium on Field Programmable Gate Arrays},
+ series = {FPGA '08},
+ year = {2008},
+ isbn = {978-1-59593-934-0},
+ location = {Monterey, California, USA},
+ pages = {77--86},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1344671.1344684},
+ doi = {10.1145/1344671.1344684},
+ acmid = {1344684},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {FPGA, emulator, multicore, multiprocessor, prototype, simulator},
 }
 
 @inproceedings{Diablo,
@@ -105,6 +222,21 @@
  address = {New York, NY, USA},
  keywords = {FPGA, evaluation, performance, warehouse-scale computing},
 }
+
+@inproceedings{fased,
+ author = {Biancolin, David and Karandikar, Sagar and Kim, Donggyu and Koenig, Jack and Waterman, Andrew and Bachrach, Jonathan and Asanovi\'c, Krste},
+ title = {FASED: FPGA-Accelerated Simulation and Evaluation of DRAM},
+ booktitle = {The 2019 ACM/SIGDA International Symposium on Field-Programmable Gate Arrays (FPGA'19)},
+ series = {FPGA '19},
+ year = {2019},
+ isbn = {978-1-4503-6137-8/19/02},
+ location = {Seaside, CA, USA},
+ numpages = {10},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {emulation; FPGA prototyping; memory systems}
+}
+
 
 @misc{amazonf1,
    author = "Amazon",
@@ -222,29 +354,6 @@ publisher = {ACM},
 address = {New York, NY, USA},
 } 
 
-@inproceedings{FAME,
-author = {Tan, Zhangxi and others},
-booktitle = {ISCA},
-title = {{A Case for FAME: FPGA Architecture Model Execution}},
-year = {2010}
-}
-
-@inproceedings{FAST,
- author = {Chiou, Derek and others},
- title = {FPGA-Accelerated Simulation Technologies (FAST): Fast, Full-System, Cycle-Accurate Simulators},
- booktitle = {Proceedings of the 40th Annual IEEE/ACM International Symposium on Microarchitecture},
- series = {MICRO 40},
- year = {2007},
- isbn = {0-7695-3047-8},
- pages = {249--261},
- numpages = {13},
- url = {http://dx.doi.org/10.1109/MICRO.2007.36},
- doi = {10.1109/MICRO.2007.36},
- acmid = {1331723},
- publisher = {IEEE Computer Society},
- address = {Washington, DC, USA},
-}
-
 @inproceedings{sosphistory,
     author = {David Patterson},
     booktitle = {SOSP'15 History Day},
@@ -359,36 +468,6 @@ year={2007},
 publisher={IEEE}
 }
 
-@inproceedings{RAMPGold,
- author = {Tan, Zhangxi and others},
- title = {RAMP Gold: An FPGA-based Architecture Simulator for Multiprocessors},
- booktitle = {Proceedings of the 47th Design Automation Conference},
- series = {DAC '10},
- year = {2010},
- isbn = {978-1-4503-0002-5},
- location = {Anaheim, California},
- pages = {463--468},
- numpages = {6},
- url = {http://doi.acm.org/10.1145/1837274.1837390},
- doi = {10.1145/1837274.1837390},
- acmid = {1837390},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {FPGA, multiprocessors, simulation},
-}
-
-
-@INPROCEEDINGS{RAMPBlue, 
-    author={A. Krasnov and A. Schultz and J. Wawrzynek and G. Gibeling and P. Y. Droz}, 
-    booktitle={2007 International Conference on Field Programmable Logic and Applications}, 
-    title={RAMP Blue: A Message-Passing Manycore System in FPGAs}, 
-    year={2007}, 
-    pages={54-61}, 
-    keywords={Linux;distributed memory systems;field programmable gate arrays;message passing;FPGA;MicroBlaze core;RAMP Blue project;distributed-memory architecture;field programmable gate array;message-passing manycore system;research accelerator for multiple processor;software infrastructure;tree topology;uClinux;Application software;Computer architecture;Debugging;Emulation;Field programmable gate arrays;Hardware;Network topology;Prototypes;Routing;Switches}, 
-    doi={10.1109/FPL.2007.4380625}, 
-    ISSN={1946-147X}, 
-    month={Aug},}
-
 @ARTICLE{MicroSimPanel, 
 author={J. C. Hoe and D. Burger and J. Emer and D. Chiou and R. Sendag and J. Yi}, 
 journal={IEEE Micro}, 
@@ -461,56 +540,6 @@ organization={IEEE}
     doi={10.1109/PROC.1987.13876}, 
     ISSN={0018-9219}, 
     month={Sept},}
-
-@inproceedings{LIFPGADesign,
- author = {Fleming, Kermin Elliott and others},
- title = {Leveraging Latency-insensitivity to Ease Multiple FPGA Design},
- booktitle = {Proceedings of the ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
- series = {FPGA '12},
- year = {2012},
- isbn = {978-1-4503-1155-7},
- location = {Monterey, California, USA},
- pages = {175--184},
- numpages = {10},
- url = {http://doi.acm.org/10.1145/2145694.2145725},
- doi = {10.1145/2145694.2145725},
- acmid = {2145725},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {DSP, FPGA, compiler, design automation, high-level synthesis, programming languages, switch architecture},
-}
-@inproceedings{HASim,
- author = {Pellauer, Michael and others},
- title = {HAsim: FPGA-based High-detail Multicore Simulation Using Time-division Multiplexing},
- booktitle = {Proceedings of the 2011 IEEE 17th International Symposium on High Performance Computer Architecture},
- series = {HPCA '11},
- year = {2011},
- isbn = {978-1-4244-9432-3},
- pages = {406--417},
- numpages = {12},
- url = {http://dl.acm.org/citation.cfm?id=2014698.2014876},
- acmid = {2014876},
- publisher = {IEEE Computer Society},
- address = {Washington, DC, USA},
-} 
-
-@inproceedings{ProtoFlex,
- author = {Chung, Eric S. and others},
- title = {A Complexity-effective Architecture for Accelerating Full-system Multiprocessor Simulations Using FPGAs},
- booktitle = {Proceedings of the 16th International ACM/SIGDA Symposium on Field Programmable Gate Arrays},
- series = {FPGA '08},
- year = {2008},
- isbn = {978-1-59593-934-0},
- location = {Monterey, California, USA},
- pages = {77--86},
- numpages = {10},
- url = {http://doi.acm.org/10.1145/1344671.1344684},
- doi = {10.1145/1344671.1344684},
- acmid = {1344684},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {FPGA, emulator, multicore, multiprocessor, prototype, simulator},
-}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
