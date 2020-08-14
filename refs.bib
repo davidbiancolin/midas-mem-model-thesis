@@ -1,3 +1,54 @@
+% Full-System Simulation Technologies
+@misc{QEMU,
+   title = "QEMU: the FAST! processor emulator",
+   year = "2020 (Accessed August 2nd, 2020)",
+   howpublished = "\url{https://www.qemu.org}",
+ }
+
+@article{Gem5,
+author = {Binkert, Nathan and Beckmann, Bradford and Black, Gabriel and Reinhardt, Steven K. and Saidi, Ali and Basu, Arkaprava and Hestness, Joel and Hower, Derek R. and Krishna, Tushar and Sardashti, Somayeh and Sen, Rathijit and Sewell, Korey and Shoaib, Muhammad and Vaish, Nilay and Hill, Mark D. and Wood, David A.},
+title = {The Gem5 Simulator},
+journal = {SIGARCH Comput. Archit. News},
+issue_date = {May 2011},
+volume = {39},
+number = {2},
+month = aug,
+year = {2011},
+issn = {0163-5964},
+pages = {1--7},
+numpages = {7},
+url = {http://doi.acm.org/10.1145/2024716.2024718},
+doi = {10.1145/2024716.2024718},
+acmid = {2024718},
+publisher = {ACM},
+address = {New York, NY, USA},
+}
+
+@inproceedings{MARSSx86,
+author = {Patel, Avadh and Afram, Furat and Chen, Shunfei},
+booktitle = {DAC},
+title = {{MARSSx86: A full system simulator for x86 CPUs}},
+year = {2011}
+}
+
+@inproceedings{nehalemprototype,
+title={Intel nehalem processor core made FPGA synthesizable},
+author={Schelle, Graham and Collins, Jamison and Schuchman, Ethan and Wang, Perrry and Zou, Xiang and Chinya, Gautham and Plate, Ralf and Mattner, Thorsten and Olbrich, Franz and Hammarlund, Per and others},
+booktitle={Proceedings of the 18th annual ACM/SIGDA international symposium on Field programmable gate arrays},
+pages={3--12},
+year={2010},
+organization={ACM}
+}
+
+@inproceedings{atomprototype,
+title={Intel atom  processor core made FPGA-synthesizable},
+author={Wang, Perry H and Collins, Jamison D and Weaver, Christopher T and Kuttanna, Blliappa and Salamian, Shahram and Chinya, Gautham N and Schuchman, Ethan and Schilling, Oliver and Doil, Thorsten and Steibl, Sebastian and others},
+booktitle={Proceedings of the ACM/SIGDA international symposium on Field programmable gate arrays},
+pages={209--218},
+year={2009},
+organization={ACM}
+}
+
 % Hardware Emulation
 @ARTICLE{VirtualWires,
   author={J. {Babb} and R. {Tessier} and M. {Dahl} and S. Z. {Hanono} and D. M. {Hoki} and A. {Agarwal}},
@@ -99,6 +150,24 @@ series = {SIGMETRICS ’93}
   volume={},
   number={},
   pages={1-12},}
+
+@ARTICLE{RPM,
+  author={L. A. {Barroso} and S. {Iman} and M. {Dubois} and K. {Ramamurthy}},
+  journal={Computer}, 
+  title={RPM: a rapid prototyping engine for multiprocessor systems}, 
+  year={1995},
+  volume={28},
+  number={2},
+  pages={26-34},}
+
+@INPROCEEDINGS{RPMDesign,
+  author={K. {Oner} and L. A. {Barroso} and S. {Iman} and  {Jaeheon Jeong} and K. {Ramamurthy} and M. {Dubois}},
+  booktitle={Third International ACM Symposium on Field-Programmable Gate Arrays}, 
+  title={The Design of RPM: An FPGA-based Multiprocessor Emulator}, 
+  year={1995},
+  volume={},
+  number={},
+  pages={60-66},}
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%% RAMP Papers
@@ -228,6 +297,13 @@ year = {2010}
     series = {FPGA ’07}
 }
 
+@inproceedings{RDL,
+  title={The RAMP Architecture \& Description Language},
+  booktitle = {In 2nd Workshop on Architecture Research using FPGA Platforms},
+  author={Greg Gibeling and Andrew Schultz and Krste Asanovic},
+  year={2006}
+}
+
 @inproceedings{Diablo,
  author = {Tan, Zhangxi and others},
  title = {DIABLO: A Warehouse-Scale Computer Network Simulator Using FPGAs},
@@ -254,7 +330,80 @@ year = {2010}
   number={3},
   pages={664-678},}
 
-@inproceedings{fased,
+@inproceedings{fabscalar,
+title={Fabscalar: Composing synthesizable rtl designs of arbitrary cores within a canonical superscalar template},
+author={Choudhary, Niket K and Wadhavkar, Salil V and Shah, Tanmay A and Mayukh, Hiran and Gandhi, Jayneel and Dwiel, Brandon H and Navada, Sandeep and Najaf-abadi, Hashem H and Rotenberg, Eric},
+booktitle={ACM SIGARCH Computer Architecture News},
+volume={39},
+number={3},
+pages={11--22},
+year={2011},
+organization={ACM}
+}
+
+@inproceedings{fabscalarfpga,
+ author = {Dwiel, Brandon H. and others},
+ title = {FPGA Modeling of Diverse Superscalar Processors},
+ booktitle = {Proceedings of the 2012 IEEE International Symposium on Performance Analysis of Systems \& Software},
+ series = {ISPASS '12},
+ year = {2012},
+ isbn = {978-1-4673-1143-4},
+ pages = {188--199},
+ numpages = {12},
+ url = {http://dx.doi.org/10.1109/ISPASS.2012.6189225},
+ doi = {10.1109/ISPASS.2012.6189225},
+ acmid = {2311007},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+}
+
+%%%%%%%%%%%%%%%%%%%%%%
+% UCB BAR Publications
+%%%%%%%%%%%%%%%%%%%%%%
+
+@ARTICLE{Chipyard,
+  author={A. {Amid} and D. {Biancolin} and A. {Gonzalez} and D. {Grubb} and S. {Karandikar} and H. {Liew} and A. {Magyar} and H. {Mao} and A. {Ou} and N. {Pemberton} and P. {Rigge} and C. {Schmidt} and J. {Wright} and J. {Zhao} and Y. S. {Shao} and K. {Asanović} and B. {Nikolić}},
+  journal={IEEE Micro}, 
+  title={Chipyard: Integrated Design, Simulation, and Implementation Framework for Custom SoCs}, 
+  year={2020},
+  volume={40},
+  number={4},
+  pages={10-21},}
+
+@inproceedings{FireSim,
+author = {Karandikar, Sagar and Mao, Howard and Kim, Donggyu and Biancolin, David and Amid, Alon and Lee, Dayeol and Pemberton, Nathan and Amaro, Emmanuel and Schmidt, Colin and Chopra, Aditya and Huang, Qijing and Kovacs, Kyle and Nikolic, Borivoje and Katz, Randy and Bachrach, Jonathan and Asanovi\'{c}, Krste},
+title = {Firesim: FPGA-Accelerated Cycle-Exact Scale-out System Simulation in the Public Cloud},
+year = {2018},
+isbn = {9781538659847},
+publisher = {IEEE Press},
+url = {https://doi.org/10.1109/ISCA.2018.00014},
+doi = {10.1109/ISCA.2018.00014},
+booktitle = {Proceedings of the 45th Annual International Symposium on Computer Architecture},
+pages = {29–42},
+numpages = {14},
+keywords = {computer simulation, performance analysis, distributed computing, data centers, field programmable gate arrays, scalability, computer networks, computer architecture},
+location = {Los Angeles, California},
+series = {ISCA ’18}
+}
+
+@inproceedings{FirePerf,
+author = {Karandikar, Sagar and Ou, Albert and Amid, Alon and Mao, Howard and Katz, Randy and Nikoli\'{c}, Borivoje and Asanovi\'{c}, Krste},
+title = {FirePerf: FPGA-Accelerated Full-System Hardware/Software Performance Profiling and Co-Design},
+year = {2020},
+isbn = {9781450371025},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3373376.3378455},
+doi = {10.1145/3373376.3378455},
+booktitle = {Proceedings of the Twenty-Fifth International Conference on Architectural Support for Programming Languages and Operating Systems},
+pages = {715–731},
+numpages = {17},
+keywords = {hardware/software co-design, fpga-accelerated simulation, network performance optimization, agile hardware, performance profiling},
+location = {Lausanne, Switzerland},
+series = {ASPLOS ’20}
+}
+
+@inproceedings{FASED,
  author = {Biancolin, David and Karandikar, Sagar and Kim, Donggyu and Koenig, Jack and Waterman, Andrew and Bachrach, Jonathan and Asanovi\'c, Krste},
  title = {FASED: FPGA-Accelerated Simulation and Evaluation of DRAM},
  booktitle = {The 2019 ACM/SIGDA International Symposium on Field-Programmable Gate Arrays (FPGA'19)},
@@ -276,75 +425,100 @@ year = {2010}
    howpublished = "\url{https://aws.amazon.com/ec2/instance-types/f1/}",
 }
 
-
-@inproceedings{fabscalarfpga,
- author = {Dwiel, Brandon H. and others},
- title = {FPGA Modeling of Diverse Superscalar Processors},
- booktitle = {Proceedings of the 2012 IEEE International Symposium on Performance Analysis of Systems \& Software},
- series = {ISPASS '12},
- year = {2012},
- isbn = {978-1-4673-1143-4},
- pages = {188--199},
- numpages = {12},
- url = {http://dx.doi.org/10.1109/ISPASS.2012.6189225},
- doi = {10.1109/ISPASS.2012.6189225},
- acmid = {2311007},
- publisher = {IEEE Computer Society},
- address = {Washington, DC, USA},
-} 
-
-@inproceedings{fabscalar,
-title={Fabscalar: Composing synthesizable rtl designs of arbitrary cores within a canonical superscalar template},
-author={Choudhary, Niket K and Wadhavkar, Salil V and Shah, Tanmay A and Mayukh, Hiran and Gandhi, Jayneel and Dwiel, Brandon H and Navada, Sandeep and Najaf-abadi, Hashem H and Rotenberg, Eric},
-booktitle={ACM SIGARCH Computer Architecture News},
-volume={39},
-number={3},
-pages={11--22},
-year={2011},
-organization={ACM}
+@inproceedings{Strober,
+author = {Kim, Donggyu and Izraelevitz, Adam and Celio, Christopher and Kim, Hokeun and Zimmer, Brian and Lee, Yunsup and Bachrach, Jonathan and Asanovi\'{c}, Krste},
+title = {Strober: Fast and Accurate Sample-Based Energy Simulation for Arbitrary RTL},
+year = {2016},
+isbn = {9781467389471},
+publisher = {IEEE Press},
+url = {https://doi.org/10.1109/ISCA.2016.21},
+doi = {10.1109/ISCA.2016.21},
+booktitle = {Proceedings of the 43rd International Symposium on Computer Architecture},
+pages = {128–139},
+numpages = {12},
+keywords = {statistical sampling, power estimation, energy, FPGA, modeling, hardware},
+location = {Seoul, Republic of Korea},
+series = {ISCA ’16}
 }
 
-@inproceedings{strober,
- author = {Kim, Donggyu and others},
- title = {Strober: Fast and Accurate Sample-based Energy Simulation for Arbitrary RTL},
- booktitle = {Proceedings of the 43rd International Symposium on Computer Architecture},
- series = {ISCA '16},
- year = {2016},
- isbn = {978-1-4673-8947-1},
- location = {Seoul, Republic of Korea},
- pages = {128--139},
- numpages = {12},
- url = {https://doi.org/10.1109/ISCA.2016.21},
- doi = {10.1109/ISCA.2016.21},
- acmid = {3001151},
- publisher = {IEEE Press},
- address = {Piscataway, NJ, USA},
- keywords = {FPGA, energy, hardware, modeling, power estimation, statistical sampling},
+@inproceedings{Simmani,
+author = {Kim, Donggyu and Zhao, Jerry and Bachrach, Jonathan and Asanovi\'{c}, Krste},
+title = {Simmani: Runtime Power Modeling for Arbitrary RTL with Automatic Signal Selection},
+year = {2019},
+isbn = {9781450369381},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3352460.3358322},
+doi = {10.1145/3352460.3358322},
+booktitle = {Proceedings of the 52nd Annual IEEE/ACM International Symposium on Microarchitecture},
+pages = {1050–1062},
+numpages = {13},
+location = {Columbus, OH, USA},
+series = {MICRO ’52}
 }
 
-@inproceedings{midas,
- author = {Kim, Donggyu and others},
+@INPROCEEDINGS{DESSERT,
+  author={Kim, Donggyu and Celio, Christopher and Karandikar, Sagar and Biancolin, David and Bachrach, Jonathan and Asanović, Krste},
+  booktitle={2018 28th International Conference on Field Programmable Logic and Applications (FPL)}, 
+  title={DESSERT: Debugging RTL Effectively with State Snapshotting for Error Replays across Trillions of Cycles}, 
+  year={2018},
+  volume={},
+  number={},
+  pages={76-764},}
+
+@INPROCEEDINGS{GoldenGate,
+  author={Magyar, Albert and Biancolin, David and Koenig, Jack and Seshia, Sanjit and Bachrach, Jonathan and Asanović, Krste},
+  booktitle={2019 IEEE/ACM International Conference on Computer-Aided Design (ICCAD)}, 
+  title={Golden Gate: Bridging The Resource-Efficiency Gap Between ASICs and FPGA Prototypes}, 
+  year={2019},
+  volume={},
+  number={},
+  pages={1-8},}
+
+@phdthesis{DGKDissertation,
+    Author = {Kim, Donggyu},
+    Title = {FPGA-Accelerated Evaluation and Verification of RTL Designs},
+    School = {EECS Department, University of California, Berkeley},
+    Year = {2019},
+    Month = {May},
+    URL = {http://www2.eecs.berkeley.edu/Pubs/TechRpts/2019/EECS-2019-57.html},
+    Number = {UCB/EECS-2019-57}
+}
+
+@inproceedings{MIDAS,
+ author = {Kim, Donggyu and Celio, Christopher and Biancolin, David, and Bachrach, Jonathan and Asanovic, Krste},
  title = {{Evaluation of RISC-V RTL with FPGA-Acclerated Simulation}},
  booktitle = {CARRV '17},
  year = {2017}
 }
 
-@inproceedings{firesim,
- author = {Karandikar, Sagar and others},
- title = {Firesim: FPGA-accelerated Cycle-exact Scale-out System Simulation in the Public Cloud},
- booktitle = {Proceedings of the 45th Annual International Symposium on Computer Architecture},
- series = {ISCA '18},
- year = {2018},
- isbn = {978-1-5386-5984-7},
- location = {Los Angeles, California},
- pages = {29--42},
- numpages = {14},
- url = {https://doi.org/10.1109/ISCA.2018.00014},
- doi = {10.1109/ISCA.2018.00014},
- acmid = {3276543},
- publisher = {IEEE Press},
- address = {Piscataway, NJ, USA},
- keywords = {computer architecture, computer networks, computer simulation, data centers, distributed computing, field programmable gate arrays, performance analysis, scalability},
+@inproceedings{Diplomacy,
+ author = {Cook, Henry, and Terpstra, Wesley and Lee, Yunsup},
+ title = {Diplomatic Design Patterns: A TileLink Case Study},
+ booktitle = {CARRV '17},
+ year = {2017}
+}
+
+@conference {FireBox,
+author = {Krste Asanovi{\'c}},
+title = {FireBox: A Hardware Building Block for 2020 Warehouse-Scale Computers},
+year = {2014},
+address = {Santa Clara, CA},
+publisher = {{USENIX} Association},
+month = feb,
+}
+@misc{FETT,
+   author = "Defense Advanced Research Projects Agency",
+   title = "DARPA Announces First Bug Bounty Program to Hack SSITH Hardware Defenses",
+   year = "2020 (Accessed July 29th, 2020)",
+   howpublished = "\url{https://github.com/firesim/firesim/issues/613}",
+}
+
+@misc{FireSimFETT,
+   author = "GitHub",
+   title = "FireSim Github Issue 613 (Support Ticket for FETT)",
+   year = "2020 (Accessed July 29th, 2020)",
+   howpublished = "\url{https://www.darpa.mil/news-events/2020-06-08a}",
 }
 
 @article{smarts,
@@ -366,7 +540,7 @@ publisher = {ACM},
 address = {New York, NY, USA},
 } 
 
-@article{spec,
+@article{SPEC2006,
 author = {Henning, John L.},
 title = {SPEC CPU2006 Benchmark Descriptions},
 journal = {SIGARCH Comput. Archit. News},
@@ -400,8 +574,8 @@ address = {New York, NY, USA},
    howpublished = "\url{https://www.sifive.com/products/hifive1/}",
  }
 
-@inproceedings{firrtl,
- author = {Izraelevitz, Adam and others},
+@inproceedings{FIRRTL,
+ author = {Izraelevitz, Adam and Koenig, Jack and Li, Patrick and Lin, Richard and Wang, Angie and Magyar, Albert and Kim, Donggyu and Schmidt, Colin and Markley, Chick and Lawson, Jim and Bachrach, Jonathan},
  title = {Reusability is FIRRTL Ground: Hardware Construction Languages, Compiler Frameworks, and Transformations},
  booktitle = {Proceedings of the 36th International Conference on Computer-Aided Design},
  series = {ICCAD '17},
@@ -629,7 +803,7 @@ organization={IEEE}
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%% Target Designs
 %%%%%%%%%%%%%%%%%%%%%%%%
-@techreport{rocketchip,
+@techreport{RocketChip,
     Author = { Asanovi\'{c}, Krste and others},
     Title = {{The Rocket Chip Generator}},
     Institution = {EECS Department, University of California, Berkeley},
@@ -638,7 +812,16 @@ organization={IEEE}
     Number = {UCB/EECS-2016-17},
     Abstract = {Rocket Chip is an open-source Sysem-on-Chip design generator that emits synthesizable RTL. It leverages the Chisel hardware construction language to compose a library of sophisticated generators for cores, caches, and interconnects into an integrated SoC. Rocket Chip generates general-purpose processor cores that use the open RISC-V ISA, and provides both an in-order core generator (Rocket) and an out-of-order core generator (BOOM). For SoC designers interested in utilizing heterogeneous specialization for added efficiency gains, Rocket Chip supports the integration of custom accelerators in the form of instruction set extensions, coprocessors, or fully independent novel cores. Rocket Chip has been taped out (manufactured) eleven times, and yielded functional silicon prototypes capable of booting Linux.}
 }
-@techreport{boom,
+@techreport{Hwacha,
+    Author = {Lee, Yunsup and Schmidt, Colin and Ou, Albert and Waterman, Andrew and Asanovi\'{c}, Krste},
+    Title = {{The Hwacha Vector-Fetch Architecture Manual, Version 3.8.1}},
+    Institution = {EECS Department, University of California, Berkeley},
+    Year = {2015},
+    Month = {December},
+    Number = {UCB/EECS-2015-262}
+}
+
+@techreport{BOOM,
     Author = {Celio, Christopher and Patterson, David A. and Asanovi\'{c}, Krste},
     Title = {{The Berkeley Out-of-Order Machine (BOOM): An Industry-Competitive, Synthesizable, Parameterized RISC-V Processor}},
     Institution = {EECS Department, University of California, Berkeley},

@@ -1,23 +1,26 @@
-This work draws from two different schools of system-level simulation thought.
-In the first third of this chapter, we discuss system-level simulation in the
-context SoC design and verification. Second, we explore academic work computer
-architecture to accelerate microarchitectural simulations of future
-microprocessors. Finally, we introduce precusor work done at Berkeley
-Architecture Research group over the past decade, that attempts to build better
-full-system simulators, or in industrial parlance, hardware emulators, for SoC
-verification by applying techniques from these microarchitecture simulators as
-automatic RTL transformations.
+Full-system simulation is used ubiquitously in SoC design and verification. In
+the first third of this chapter, we explore the roles full-system simulation
+serves in the SoC design process, and discuss commonly used full-system
+simulation technologies with emphasis on hardware-accelerated forms like FPGA
+prototyping and hardware emulation.
+In the second third, we study how computer architecture researchers employ full-system simulation
+conduct higher-level architectural and microarchitectural studies, and how academics have
+sought to use FPGAs to accelerate these simulations.
+We conclude by reviewing work done by the Berkeley Architecture Research~(BAR)
+group over the past decade that attempts to build more cost-effective hardware
+emulators by applying techniques from these FPGA-accelerated microarchitecture
+simulators as automatic transformations to SoC RTL.
 
 To avoid confusion when speaking of computers simulating computers, the
 literature commonly makes a distinction between the \emph{target}, the system
-being simulated, and the \emph{host} or \emph{host-platform}, the system
-executing the simulation. The host-platform is often not a single machine but
+being simulated, and the \emph{host}, the system
+executing the simulation. The host is often not a single machine but
 a collection of interconnected machines, which may include CPUs,
 GPUs, and FPGAs.
 
 \section{A Tour of Full-System Simulation for SoC Design}
 
-Simulation is central in performing three fundamental tasks of SoC design.
+Simulation is central to performing three fundamental tasks of SoC design.
 
 \begin{enumerate}
 
@@ -54,21 +57,21 @@ Table~\ref{tbl:full-system-simulation-tech}.
 
 \subsection{CPU-Hosted Simulation for Prototyping}\label{UArchSWSim}
 
-Architecture-level simulators such as QEMU\cite{qemu}, which model the system at the
+Architecture-level simulators such as QEMU\cite{QEMU}, which model the system at the
 instruction-set-architecture level and include as limited set of standard
 device models for I/O, are fast and inexpensive as they run on conventional CPUs.
 When augmented with simple timing models, they are ideal for doing initial system prototyping, as
 these models can be quickly modified and recompiled.
 However, as these timing models become more complex, they become more
-challenging to validate, and cruically, the throughput of these simulators rapidly declines.
+challenging to validate, and crucially, the throughput of these simulators rapidly declines.
 
 Continuing in the direction of increasing fidelity, microarchitecture-level
-simulators such as Gem5~\cite{gem5}, and MARSSx86~\cite{marssx86}. are CPU-hosted 
+simulators such as Gem5~\cite{Gem5}, and MARSSx86~\cite{MARSSx86}. are CPU-hosted 
 simulators that provide configurable, "cycle-level" timing models of a complete systems, including CPU pipelines,
 caches, and off-chip memory systems.  These simulators can run target workloads at hundreds of KIPS, but are
 often much slower in practice when employing more detailed or custom models. This
 makes it practically impossible to run complete workloads, such as
-multi-threaded Java applications or SPECint2006~\cite{spec} with its reference
+multi-threaded Java applications or SPECint2006~\cite{SPEC2006} with its reference
 inputs. Here, a common remedy is to employ statistical sampling
 techniques~\cite{smarts} to fast-forward to the region of interest on an architecture-level simulator, before
 executing O(100M) instructions at the desired fidelity.
@@ -78,15 +81,15 @@ judicious use of cycle-level simulators can be an appropriate vehicle for
 doing initial system prototyping. For radical proposals that involve
 aggressive microarchitectural changes or traverse multiple layers of the
 computing stack, this approach is often inadequate (particularly for workloads that
-are multithreaded, or are long-running and irregular, for which it is diffcult to collect 
-meaningful samples without peturbing the system under evaluation, such as
+are multithreaded, or are long-running and irregular, for which it is difficult to collect 
+meaningful samples without perturbing the system under evaluation, such as
 managed-language workloads~\cite{MicroSimPanel}).
 
 
 \subsection{CPU-Hosted Simulation for Verification}
 
 Since the aforementioned simulation techniques use abstract models of the
-target system, they are useless for system verifaction and validation once
+target system, they are useless for system verification and validation once
 implementation begins. (In fact, those models will need to be validated against the
 implementation as it is completed). Instead, here designers use CPU-hosted
 simulators that faithfully represent the implementation at a particular
@@ -95,9 +98,9 @@ abstraction level.
 For simulating digital components of the SoC, a Register Transfer Level~(RTL) ,
 like Synopsys VCS, or Verilator, is the tool of choice. Broadly speaking, RTL
 simulators model state elements and the combinational functions that update
-them at cycle boundaries. Values on wires transition instantiously, and in
+them at cycle boundaries. Values on wires transition instantaneously, and in
 general no delay through launching registers, combinational circuits is
-modelled. Supposing the underlying digital abstraction holds, RTL simulation
+modeled. Supposing the underlying digital abstraction holds, RTL simulation
 ideal for doing dynamic verification of a digital circuit. Small blocks compile
 in seconds, while complete SoCs can be compiled in 1s to 10s of minutes. RTL
 simulators are relatively easy to debug, as they provide complete visibility
@@ -114,18 +117,18 @@ It's important to note at this point that, higher-fidelity software simulation
 of the design is commonly used after the SoC is synthesized and implemented in
 a particular process technology.  These simulations include combinational,
 wire, and parasitic delays, and can generally include more detailed models of
-analog components of the system. The additional fidelity only exercabates the
+analog components of the system. The additional fidelity only exacerbates the
 throughput limitation of CPU-based simulation.
 
 To do effective full-system validation and dynamic verification, considerably
 faster simulation throughput is required. While there are many techniques that
 can improve throughput on CPUs, such as multithreading, relaxing or restricting
-the the timing sematics of the design language, ultimately the abundant
+the the timing semantics of the design language, ultimately the abundant
 fine-grained, often bit-level, parallelism of RTL simulation cannot exploited
 by multiprocessors to overcome the 6+ order of magnitude slow down over a
 silicon prototype.
 
-\subsection{Hardware-Accelerated Full-System Simulation -- FPGA Prototyping}
+\subsection{FPGA Prototyping}\label{sec:fpga-prototyping}
 
 To build simulators that execute a rates closer to a silicon prototype, designers turned
 to fine-grained parallel hardware to simulate SoCs.  The earliest form of
@@ -150,7 +153,7 @@ prototyping platform), but more critically, are difficult to use:
         signals for small window of time, as these tools consume considerable
         FPGA resources.  If the bug is not found on the first iteration, the
         process must be repeated: the design must be resynthesized with a new
-        sset of sampled signals.
+        set of sampled signals.
 
     \item Long compile times (ones to tens of hours) make it difficult to
         iterate about a design point, and lengthens the aforementioned the debug cycle.
@@ -179,7 +182,7 @@ verification. However, in most cases FPGA prototypes are the fastest available
 full-system RTL model the target and so are used extensively for
 pre-silicon software development and for regression testing.
 
-\subsection{Hardware-Accelerated Full-System Simulation -- Hardware Emulation}
+\subsection{Hardware Emulation}
 
 Hardware emulation aims to provide productive full-system verification by
 marrying the speed FPGA prototypes with the usability software simulators.
@@ -204,9 +207,9 @@ specialized for simulating logic (Logic Processors) and memory (Array
 Processors), and were interconnected with high-radix crossbars (256 x 256 in
 these early machines). A compiler~\cite{YSESoftware} would partition, map, and schedule
 the DUT onto this array. Both EVE and YUE could do gate-level simulation in zero-delay
-or unit-delay (every gate propogation incurs a constant delay) modes. Cyclist~\cite{Cyclist}
+or unit-delay (every gate propagation incurs a constant delay) modes. Cyclist~\cite{Cyclist}
 is a recent academic work that further explores this approach; it uses a
-homogenous array of RISC-V cores attached in a 2-D mesh network.
+homogeneous array of RISC-V cores attached in a 2-D mesh network.
 
 Cadence's Palladium~\cite{Palladium} emulators derive from EVE (which was for a time sold by QuickTurn Design Systems under the name CoBALT~\cite{CoBALT}, before they
 were acquired by Cadence. Relative to
@@ -219,7 +222,7 @@ water-cooled -- unlike the competing offerings.
 While a EVE-like processor arrays can provide radically improved compilation speeds since
 the compilation problem is fundamentally simpler than running FPGA place and
 route, one natural alternative is to modify conventional FPGAs for emulation.
-This might involve adding dedicated hardware to improve debugability (e.g., to make it
+This might involve adding dedicated hardware to improve debuggability (e.g., to make it
 possible to capture full-visibility waveforms), adding I/O multiplexing
 hardware to ease the FPGA-partitioning problem~(i.e., a hardware implementation of Virtual Wires~\cite{VirtualWires}), and modifying the programmable
 fabric to better match the resources and interconnect required ASIC designs.
@@ -233,9 +236,9 @@ compile times. Veloce emulators use less power and are air-cooled.
 Hardware emulation large total-cost of ownership is driven to some degree
 because the leading emulators are both power-hungry and use custom silicon. To
 skirt some of the costs of those platforms, a third alternative that sees
-industrial use is to use large, commericial-off-the-shelf FPGAs but rely on
+industrial use is to use large, commercial-off-the-shelf FPGAs but rely on
 custom tooling and system packaging to improve usability. Synopsys's
-ZeBu~\cite{ZeBu} plaform does percisely this by leveraging the largest
+ZeBu~\cite{ZeBu} platform does precisely this by leveraging the largest
 available Xilinx FPGAs available at the time of its release (Virtex Ultrascale
 VU440s~\cite{ZeBu}). At time of writing, ZeBu provides the highest simulation
 throughput and the lowest power consumption but has a reduced debug feature set
@@ -243,204 +246,203 @@ relative to other emulators.
 
 In it's use of COTS FPGAs, Synopsys ZeBu is most similar to the work presented herein. 
 
-\begin{sidewaystable}
-\begin{center}
-\resizebox{\textwidth}{!}{%
-    \begin{tabular}{|p{0.1\textwidth}|p{0.1\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
-    \hline
-        \textbf{Technology} & \textbf{Examples} & \textbf{Speed}\newline(Relative to Silicon) &
-        \textbf{Fixed Cost} \newline(\$ per simulator) &
-        \textbf{Variable Cost}\newline(\$ per target-second) & \textbf{``Compile" Time}\newline(Hours)  \\
-    \hline
-    \hline
-        Arch SW Simulator & QEMU \newline Spike & $10^{-1}$ &
-        Free + $10^3$ & \TODO{} & 0 - 0.1 \\
-    \hline
-        $\mu$Arch SW Simulator & Gem5 \newline MARSSx86 & $10^{-6} - 10^{-4}$ &
-        Free + $10^{3}$ & \TODO{} & 0 - 0.1 \\
-    \hline
-        RTL Simulation & VCS \newline Verilator  & $10^{-7} - 10^{-4}$ &
-        $10^{3} /seat/yr + 10^{3}$ \newline $10^{3}$ & \TODO{} & $10^{-2} - 10^{-1}$ \\
-    \hline
-        Single-FPGA prototype & FPGA-zynq & $10^{-2} - 10^{-1}$ & 2495~(ZC706) \newline 495~(Zedboard) &%
-        \TODO{10W (ZC706)} & 0.5 - 1 (FPGA-zynq)\newline $10^{0} - 10^{1}$ \\
-    \hline
-        Multi-FPGA prototype & \cite{nehalemprototype}, \cite{atomprototype} \newline Protium S1  &
-        $10^{-4} - 10^{-3}$ & \TODO{} & \TODO{} & \TODO{} \\
-    \hline
-        Hardware Emulation & Palladium Z1 & $10^{-3} - 10^{-2}$ &
-        $10^{6}$ & \TODO{$10^{-2}$} & 140 MG/hr \\
-    \hline
-        Silicon Test-chip & \TODO{} & 1 & $10^{5} - 10^{7}$ & \TODO{$10^{-5} - 10^{-4}$} & $10^3 - 10^4$ \\
-    \hline
-\end{tabular}}
-\end{center}
-    \caption{Constrasting different technologies for building full-system
-    simulators; ordered approximately from top-to-bottom in descending
-    fidelity. We define ``compile time" to be the time it takes to make one
-    design iteration less the time spent in simulation and implementing a design
-    change; the time to generate a simulator from a specification of the
-    target.}
-\label{tbl:full-system-simulation-tech}
-\end{sidewaystable}%
+%\begin{sidewaystable}
+%\begin{center}
+%\resizebox{\textwidth}{!}{%
+%    \begin{tabular}{|p{0.1\textwidth}|p{0.1\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|}
+%    \hline
+%        \textbf{Technology} & \textbf{Examples} & \textbf{Speed}\newline(Relative to Silicon) &
+%        \textbf{Fixed Cost} \newline(\$ per simulator) &
+%        \textbf{Variable Cost}\newline(\$ per target-second) & \textbf{``Compile" Time}\newline(Hours)  \\
+%    \hline
+%    \hline
+%        Arch SW Simulator & QEMU \newline Spike & $10^{-1}$ & Free + $10^3$ & \TODO{} & 0 - 0.1 \\
+%    \hline
+%        $\mu$Arch SW Simulator & Gem5 \newline MARSSx86 & $10^{-6} - 10^{-4}$ & Free + $10^{3}$ & \TODO{} & 0 - 0.1 \\
+%    \hline
+%        RTL Simulation & VCS \newline Verilator  & $10^{-7} - 10^{-4}$ & $10^{3} /seat/yr + 10^{3}$ \newline $10^{3}$ & \TODO{} & $10^{-2} - 10^{-1}$ \\
+%    \hline
+%        Single-FPGA prototype & FPGA-zynq & $10^{-2} - 10^{-1}$ & 2495~(ZC706) \newline 495~(Zedboard) &% \TODO{10W (ZC706)} & 0.5 - 1 (FPGA-zynq)\newline $10^{0} - 10^{1}$ \\
+%    \hline
+%        Multi-FPGA prototype & \cite{nehalemprototype}, \cite{atomprototype} \newline Protium S1  & $10^{-4} - 10^{-3}$ & \TODO{} & \TODO{} & \TODO{} \\
+%    \hline
+%        Hardware Emulation & Palladium Z1 & $10^{-3} - 10^{-2}$ & $10^{6}$ & \TODO{$10^{-2}$} & 140 MG/hr \\
+%    \hline
+%        Silicon Test-chip & \TODO{} & 1 & $10^{5} - 10^{7}$ & \TODO{$10^{-5} - 10^{-4}$} & $10^3 - 10^4$ \\
+%    \hline
+%\end{tabular}}
+%\end{center}
+%    \caption{Contrasting different technologies for building full-system
+%    simulators; ordered approximately from top-to-bottom in descending
+%    fidelity. We define ``compile time" to be the time it takes to make one
+%    design iteration less the time spent in simulation and implementing a design
+%    change; the time to generate a simulator from a specification of the
+%    target.}
+%\label{tbl:full-system-simulation-tech}
+%\end{sidewaystable}%
 
 \section{Hardware-Accelerated Microarchitecture Simulation}
 
-While the aim of this work is ultimately to produce more cost-effective hardware emulation for 
-pre-silicon silicon verification validation, as mentioned previously, it attempts to do so by drawing
-from technologies developed in academia to accelerate cycle-level microarchitecture simulation~(see Section~\ref{UArchSWSim}).
+In order to build more cost-effective hardware emulators, this work draws from
+technologies developed in academia to accelerate cycle-level microarchitecture
+simulation~(this is described see Section~\ref{UArchSWSim}).
 
-The first, most obvious way to try to accelerate these simulations is to
-parallelize simulations over multiprocessors or networks of workstations.
-Notably, the Wisconsin Wind Tunnel~(WWT, \cite{WisconsinWindTunnel}), relying
-on a window-based parallel discrete-event simulation engine to manage the
-synchronization. For simulators like the WWT, and more recent works such as Graphite~\cite{Graphite}, to acheive achieve
-good performance, they must reduce the synchronization overhead between
-partitions of the design by modelling the target more abstractly, or by
+The first, most obvious way to accelerate these is to
+parallelize them over multiprocessors or networks of workstations.
+One early example of this is the Wisconsin Wind Tunnel~(WWT)\cite{WisconsinWindTunnel}, which relied
+on a window-based, parallel discrete-event simulation engine to manage synchronization
+across workstations. For CPU-hosted simulators like the WWT, and recent works like Graphite~\cite{Graphite}, to achieve
+good performance they must reduce the synchronization overhead between
+partitions of the design by either modeling the target more abstractly, or by
 introducing extra target-latency between partitions.  While this may be
-appropriate for building coarser models of processor architectures, it's
-ineffective for accelerating RTL simulations, which in the general require
+appropriate for building coarser models, it's ineffective for accelerating RTL
+simulations and thus for building hardware emulators, which, at best, require
 per-cycle synchronization.
 
-In order to build simulators that were both fast and close-to-cycle-accurate,
-many academics turned to FPGAs, which by the 90s and early 00s proven themselves as effective
-vehicles for ASIC prototyping and emulation. Instead of directly implementing an
-ASIC, instead, microarchitectural models could be written in RTL and
-hosted on an FPGA. Early instances of this approach include \TODO{refs}, the bulk 
-of the research in this domain can be attributed to the RAMP project~\cite{RAMP}.
+So, in order to build simulators that were both fast and cycle-accurate
+many academics turned to FPGAs, which by the 1990s and early 2000s had proven themselves as effective
+vehicles for ASIC prototyping and emulation. However, instead of directly implementing an
+ASIC design, here FPGAs would be used as a host for microarchitectural models written in RTL.
+An early example of this approach is the Rapid Processor Emulator~\cite{RPM, RPMDesign}, however the bulk of the research
+in this domain can be attributed to the RAMP project~\cite{RAMP}.
 
 \subsection{Research Accelerator For Multiple Processors (RAMP)}
 
-The RAMP project began in 2005 driven by the realization that future computer
-microarchitectures were going to seek parallelism beyond ILP, as the end of
+The RAMP project began in 2005 driven by the realization that advances in computing performance
+would require exploiting other forms of parallelism beyond ILP, as the end of
 Dennard scaling would necessarily make single-threaded performance improvements
 more difficult to attain. The goal was to develop a shared full-system
 simulation infrastructure for the computer architecture community which would
 be better suited to study future thread-parallel systems of 64 - 1024
-processors, than traditional software simulators. Collaborators included UT
-Austin, CMU, UC Berkeley, University of Washington, Stanford, and MIT.  While
-the RAMP project ultimately failed to produced a unified simulation
-infrastructure, differences in the the simulators produced by the member
-institutions each uniquely advanced the state-of-the-art.
+processors, than traditional software simulators. Member universities included UT
+Austin; CMU; UCB; University of Washington; Stanford; and MIT.
+%While
+%the RAMP project ultimately failed to produced a unified simulation
+%infrastructure, differences in the the simulators produced by the member
+%institutions each uniquely advanced the state-of-the-art.
 
-At the onset of the project three initial, motholithic prototypes were built,
+At the onset of the project three initial, monolithic prototypes were built,
 each was designed to model a different class of target.
-RAMP Red, later known as ATLAS~\cite{ATLAS}(Stanford) was designed to study transactional-memory-based chip-multiprocessors. It supported up to 8 PowerPC cores.
-RAMP Blue~\cite{RAMPBlue}(UC-Berkeley) was designed to simulate
-large-scale distributed-memory message-passing machines and used Xilinx
+RAMP Red, later known as ATLAS~(Stanford)~\cite{ATLAS} was designed to study transactional-memory-based chip-multiprocessors, and supported up to 8 PowerPC cores.
+RAMP Blue~(UCB)\cite{RAMPBlue}) was tailored for large-scale distributed-memory message-passing machines and used Xilinx
 Microblaze softcores to prototype the target system. Partitioned over 21
 BEE2 boards, RAMPBlue could simulate a system with as many as 1008 cores.
-Finally, RAMP White~\cite{RAMPWhite}(UT Austin) models cache-coherent
-shared-memory processors. It supports both PowerPC (when using a Xilinx
-host with a hardened PowerPC 405 core), and 32-bit SPARCV8 (soft core) targets.
+Finally, RAMP White(UT Austin)~\cite{RAMPWhite} modeled cache-coherent
+shared-memory processors. It supported both PowerPC (when using a Xilinx
+host with a hardened PowerPC 405 core) and 32-bit SPARCV8 (soft core) targets.
 Each of these prototypes used the same host platform (the Berkeley Emulation
-Engine 2), and were initially constructed using shared libraries and a common
-specification language called the RAMP design language.
+Engine 2)~\cite{BEE2}, and were initially constructed using shared libraries and a common
+specification language called the RAMP design language~\cite{RDL}.
 
 Other, mostly later, projects tied to RAMP abandoned the shared infrastructure
 and explored different simulator design styles.
-ProtoFlex~\cite{ProtoFlex}~(CMU) was an architecture-level simulator that
+ProtoFlex~(CMU)\cite{ProtoFlex} was an architecture-level simulator that
 demonstrated 16-way host-multithreading of a single FPGA-hosted functional
 model.  ProtoFlex could switch between FPGA-hosted and CPU-hosted modes via
-\emph{transplantation}.  FAST~\cite{FAST}~(UT Austin) was a cycle-accurate
-x86 simulator which leveraged a split CPU-hosted functional and FPGA-hosted
-timing model. RAMPGold~\cite{RAMPGold}(UC Berkeley) used FPGA-hosted timing
-and functional models with 64-way host-multithreading to model a larger
+a process it called transplantation. FAST~(UT Austin)\cite{FAST} was a cycle-accurate
+x86 simulator which leveraged a split, CPU-hosted functional model and FPGA-hosted
+timing model. RAMPGold~(UCB)\cite{RAMPGold}(UC Berkeley) used FPGA-hosted timing
+and functional models with 64-way host-multithreading to realize a larger
 target on a single FPGA.  To model a datacenter-scale target,
-DIABLO~\cite{Diablo} leveraged RAMP Gold's multithreading to simulate 3072
-servers on 24 FPGAs.  Finally HASim~\cite{HASim}(MIT) also used FPGA-hosted
-timing and functional models, but provided more detailed pipeline and
-memory hierarchy models. Other work studied partitioning targets over
-multiple FPGAs. \cite{LIFPGADesign} showed that by partitioning HAsim over
-two FPGAs, they could model eight times as many cores, due to improved
-resource sharing between virtual instances.
+DIABLO~(UCB)\cite{Diablo} stitched together 24 instances of a modified version RAMPGold to simulate 3072 interconnected
+servers.  Finally, HASim~\cite{HASim}(MIT) also used FPGA-hosted timing and
+functional models, but provided more detailed pipeline and memory hierarchy
+models. Later work studied partitioning HASim over multiple FPGAs.
+\cite{LIFPGADesign} and showed that by using two FPGAs HASim could host eight
+times as many cores, due to improved resource sharing between virtual
+instances.
 
-Contemperanously, other groups not associated with the RAMP project explored
+contemporaneously[D[D[D[D[D[D[D[D[D[D[D[D[D[DCo, other groups not associated with the RAMP project explored
 using FPGAs for microarchitecture simulation.  One notable example is
-DART~\cite{DART}, an FPGA-based Network-on-Chip simulator, that leverages
-decoupling and multithreading like many RAMP simulators.
+DART~\cite{DART}, an FPGA-based Network-on-Chip simulator that used
+multithreading, like many RAMP simulators, but leveraged NoC-specific model abstractions
+to permit a wide range of runtime-reconfigurable model parameters.
 
 \subsection{FAME Taxonomy}
 
-* One output of the RAMP project was the FAME (FPGA Architecture Model
-Execution (FAME)~\cite{FAME} taxonomization of FPGA-accelerated simulation work,
-which distills many of the contributions of the works above into three,
-RAID-like dimensions: host-decoupling (FAME-1), abstract RTL vs concrete RTL
+One output of the RAMP project was the FPGA Architecture Model
+Execution~(FAME)\cite{FAME} taxonomization of FPGA-accelerated simulation work,
+which distills many of the contributions of the works above into three dimensions: host-decoupling (FAME-1), abstract RTL vs concrete RTL
 (FAME-2), and multithreading (FAME-4).
 
-\subsection{FAME-1: Host-Target Decoupling}\label{sec:fame1}
+\subsection{FAME-1: Host Decoupling}\label{sec:fame1}
 
-In host-decoupled FPGA simulators, a target-cycle of simulation
-executes over multiple, possibly variable, number of FPGA-host cycles. In contrast, an
-FPGA prototype executes a single target-cycle on every FPGA-host cycle. With
-this technique, ASIC structures that map inefficently to FPGA fabric may be replaced
+In host-decoupled FPGA simulators, a target cycle of simulation
+executes over multiple FPGA-host cycles. In contrast, a
+conventional FPGA prototype executes a single target-cycle on every FPGA-host
+cycle; multiple clocks can be prototyped using multiple host clocks with the
+same relative frequency relationship as exists in the target.
+With host-decoupling, ASIC structures that map inefficiently to FPGA fabric may be replaced
 with optimized-for-FPGA structures that take more host cycles to execute, but save
 FPGA resources and improve host-cycle time.  One classic optimization replaces
 multi-ported register files and CAMs with a dual-ported BRAMs pumped over
 multiple cycles.  Additionally, host-decoupling permits the simulator to
-tolerate variable latencies in the host-platform without sacrificing simulator
+tolerate variable latencies in the host without sacrificing simulator
 performance or changing the target-time behavior of the simulation.
-Nearly all academic FPGA-accelerated simulators are FAME-XX1 simulators.
-Unlike FPGA prototypes, commerical FPGA-based emulators are necessarily host decoupled to
-make them deterministic, and to support a plethora of features.
-We expand on mechanisms for implementing host-decoupling in Section~\ref{sim:fame1-abstractions}
+Nearly all academic FPGA-accelerated simulators employ host-decoupling.
+Unlike FPGA prototypes, commercial FPGA-based emulators are necessarily host-decoupled to
+make them execute deterministically and to support a wealth of additional features that may require
+halting parts of the emulation. We expand on mechanisms for implementing host-decoupling in Section~\ref{sim:fame1-abstractions}
 
 \subsection{FAME-2: Abstract RTL}
 
-In an abstract-RTL FPGA-accelerated simulation, components of the simulator do
+In an abstract-RTL FPGA-accelerated simulator, components of the simulator do
 not model the implementation RTL exactly. Abstraction permits simplifying
-components of the simulator, trading simulation fidelity for FPGA-resource
+components of the target, trading simulation fidelity for FPGA-resource
 savings. Additionally, abstract models can be made reconfigurable in ways the
-implementation RTL cannot. Most academic FPGA-accelerated simulators are either
-partially or completely abstract-RTL simulators.  In contrast, commerical
-hardware emulators and FPGA prototypes are concrete -- though some ASIC features
-may need to be replaced with an equivalent model provided by the emulation or
-prototyping platform.
+implementation RTL cannot~(i.e., a latency-pipe model can expose it's latency
+as a runtime-programmable register).  The FAME-2 dimension of the taxonomy
+represents a spectrum in practice.  Most academic FPGA-accelerated simulators
+are either partially or completely abstract-RTL simulators.  Even commercial
+hardware emulators and FPGA prototypes are to some extent abstract -- as
+generally some ASIC features may need to be replaced with an equivalent model
+provided by the emulation or prototyping platform.
+%Can i cite documentation?
 
 \subsection{FAME-4: Multithreading}
 
-In a multithreaded FPGA-accelerated simulation, multiple virtual instances of a
+In a multithreaded FPGA-accelerated simulator, like HASim or RAMPGold, multiple virtual instances of a
 block or module within the target are simulated using a single physical
-datapath on the FPGA. The target state is duplicated according to the number of
+combinational datapath on the FPGA. The target state is duplicated according to the number of
 virtual instances, and a scheduler selects which virtual instance should be
 simulated in a given host-cycle. ASIC logic tends to be expensive when mapped
 to FPGA fabric; in FPGA prototypes, designs tend to be logic~(LUT) constrained,
 which leaves much of the FPGA's embedded BRAM left unused.  Multithreading
 improves the mapping efficiency of the target, by reusing the expensive logic
 over multiple copies of target state which can be mapped into abundant FPGA BRAMs and registers.
-HASim~\cite{HASim} and RAMPGold~\cite{RampGold} are examples of simulators that
-employ multithreading. To the best of our knowledge, commerical hardware
-emulators and FPGA prototypes do not using mulithreading schemes.
+To the best of our knowledge, commercial hardware
+emulators and FPGA prototypes do not using multithreading schemes.
 
 \subsection{RAMP Retrospective}
 
-Ultimately, RAMP-style FPGA-accelerated microarchitecture simulation failed to take off
-in the computer architecture community. There are a number of technical explanations for this, many of which
-derive from the aforementioned challenges with using FPGAs to prototype ASICs.
+Ultimately, RAMP-style FPGA-accelerated simulation failed to take off
+in the computer architecture community. There are a number of technical explanations for this, though many of these
+derive from the aforementioned challenges with using FPGAs to prototype ASICs~(see Section~\ref{sec:fpga-prototyping}).
+We expand on three more specific challenges here.
 
-Open-source software simulators can run on machines researchers already had access to desktops,
+\begin{itemize}
+    \item \emph{Large Barrier to Entry}: open-source software simulators can run on machines researchers already possess,
 whereas FPGA-based simulators requires expensive hardware. For instance, the early RAMP prototypes all used
-the BEE2 board. Using smaller, more inexpensive boards would come at the expense of reduced simulation capacity
-and thus required the extensive resource-optimizations to support simulating research-worthy target designs.
+the BEE2 board. While using smaller, more inexpensive boards would reduce initial capital costs, it does so at the expense of reduced simulation capacity.
+Simulators using smaller hosts, like RAMPGold, required extensive resource-optimizations to support simulating research-worthy target designs.
 
-Reproducability: since these simulators were tied to particular FPGA host
+\item \emph{Reproducibility of Results}: since RAMP simulators were tied to particular FPGA host
 platforms, other researchers would need to purchase the same host to reproduce
-publish results. Even if reserachers had access to their own FPGAs, they
+publish results. Even if researchers had access to their own FPGAs, they
 generally could not run a simulator designed for a different host on their own
 FPGAs without modification to simulator.
 
-Model Complexity: This was crux of the RAMP project; designers of RAMP simulators have said that
-designing models for these simulators is often more difficult than writing the RTL implementation itself.
+\item \emph{Modeling Complexity}: designers of RAMP simulators have said that
+designing models was more difficult than writing RTL for the matching implementation.
 Consider a processor pipeline: to model detailed "cycle-accurate" behavior of that pipeline
-the model design must write RTL that contains much of the complexity inherent to the actual pipeline's design in order
-to properly capture the right hazards which can profoundly affect the processors performance.
+the model designer must write RTL that contains much of the same complexity inherent to the actual pipeline's design in order
+to properly capture the all hazards that may affect the processors performance.
 In order to support modeling a space of different processor designs, either at compile time by generating different model RTL, or at runtime
-by reconfiguring the simulator, they must add still more complexity.
-In order to provide reasonable simulation capacity, multi-cycle resource optimizations must applied to the model,
-adding still more complexity, and making the model fundamentally more difficult to debug than an FPGA prototype, since
-the design is decoupled in simulation time (i.e., in a given host cycle, parts of the simulator may be at target cycle $t$, while
-others may be at cycles $t+1$, $t-1$) and there is additional scheduling logic through the design.
-Finally, just like their software counterparts, these models, if they are to be trusted, must be validated against a real implementation. 
+, by adding logic to permit reconfiguring the simulator, they must add still more complexity.
+In order to provide reasonable simulation capacity, they must also apply multi-cycle resource optimizations to the model.
+Taken together, this complexity makes the model more difficult to debug than an already-difficult-to-debug FPGA prototype,
+and to add insult to injury, these models, like their software counterparts, must still be validated against a real implementation.
+\end{itemize}
 
 %
 %\section{FAME-1 Target Dataflow Abstractions}\label{sim:fame1-abstractions}
@@ -448,7 +450,7 @@ Finally, just like their software counterparts, these models, if they are to be 
 %* Another product of the RAMP project and follow on works, were FPGA-friendly abstractions 
 %for describing target designs so that they could be easily host-decoupled.
 %
-%* At a high level, these absractions represent the target as a dataflow graph of actors. The execution
+%* At a high level, these abstractions represent the target as a dataflow graph of actors. The execution
 %of this graph defines a deterministic simulation of the target it represents. These actors can be hosted
 %
 %* In essence this represents a simplification of conservative Parallel Discrete Event
@@ -470,156 +472,177 @@ Finally, just like their software counterparts, these models, if they are to be 
 \section{Recent Work at Berkeley}
 
 At the end of the RAMP project it was clear that writing performance models for
-FPGAs, was not going to be tractable without major breakthroughs in improving
-FPGA usability. Since pushing an actual implementation through a EDA flow is
-required to meaniningfully, assess a designs QoR, notably it's critical path
-delay -- effort spent writing FPGA performance models would be better spent
-writing the implementation. If RTL design could be made more productive,
-computer architecture reserachers may be more willing to conduct
+FPGAs was not going to be tractable without major breakthroughs in improving
+FPGA usability. Since evaluating an RTL implementation with an EDA flow is still
+required to meaningfully assess a design's quality-of-result~(QOR), notably it's critical path
+delay, effort spent writing FPGA performance models would be better spent
+writing the implementation. If the RTL design process could be made more productive,
+computer architecture researchers may be more willing to conduct
 microarchitecture studies using realizable RTL designs instead of software
-simulators. Once SoC implementations are available, these designs could be
-transformed into RAMP-like simulators using compiler transformations. Unlike
-prior RAMP designs, these simulators would actually represent area-optimized
-hardware-emulators of the design -- much like a commerical hardware emulator,
-they would exactly represent the input design's behavior, and so would not need
-to be validated against silicon. The compiler would be called MIDAS, as it would transform
-a chip design into [RAMP]Gold.
+simulators. In this model, once an RTL implementation is ready it could be
+transformed into a RAMP-like simulator using a \emph{FAME Compiler}. This circumvents the aforementioned model complexity challenge,
+as these simulators would essentially be area-optimized hardware emulators of the design:
+they would exactly represent the input design's behavior and so would not need
+to be validated against silicon.
 
-This was one motivations that drove research done by the Berkeley Architecture
-Research group under the ParLab, ASPIRE Lab, and ADEPT labs.
-Chisel~\cite{Chisel}, an RTL design language hosted in Scala, allows designers
-to specify rich hardware generators, by leaning on the host-language to provide
-powerful metaprogramming features not avaliable in SystemVerilog or VHDL.
-Instead of performing parameter sweeps in a software model, with a generator,
-the user explores the design space by elaborating and evaluating multiple
-design \emph{instances}. The Rocket-Chip SoC generator\cite{RocketChip} is best
-known Chisel generator: it generates complete RISC-V SoCs including
-core-pipelines, private caches, uncores and common periphery devices. Rocket
-Chip lets the user stitch together near-arbitrary networks of disperate devices
+This was one vision that drove research done by UCB-BAR over the past decade.
+To address the RTL design productivity challenge, we developed
+Chisel~\cite{Chisel}. Chisel, an RTL design language hosted in Scala, allows
+designers to specify rich hardware generators by leaning on the host language to provide
+powerful metaprogramming features not available in SystemVerilog or VHDL.
+Instead of performing parameter sweeps in a software model, with a generator
+the user explores the design space by elaborating and evaluating different
+\emph{instances} of the design. The Rocket Chip SoC generator\cite{RocketChip} is one example of this: it generates complete RISC-V SoCs including
+core pipelines, private caches, uncores, and common periphery devices. Rocket
+Chip lets the user stitch together near-arbitrary networks of disparate devices
 using it's diplomacy~\cite{Diplomacy} library, developed by SiFive, which leverages Scala's type
-system to provide intelligent, resource optimized system integration. The
+system to provide intelligent, area-optimized system integration. The
 Berkeley Out-of-Order Machine (BOOM)~cite{BOOM} and Hwacha vector-fetch
-processor~\cite{Hwacha} generators provide additional core IP that can be
+processor~\cite{Hwacha} Chisel generators provide additional core IP that can be
 integrated into a Rocket Chip SoC.
 
-In parallel to the development of these generators, FIRRTL(Flexible
-Intermediate Representation For RTL~\cite{FIRRTL}) was designed to support
-writing resuable compiler transformations on generated instances. FIRRTL's
-Scala-based compiler infrastructure basis for MIDAS, Golden Gate, and this work.
+To support writing reusable compiler transformations on generated instances, in
+Chisel3, Chisel2's internal representation~(IR) of an RTL circuit and its
+lowering transforms were replaced with FIRRTL~(Flexible Intermediate
+Representation For RTL)\cite{FIRRTL} and its Scala-based compiler. During
+elaboration, Chisel3 emits a high-level form of FIRRTL. The FIRRTL compiler
+then lowers the instance to Verilog while scheduling user-provided passes. These passes can be used to
+a tailor an instance to a particular backend: for instance, when preparing a
+design for an ASIC implementation, FIRRTL memories can be replaced
+black boxes corresponding to technology-specific SRAMs. Alternatively, if the same
+design is destined to become an FPGA prototype, these memories could be double-pumped
+to save FPGA resources.
 
 \subsection{Strober and MIDAS}
 
-The first iteration of this FAME-style emulator compiler derived from the
-Strober~\cite{Strober} energy modelling project. Since SoC-scale gate-level
-simulations run much to slowly to generate workload-driven power estimates,
-Strober leveraged an FPGA-based simulator to rapidly advance to randomly
-selected points in simulated time. Here a state and limited I/O trace snapshot would be
-captured, so they could be replayed in the slower gate-level simulator which
-could then be used to drive a conventional power estimation flow. By selecting an apporpriate number of samples,
-average power disappation for the SoC can be estimated within a desired error bound.
+The first FAME-compiler-like work done at UCB-BAR can be found in the
+Strober~\cite{Strober} energy modeling project. While
+gate-level-simulation-driven power estimation using commercial tools like
+Synopsys PrimeTime PX provides accurate pre-silicon results, gate-level
+simulation runs much too slowly to conduct system-level microarchitectural studies using
+complete workloads. Instead, Strober generates an accurate average power
+estimate by sampling the execution of the workload running on a fast,
+FPGA-based simulator and then replaying those samples for short durations in
+gate-level simulation. By selecting an appropriate number of samples, average
+power dissipation for the SoC can be estimated within a desired error bound.
 
-Strober, predating FIRRTL, modified Chisel's backend to transform the instance RTL to:
+To realize this, Strober needed to automatically generate an FPGA-based
+simulator from ASIC RTL with ability to capture complete RTL state snapshots
+and IO traces~\footnote{While these features are available in commercial
+emulation tools but no reusable open-source flow existed at the time.}.
+Since Strober predated FIRRTL, it modified the Chisel2 backend to:
 \begin{enumerate}
-    \item Host-decouple input RTL, in essence to gate the target clock, in order to halt simulation time. This is called
-        a \emph{FAME-1 transformation}.
-    \item Inject a scan-chain to read out target state, and add I/O trace buffers. This enables replaying the state snapshot in either
-        RTL or gate-level simulation.
-    \item Elaborate a simulation wrapper, additional RTL to control the simulator.
+    \item Host-decouple input RTL to support halting the simulator to capture
+        state snapshots. This is called a \emph{FAME-1 transformation}.
+    \item Inject a shadow scan-chain to read out target state.
+    \item Elaborate a simulation wrapper around the transformed target. This
+        wrapper included IO channels that can buffer a limited IO trace, a
+        latency-pipe timing model for the target's DRAM memory system, as well
+        as a simulation control bus.
 \end{enumerate}
 
-Strober simulators are co-hosted over an FPGA and an CPU. A \emph{driver} process, writes to memory mapped registers
-on the FPGA to control simulation advance and to initiate state snapshot capture.
+Strober simulators are co-hosted over an FPGA and an CPU -- a \emph{driver}
+process, writes to memory mapped registers accessible on the simulation control
+bus to advance the simulator and to initiate state snapshot capture.
 
-In parallel. Jack Koenig in late 2015 I began developing MIDAS. We wrote a
-primitive FAME-1 transform, and started buidling out a library memory system
-models~(this would later become FASED~\cite{FASED}).  Seeing an opportunity to
-reuse work, we merged these two projects. MIDAS, as presented at
-CARRV2018~\cite{MIDAS}, retained all of Strober's features, while vastly
-improving simulation performance, made it
-easier to support co-simulation of other library models.
+Initially independent of Strober, MIDAS began as class project to build an
+FPGA-based performance simulation framework. It had it's own FAME-1 transform,
+and a nascent library of more detailed memory system models~(this would later
+become FASED~\cite{FASED}).  Seeing an opportunity to reuse work, we merged
+these two projects. MIDAS, as presented at CARRV2018~\cite{MIDAS}, retained all
+of Strober's features, but used Chisel3 and FIRRTL, vastly improved simulation
+performance, made it easier to support co-simulation of other IO models.
 
-MIDAS was the basis for a number of publications. Dessert, leveraged Strober's
-state snapshotting features to preform \emph{ganged-simulation}, where one
-instance of a simulator runs ahead to detect a simulation error either via an
-assertion firing, or by detecting a commit-log mismatch between the target
-processor and an online golden model. The master instance provides instructs
-the lagging slave instance, to capture a state snapshot in advance of the the
-error.  Using Strober's replay feature, a full visibility waveform of the
-failing target design can be generated. While commerical emulators provide rich
-sets of state-snapshotting features -- DESSERT's differs in that uses two
-simulators, to let the simulation advance at full-throughput to the point of
-failure.
-
-Simmani~\cite{Simanni} revisted power estimation, but instead of using complete
-state snapshots, injected statistically selected set of performance counters
-into design. These counters could provide a dynamic estimate of total system
-power disappation.
+MIDAS was the basis for a number of research projects at UCB-BAR. To improve simulator debuggability, DESSERT~\cite{DESSERT},
+leveraged MIDAS's state snapshotting features to perform
+\emph{ganged-simulation}. Here one instance of a simulator runs ahead of a second lagging instance, to
+detect a simulation error. A detectable error could be either fired hardware assertion, which had been synthesized by the source FIRRTL, or a
+commit-log mismatch between the target processor and an online golden model.
+On detection of an error, the leading instance instructs the lagging instance to capture a
+state snapshot of the target before the error would occur.  Using the replay feature, a
+full visibility waveform of the failing target design could then be generated. While
+commercial emulators provide rich sets of state-snapshotting features --
+DESSERT's differs in that uses two simulators, to let the simulation advance at
+full-throughput to the point of failure. Simmani~\cite{Simmani} revisited power
+estimation, but instead of using complete state snapshots, injected
+a statistically selected set of performance counters into design. These counters
+could provide a dynamic estimate of power dissipation. Finally,
+MIDAS's DRAM memory models were published as FASED~\cite{FASED}, we cover FASED
+in greater detail in a later chapter. For more detail on Strober, MIDAS, and
+Simmani, we direct the interested reader to Donggyu Kim's
+dissertation~\cite{DGKDissertation}.
 
 \subsection{FireSim}
 
-One of the research goals of the ASPIRE lab was to study new architectures for
-warehouse-scala computers.  he lab's proposed design, FireBox~\cite{FireBox},
-was an early example of a disaggregated machine -- it would rely on high
-bandwidth, photonic networking made possible with relatively inexpensive
+As Strober was being developed, UCB-BAR continued to study new architectures for
+warehouse-scale computers, notably as part of the FireBox~\cite{FireBox} project.
+FireBox was an early example of a disaggregated datacenter that relied on
+high-bandwidth photonic networking made possible with relatively inexpensive
 silicon-integrated photonics, a focus of earlier work done by the lab.  To
-simulate FireBox, we build FireSim -- which interconnected MIDAS-generated
-simulators, with a distributed, CPU-hosted network model to build a
-cycle-accurate warehouse-scale computer simulation. Much like MIDAS attempts to
-automate, FireSim builds on Diablo, and relies extensively on automation to overcome usability challenges.
-Instead of using a custom-host platform, FireSim uses the publich cloud, specifically Amazon Web Servce's, and requests as many FPGA (to host Rocket
-Chip derived simulators) and compute nodes (to host software switch models) as
-required to host the simulator. FireSim's \emph{manager} can dynamically spin
-up and teardown simulators deployed to EC2 to make it easy to coordinate
-simulations of arbitrary size, or to run multiple simulations in parallel.
+simulate FireBox, we built FireSim~\cite{FireSim}. Building on DIABLO, FireSim interconnected MIDAS-generated
+simulators with a distributed, CPU-hosted network model to build a
+cycle-accurate, warehouse-scale computer simulation. To overcome the usability
+challenges of DIABLO, FireSim relies extensively on automation.  Instead of
+using a custom host platform, FireSim uses the public cloud, specifically
+Amazon Web Service's Elastic Computer Cluster~(EC2).  When the user wishes to run a simulation, FireSim's \emph{manager} program
+requests as many FPGAs nodes (to host
+Rocket Chip-derived simulators) and compute nodes (to host switch models) as
+required. The manager's ability to dynamically spin up and tear down simulators
+deployed to EC2 to make it easy to coordinate simulations of arbitrary size. Armed with this flexibility, in our
+ISCA2018 publication we were able to reproduce behaviors observable in real
+datacenters at a variety of different simulation scales.
 
-Since the ISCA publication, FireSim has evolved to become a general-purpose hardware emulation environment
-for Rocket-Chip-based SoCs. It not only hosts the FAME compiler, but additionally provides:
+Since the 2018 ISCA publication, FireSim has evolved to become a
+general-purpose hardware emulation environment for Rocket Chip-based SoCs. By
+optionally removing the network simulation, the manager can instead batch out
+parallel workloads to multiple independent simulator instances, making it
+productive for doing performance evaluations of SoC-scale systems.
+Presently, In addition to the manager, FireSim provides:
 \begin{enumerate}
-    \item Device libraries for modelling periphery devices commonly intergrated into Rocket Chip SoCs. Including a block device, UART,
+    \item A FAME compiler to generate an emulator from FIRRTL. Initially, this
+        was MIDAS, but as of version 1.6.0 it has been replaced with Golden Gate~\cite{GoldenGate}.
+    \item Device libraries for modeling periphery devices commonly integrated into Rocket Chip SoCs. Including a block device, UART,
         and tether model in addition a NIC model used to performed networked simulation.
-    \item The \emph{manager} to automate both running simulations (which includes spinning up and initializing EC2 instances, programming FPGAs, running simulations, and collecting
-        simulation results. and building simulator bitstreams.
-    \item FireMarshal a utility to automate building linux distributions for
-        running on RISC-V based platforms, including FireSim.
-    \item Many of the most used RTL IP libraries in the Rocket-Chip ecosystem to enable the user to build out interesting systems.
+    \item FireMarshal, a utility to automate building Linux distributions for
+        running on RISC-V based platforms.
+    \item Many of the most commonly used RTL libraries in the Rocket-Chip ecosystem, to enable the user to build out interesting systems.
 \end{enumerate}
 
+FireSim has been used both in academia and industry, primarily for doing
+performance evaluations of new microarchitectural features implemented as
+extensions to Rocket Chip.  At Berkeley, FireSim was the basis for
+FirePerf~\cite{FirePerf}, which introduced improved instruction tracing, and
+non-invasive performance counter integration to perform rapid hardware-software co-design of the NIC
+and the Linux networking stack. These features have since been integrated into
+mainline FireSim. Academically, FireSim has been used for microarchitectural performance evaluations,
+and commercially, it has seen use at Intensivate, Esperanto, and SiFive. FireSim is also being used a RISC-V platform in DARPA's
+FETT~\cite{FETT} bug bounty program~\cite{FireSimFETT}.
 
-FireSim has been used both in academic and industry. At Berkeley, FireSim was
-the basis for FirePerf~\cite{FirePerf}, which introduced improved instruction
-tracing, and non-invasive perforance counter integration akin to that available
-on commerical emulators, to perform rapid hardware-software co-design of the
-NIC and the linux networking stack. These features have since been integrated
-into mainline FireSim. FireSim has been used as basis for a number of
-performance evaluations.  Commerically, FireSim has seen use at Intesivate,
-Esperanto, and SiFive. FireSim is also being used a plaform for RISC-V systems in DARPA's
-FETT bug bounty program~\cite{FETT}.
+As a final note, in 2020 we released Chipyard~\cite{Chipyard}, which unifies all of
+UCB-BAR's SoC design tools and IP under in a single environment. In Chipyard,
+FireSim is a library for doing hardware emulation -- many stand-alone utilities
+that were previously hosted in FireSim but aren't strictly related to hardware emulation
+support, such as FireMarshal, have been hoisted up into into Chipyard,
 
-More recently, we've released Chipyard~\cite{Chipyard} which unifies all of
-BAR's SoC design tools and IP under in a single environment. In Chipyard,
-FireSim strictly becomes a library for doing hardware emulation -- many
-standalone utilities previously hosted in FireSim, such as FireMarshal have
-been hoisted up into into Chipyard,
-
-\section{Motivations for MIDAS II}
+\section{Motivations for Golden Gate~(MIDAS II)}
 
 As adoption of FireSim started to increase, it was clear that limitations with
-MIDAS prevented it from seeing more widespread use. It's existing simple FAME-1
-transform supported systems with only a single clock domain, this precludes
-simulating any realistic system, and made it challenging to validate FireSim
-against existing RISC-V silicon. Additionally, capacity challenges with EC2
-FPGAs made it difficult to simulate larger systems, notably the testchips the
-group was designing concurrently. Without the ability to do multi-FPGA
+its FAME compiler, MIDAS, prevented it from seeing more widespread use. Firstly, MIDAS's existing FAME-1
+transform supported systems with only a single, fixed-frequency clock domain,
+and barred use of asynchronous resets. This precludes
+simulating most realistic systems and made it challenging to validate FireSim
+against existing RISC-V silicon. Secondly, capacity challenges with EC2
+FPGAs made it difficult to simulate larger systems, notably the test-chips
+UCB-BAR was designing concurrently. Without the ability to do multi-FPGA
 partitioning, and without any automated application of RAMP-style
-optimizations, FireSim's was hamstrung to supporting only relatively small
-SoCs. Taken together, restrictions on the scale of the design and structures present
-the RTL MIDAS could accept, hamstrung FireSim to being a limited, albeit
+optimizations, this hamstrung FireSim to supporting only relatively small
+SoCs. Taken together, these restrictions kneecapped FireSim to being a limited, albeit
 open-source, hardware emulation for primitive Rocket Chip-based SoC designs.
 
-To address these two concerns, Albert Magyar and I redesigned MIDAS, and called
-the new FAME compiler Golden Gate. Before we expand on the initial
-implementation of Golden Gate, we first review different target formalisms and
-implementation strategies for building FPGA-hosted discrete event simulators.
+To address these two concerns, we set about designing a new FAME compiler
+called Golden Gate~\cite{GoldenGate}. Before we expand on the initial
+implementation of Golden Gate, in the next chapter we review different target formalisms and
+implementation strategies for building FPGA-hosted, discrete-event simulators.
 
 %\section{Segue}
 %The ideal full-system simulator -- sufficient for both academic and industrial
@@ -692,10 +715,10 @@ implementation strategies for building FPGA-hosted discrete event simulators.
 %
 %\subsection{FAME-1 (XX1): Host-Target Decoupling}\label{sec:fame1}
 %
-%In host-decoupled fpga-accelerated simulators, a target-cycle of simulation
+%In host-decoupled FPGA-accelerated simulators, a target-cycle of simulation
 %executes over a variable number of FPGA-host cycles. In contrast, an
-%FPGA protoype executes a single target-cycle on every FPGA-host cycle. With
-%this technique, ASIC structures that map inefficently to FPGA fabric may be replaced
+%FPGA prototype executes a single target-cycle on every FPGA-host cycle. With
+%this technique, ASIC structures that map inefficiently to FPGA fabric may be replaced
 %with optimized-for-FPGA structures that take more host cycles to execute, but save
 %FPGA resources and improve host-cycle time.  One classic optimization replaces
 %multi-ported register files and CAMs with a dual-ported BRAMs pumped over
@@ -743,7 +766,7 @@ implementation strategies for building FPGA-hosted discrete event simulators.
 %the host-platform: FAST~\cite{fast} hosted its functional model in software and its
 %timing model in fabric (ProtoFlex did the opposite~\cite{protoflex}).
 %
-%For a comphrehensive survey of FPGA-accelerated simulation work we direct
+%For a comprehensive survey of FPGA-accelerated simulation work we direct
 %the reader to~\cite{fpgasimbook}.
 %
 %\section{Adoption Challenges}
@@ -795,12 +818,12 @@ implementation strategies for building FPGA-hosted discrete event simulators.
 %FPGA~\cite{ultrascale} by BRAM capacity would permit modeling in excess of 5000
 %cores.}. As they have scaled, FPGAs have continued to become more
 %heterogeneous, adding features that make them more amenable to hosting
-%full-system simulaions.  Both Intel and Xilinx now sell FPGAs with embedded ARM
+%full-system simulations.  Both Intel and Xilinx now sell FPGAs with embedded ARM
 %cores, making it easier to co-simulate tightly coupled hardware and software
 %models of a system. Modern FPGAs include hardened DRAM controllers that are
 %comparable to those of ASICs. This trend towards greater integration looks to
 %continue. For example, upcoming Intel Stratix 10 MX parts include in-package DRAM (HBM2)
-%that can support up to 1 TBps of aggregate memory bandwidth~\cite{stratix10mx}.
+%that can support up to 1  of aggregate memory bandwidth~\cite{stratix10mx}.
 %Both DRAM capacity and bandwidth are crucial for simulating components
 %of the target that may not fit in BRAM.
 %
