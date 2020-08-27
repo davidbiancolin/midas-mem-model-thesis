@@ -1,2 +1,196 @@
 % Survey of existing FPGA-based discrete event simulators, and their
 % microarchitectural design.
+
+
+For the purpose of this dissertation, it is insightful to classify FPGA-based
+RTL simulators along two dimensions. For simplicity, here we consider only
+single-FPGA hosts, but we note that this discussion can trivially extended to
+multi-FPGA hosts. This chapter was heavily influenced by dicussion in Pellaur
+and Vijayaraghavan et al. in \emph{A-Port Networks: Preserving the Timed
+Behavior of Synchronous Systems for Modeling on FPGAs}~\cite{APortNetwork}.
+
+The first dimension, is timekeeping strategy. \emph{Explicit timekeeping}~(ET)
+simulators, keep track of simulation time whereas simulators with implicit
+timekeeping (IT) instead rely on target-cycle count as a proxy for target time. This represents an
+implementation optimization, as additional FPGA resources required track and
+manage timestamps are unneeded. For this optimization to apply broadly across
+the simulator, target system clocks must have fixed frequency and phase, and
+all simulation events must be synchronous to these clocks.
+
+The second dimension is control granularity. At one extreme there exist
+simulators with \emph{centralized control} (CC). These track time in
+a single location, the entire simulator advances in lockstep from
+timestep to timestep.  Conversely, there are simulators with \emph{distributed
+control}~(DC). These simulators are parallel systems of \emph{logical
+processes}~(LP). Each LP locally tracks simulation time and can advance
+independently. DC simulators can be coarse-grained, with a logical process
+simulating core-scale components of the SoC, core of the SoC, or fine-grained,
+herewit logical processes may take on the scope of a CAM, RAM, or even a
+combinational circuit like a multiplexer.
+
+Taking the product of these two dimensions produces four classes of simulator:
+
+\begin{enumerate}
+\item{Implicit Timekeeping, Centralized Control (ITCC)}: Simple MIDAS generated simulators*. FabScalar FPGA
+
+\item{Implicit Timekeeping, Distributed Control (ITDC)}: RAMP simulators,networked MIDAS-generated simulators.
+
+\item{Explicit Timekeeping, Centralized Control (ETCC)}: Unrealized, commerical emulators*. Example: Direct implementations of the verilog event queue.
+
+\item{Explicit Timekeeping, Distributed Control (ETDC)}: Multi-FPGA commerical emulators*, This Work
+\end{enumerate}
+
+It is critical to note DC simulators are in effect FPGA-hosted, parallel
+discrete-event simulators.  Parallel, discrete-event simulation~(PDES) has been
+a vibrant area of research since the 1980s, but PDES researchers have focussed
+nearly exclusively on non-FPGA hosts (including multiprocessors, GPUs,
+supercomputers, networks thereof).  In the next sections, we briefly introduce
+relevant PDES work, and explain how prior work in that field translates to
+hosting DC full-system simulators on FPGAs, but first, we explore some
+simulator designs that are centrally controlled.
+
+\section{Centrally Controlled~(CC) Simulators}
+
+Once one  jjj
+% Dynamic barrier synchronization,
+
+hi
+
+
+% Why not central control?
+% Don't scale well to large SoCs. Don't scale well with large numbers of LPs
+
+
+
+
+
+
+\section{Software PDES}
+Software PDES can be divided into two classes based on how they address
+deadlock.  In \emph{Conservative} PDES, logical processes issue messages
+non-speculatively, as a result, an output message that \emph{may} depend casually on a
+particular input message will not be issued until that input arrives.
+Conservative PDES addresses deadlock by requiring LPs to have non-zero
+\emph{lookahead}. That is to say, output messages must only depend on input
+messages that are at least  $t_{lookahead}$ seconds in the past. In order to gaurantee forward
+progress, if a logical process is blocked on a particular input, whose latest
+message is timestamped to time $t_{i}$, it can and must eventually issue a
+\emph{null-message} at time $t_{i} + t_{L}$ on it's output channels. Supposing
+the blocked, path does not contain a cycle of LPs no lookahead, the simulation
+will advance.  Large lookahead improves simulation performance, as the number
+of null-messages required to avoid deadlock increases as lookahead approaches 0.
+In general, lookahead is derived from underlying properties of the system under simulation;
+if sufficient lookahead cannot be captured in the underlying system, conservative PDES algorithms may
+offer little benefit over sequential simulators.
+
+The second class PDES simulation are \emph{optimistic}. Optimistic deadlock
+avoidance first was presented in the Time Warp~\cite{TimeWarp}. In optimistic
+pdes, lps send messages speculatively. Necessarily, LPs have mechanisms to
+rollback from misspeculation and to inform downstream LPs of earlier messages
+that were erronously sent. In Time Warp, LPs correct for mispeculated messages,
+by sending \emph{anti-messages}, which as the physics-analogy would suggest,
+\emph{annaliate} its corresponding pair that was erronously sent previously.
+
+Though a conservative vs. optimistic PDES debate raged through
+the 90s and 00s, both optimisitic and conservative PDES algorithms see
+contemporary use.
+- Summary of where they are used.
+
+
+\subsection{Considerations for FPGA-Hosted PDES}
+
+FPGA are a unique host platform relative to those studied in the PDES
+literatures, as a number of complications introduced by multiprocessors and
+networked-hosts do not apply. Notably:
+
+\begin{enumerate}
+\item{FPGAs trivially support FIFO communication channels}. Unlike in
+conventional PDES hosts, channels between FPGA-hosted LPs are easily made FIFO.
+In a conservative PDES implementation, LPs do not need to reorder messages, and
+can assume messages from the same sender arrive in monotonically increasing
+time-order.
+
+\item{Transmissions errors are rare}. FPGA-hosted channels (i.e., hardware
+queues) operate reliably, and even those that cross asynchronously related host-clock-domains
+can be made to operate such that LPs do not need to tolerate potentially lost messages.
+\end{enumerate}
+
+The major challenge FPGA-hosts introduce over their CPU-host counterparts is
+that many of the state-of-the-art PDES algorithms are complex, making
+them a challenge to implement in hardware and expensive to support in FPGA
+fabric. At least one general-purpose, FPGA-hosted PDES has been built: PDES-A~\cite{PDESA}~\cite. PDES-A
+implements an optimistic algorithm, over an array of processing elements~(PEs).
+While it would be possible to implement RTL simulator using
+PDES-A, the effective simulation capacity and throughput of such a system would be
+considerably lower than FPGA-based emulators. ASIC emulation aside, it is
+reasonable to assume that likely some domain-specific, FPGA-hosted PDES have been built
+and published in their respective fields. One example published at FCCM by
+Herboldt et. al.~\cite{MolecularFPGAPDES} to simulate molecular dynamics.
+% See PDESA paper for cite
+
+\section{ASIC Emulation As Domain-Specific PDES}
+
+In effect, the DC simulators are domain-specific, FPGA-hosted PDES for doing ASIC simulation.
+As an application domain, ASIC emulation has a number of properties that make FPGAs well-suited for one another.;
+
+The first, most obvious reason is the reason FPGAs are used as ASIC prototyping
+platforms, they are a good implementation sub LPs. In the case of a RTL block with a single clock, a
+simple LP implementation clock-gates the block it models, and adds one or more state
+machines to control when to fire the clock, and enqueue and dequeue messages
+from other LPs. When an LP clock fires, what would be thousands, possibly
+millions or billions, of events in a software simulator is computed
+concurrently in a single host cycle. We expand on various LP implementations in
+the next section.
+
+Second, since FPGAs offer high bandwidth, and critically, low-latency
+interconnect between LPs that is tailored to the target, it is possible to
+decompose an ASIC into closely-coupled LPs that synchronize on a per-cycle
+basis. High bandwidth interconnect between LPs removes any need to compress, or
+otherwise optimize, transmission between LPs, reducing simulator complexity.
+Hundreds, even thousands, of cycle-by-cycle traces of messages can be trivally
+moved between LPs on the same FPGA, a feat that is all but impossible to
+achieve on a CPU host. LPs can be directly connected to one another with
+hardware queues, which in the general case, have a single host cycle of
+"transmission" delay. In some cases, flow-through queues or direct connections
+may be used to allow combinational transmission of messages. This permits
+decomposing an ASIC into LPs that are closely, even combinationally, coupled in
+the target, without grossly affecting simulation performance.
+
+
+%  RAMP papers are domain-specific simulators
+
+%  Explain the assumptions. SIngle clock-domain.
+%  Explain the general structure of these simulators.
+%  Explain what a target formalism is:
+%    -> A means of describing an ASIC as agraph of logical LPs. Different formalism impose different rules on the LPs.
+%  Talk about deadlock avoidance
+%    -> segue to APorts
+%    -> MIDAS' target formalism.
+%       -> Restricted form of APortNetwork
+%       -> FAME1 transform 
+%    -> FAME tranform.
+%    -> LI-BDN
+%        -> Give LP multiple rules, allow them to evaluate 
+
+
+
+
+
+
+
+
+
+Two dimensions of classification.
+
+Timekeeping Strategy
+% Implicit (Cycle-based) vs Explicit (Time-stamped)
+
+Simulation Control (Spectrum)
+% Centralized vs Distributed
+
+Synchronization Schemes \& Control Algorithms
+%Synchronization
+% Formalisms for Distributed, implicitly time-kept RTL Simulators
+
+MIDAS FAME-1 Transform \& Simulator Microarchitecture
+
