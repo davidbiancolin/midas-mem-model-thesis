@@ -5,7 +5,7 @@
 For the purpose of this dissertation, it is insightful to classify FPGA-based
 RTL simulators along two dimensions. For simplicity, here we consider only
 single-FPGA hosts, but we note that this discussion can trivially extended to
-multi-FPGA hosts. This chapter was heavily influenced by dicussion in Pellaur
+multi-FPGA hosts. This chapter was heavily influenced by dicussion in Pellauer
 and Vijayaraghavan et al. in \emph{A-Port Networks: Preserving the Timed
 Behavior of Synchronous Systems for Modeling on FPGAs}~\cite{APortNetwork}.
 
@@ -46,23 +46,64 @@ a vibrant area of research since the 1980s, but PDES researchers have focussed
 nearly exclusively on non-FPGA hosts (including multiprocessors, GPUs,
 supercomputers, networks thereof).  In the next sections, we briefly introduce
 relevant PDES work, and explain how prior work in that field translates to
-hosting DC full-system simulators on FPGAs, but first, we explore some
-simulator designs that are centrally controlled.
+hosting DC full-system simulators on FPGAs. First, we explore some
+CC simulator designs to help motivate the additional complexity DC simulators incur.
+
+\section{An Iron Law For FPGA-Based Simulator Performance}
+
+If SoC designers drop their software-based simulators and turn to emulators only for speed, it is critical
+to understand how simulator design affects it's throughput. For IT simulations of a target
+with a single clock domain, Pellauer et al. present a simple performance equation derived from the 
+Iron Law of Processor Performance:
+
+
+Where,
+
+For this to apply to DC simulators, we can modify the equation above to use the FMR of
+the LP that has executed the fewest number of target cycles in the system. We
+note though, that when LPs may advance only a bounded number of cycles ahead of
+slower LPs in the system for sufficiently long simulation, the equation above
+returns approximately the same result for all LPs.
+
+
+
 
 \section{Centrally Controlled~(CC) Simulators}
 
-Once one  jjj
-% Dynamic barrier synchronization,
+It is natural, when first building a simulator, to attempt to coordinate time
+globally across the FPGA. It is simpler to implement; there are fewer potential
+sources of causality errors, as there aren't different pieces of the simulator at different points in simulated time; and it is considerably
+easier to capture snapshots of the simulated system at particular points in
+time. In a system where different components of the target may take different,
+or even dynamically changing number of host cycles to model, there are two
+common approaches.  The first, is what A-Port Networks, as \emph{Unit-Delay
+Simulation}. Here the simulator is granted a fixed $N$ host-clock-cycles to
+compute each target-cycle, where $N$ is selected to equal the largest possibly
+latency a sub-block may take to model its piece of the target. While simple to
+implement, this will result in lost host-cycles, if in some target cycles the
+full $N$ cycle allocation is unneeded.  We also note that while it's
+relatively easy to provide tight bounds for models of many on-chip
+blocks it may be more difficult for I/O devices, which may require large $N$
+in the worst case, but far less on average.
 
-hi
 
+A natural optimization to make, is to allow sub-blocks to signal when they have
+finished computing.  The centralized controller aggregate done-signals from all
+blocks in the system, stepping the simulator only once all have been asserted.
+This is called \emph{Dynamic-Barrier Synchronization}. While this removes
+wasted host idle cycles, it introduces new control signals that must be routed
+to a central location on the FPGA. This adds considerable wire delay to paths
+that likely lie on the simulators critical path. This problem is exacerbated in
+modern FPGAs, like the VU9P devices used in EC2 F1, which are composed of
+multiple dies~\footnote{In Xilinx parlance, each logic die is referred to as a
+super-logic regions~(SLRs).}, as these control signals must use relatively
+scarser and slower inter-die interconnect. To improve simulator frequency, it
+is natural, perhaps even necessary, to pipeline these signals at the expense of
+a fixed increase to FMR: unless simulation of target cycle can be overlapped,
+FMR will increase by 1 for each additional pipeline stage.
 
 % Why not central control?
 % Don't scale well to large SoCs. Don't scale well with large numbers of LPs
-
-
-
-
 
 
 \section{Software PDES}
@@ -130,7 +171,7 @@ Herboldt et. al.~\cite{MolecularFPGAPDES} to simulate molecular dynamics.
 
 \section{ASIC Emulation As Domain-Specific PDES}
 
-In effect, the DC simulators are domain-specific, FPGA-hosted PDES for doing ASIC simulation.
+In effect, DC simulators are domain-specific, FPGA-hosted PDES for doing ASIC emulation.
 As an application domain, ASIC emulation has a number of properties that make FPGAs well-suited for one another.;
 
 The first, most obvious reason is the reason FPGAs are used as ASIC prototyping
@@ -142,7 +183,7 @@ millions or billions, of events in a software simulator is computed
 concurrently in a single host cycle. We expand on various LP implementations in
 the next section.
 
-Second, since FPGAs offer high bandwidth, and critically, low-latency
+Second, since FPGAs offer high-bandwidth, and critically, low-latency
 interconnect between LPs that is tailored to the target, it is possible to
 decompose an ASIC into closely-coupled LPs that synchronize on a per-cycle
 basis. High bandwidth interconnect between LPs removes any need to compress, or
@@ -155,6 +196,7 @@ hardware queues, which in the general case, have a single host cycle of
 may be used to allow combinational transmission of messages. This permits
 decomposing an ASIC into LPs that are closely, even combinationally, coupled in
 the target, without grossly affecting simulation performance.
+
 
 
 %  RAMP papers are domain-specific simulators
