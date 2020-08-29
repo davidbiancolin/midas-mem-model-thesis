@@ -51,22 +51,66 @@ CC simulator designs to help motivate the additional complexity DC simulators in
 
 \section{An Iron Law For FPGA-Based Simulator Performance}
 
-If SoC designers drop their software-based simulators and turn to emulators only for speed, it is critical
-to understand how simulator design affects it's throughput. For IT simulations of a target
-with a single clock domain, Pellauer et al. present a simple performance equation derived from the 
-Iron Law of Processor Performance:
+If SoC designers turn to hardware emulators for speed, it is critical
+to understand how emulator design affects throughput. For IT simulations of a target
+with a single clock domain, Pellauer et al. present a simple performance
+equation, which like the iron-law of processor performance that inspired it,
+breaks down the performance of a complete simulation into a product of terms:
 
+\begin{equation}
+    f_{sim} = \frac{cycles_{t}}{cycles_{h}} f_{fpga}
+\end{equation}\label{eq:sim-perf}
 
-Where,
+\noindent Where,
+\begin{flalign*}
+    f_{sim} &= \text{throughput of the simulator (target cycles per second, Hz)}\\
+    f_{fpga} &= \text{the clock frequency of the host FPGA (Hz)}\\
+    cycles_{h} &= \text{the total number of host cycles over which the simulation executed}\\
+    cycles_{t} &= \text{the total number of target cycles simulated}\\
+\end{flalign*}
+
+The right term of this equation, host frequency~($f_{fpga}$), is set by the
+critical path delay of the simulator. Depending on the simulator's design, and
+the target it models, this may sometimes be SoC RTL often corresponding to a
+critical path in the actual implementation, but more likely, it is a path that
+drives scheduling logic in the simulator itself (i.e., deciding whether to
+advance forward in simulation time or fire a target clock edge).
+The left term, a ratio of host-to-target cycles is a measure of the
+microarchitectural efficiency of the simulator. In an FPGA prototype, this term is
+effectively unity: every host clock simulates a target clock. In
+a host-decoupled simulator, in practise, it is always less than one\footnote{While it is possible to simulate multiple target cycles per
+host cycle by unrolling successive cycles of execution, there is no incentive
+to do so globally across a simulator, as it would double resource utilization,
+and likely double the critical path length of the simulator. In DC simulators
+of target machines with multiple clock domains, it may make sense to do this
+for relatively small LPs in the fastest clock domains, if the simulator is
+rate-limited on those LPs.}. Given this, Pellauer et al. tend to the
+more-intuitive recipricol of this term and call it FPGA-cycles-to-Model-cycles
+Ratio~(FMR). We give it below.
+
+\begin{equation}
+    FMR = \frac{cycles_{h}}{cycles_{t}}
+\end{equation}\label{eq:fmr}
+
+As an example, consider a 5-read, 3-write register file modelled by an LP that
+uses a 2-ported block RAM. If the LP statically schedules all 8 accesses, it
+will have an FMR of 4. Conversly, a more clever design that dynamically
+schedules accesses only if the ports are used could have lower FMR. In
+simulations where the register file is lightly used the FMR of the LP could
+approach unity, whereas when it is heavily used it would approach the static
+limit of 4. Unless it is statically defined, FMR can only be usefully defined
+as an average over the execution of a particular simulation. Continuing with
+this example, one could gang-together multiple BRAMs or LUTRAMs to build a more
+highly-ported RAM structure that could model more port accesses per cycle.
+While this could reduce the statically scheduled FMR from 4 to as low as 1, it
+comes at the expense of FPGA resources and, potentially, longer simulator
+critical path adversely affecting the second term of \ref{eq:sim-perf}.
 
 For this to apply to DC simulators, we can modify the equation above to use the FMR of
 the LP that has executed the fewest number of target cycles in the system. We
 note though, that when LPs may advance only a bounded number of cycles ahead of
 slower LPs in the system for sufficiently long simulation, the equation above
 returns approximately the same result for all LPs.
-
-
-
 
 \section{Centrally Controlled~(CC) Simulators}
 
@@ -79,32 +123,40 @@ or even dynamically changing number of host cycles to model, there are two
 common approaches.  The first, is what A-Port Networks, as \emph{Unit-Delay
 Simulation}. Here the simulator is granted a fixed $N$ host-clock-cycles to
 compute each target-cycle, where $N$ is selected to equal the largest possibly
-latency a sub-block may take to model its piece of the target. While simple to
+latency a sub-block may take to model its piece of the target~(its FMR is $N$). While simple to
 implement, this will result in lost host-cycles, if in some target cycles the
 full $N$ cycle allocation is unneeded.  We also note that while it's
 relatively easy to provide tight bounds for models of many on-chip
 blocks it may be more difficult for I/O devices, which may require large $N$
 in the worst case, but far less on average.
 
-
 A natural optimization to make, is to allow sub-blocks to signal when they have
 finished computing.  The centralized controller aggregate done-signals from all
-blocks in the system, stepping the simulator only once all have been asserted.
-This is called \emph{Dynamic-Barrier Synchronization}. While this removes
-wasted host idle cycles, it introduces new control signals that must be routed
-to a central location on the FPGA. This adds considerable wire delay to paths
-that likely lie on the simulators critical path. This problem is exacerbated in
-modern FPGAs, like the VU9P devices used in EC2 F1, which are composed of
-multiple dies~\footnote{In Xilinx parlance, each logic die is referred to as a
+blocks in the system and steps the simulator only once all have been
+asserted~(i.e., a wide and-reduction).  This is called \emph{Dynamic-Barrier
+Synchronization}. While this removes wasted host idle cycles (FMR can fall
+below $N$), it introduces new control signals that must be routed to a central
+location on the FPGA. This adds considerable wire delay to paths that likely
+lie on the simulators critical path. This problem is exacerbated in modern
+FPGAs, like the VU9P devices used in EC2 F1, which are composed of multiple
+dies~\footnote{In Xilinx parlance, each logic die is referred to as a
 super-logic regions~(SLRs).}, as these control signals must use relatively
-scarser and slower inter-die interconnect. To improve simulator frequency, it
-is natural, perhaps even necessary, to pipeline these signals at the expense of
-a fixed increase to FMR: unless simulation of target cycle can be overlapped,
-FMR will increase by 1 for each additional pipeline stage.
+scarser and higher-delay inter-die interconnect. Additionally, the scarcity of inter-die interconnect
+puts increased pressure on the router, and for high utilizations often results
+in unrouted nets, and other related DRC errors.  To improve simulator
+frequency, it is natural, perhaps even necessary, to pipeline these signals at
+the expense of a fixed increase to FMR: unless simulation of target cycle can
+be overlapped, FMR will increase by 1 for each additional pipeline stage. While
+FPGAs have scaled in capacity, their logic delays, and thus achievable
+$f_{max}$, have seen little improvement. This increase in capacity begets a
+greater number of units, increasing the number of terms in the and-reduction
+network and lengthening critical path of the simulator.
 
-% Why not central control?
-% Don't scale well to large SoCs. Don't scale well with large numbers of LPs
-
+These trends in FPGA scaling make it natural to want to decentralize
+timekeeping in the simulator.  Having more LPs, each of which have to manage a
+fewer number of control signals, that are routed more locally, should improve
+${f_{fpga}}$ while easing the routing and DRC challenges with centralizing
+control.
 
 \section{Software PDES}
 Software PDES can be divided into two classes based on how they address
@@ -130,7 +182,7 @@ pdes, lps send messages speculatively. Necessarily, LPs have mechanisms to
 rollback from misspeculation and to inform downstream LPs of earlier messages
 that were erronously sent. In Time Warp, LPs correct for mispeculated messages,
 by sending \emph{anti-messages}, which as the physics-analogy would suggest,
-\emph{annaliate} its corresponding pair that was erronously sent previously.
+\emph{annihiliate} its corresponding pair-message that was erronously sent previously.
 
 Though a conservative vs. optimistic PDES debate raged through
 the 90s and 00s, both optimisitic and conservative PDES algorithms see
@@ -192,7 +244,7 @@ Hundreds, even thousands, of cycle-by-cycle traces of messages can be trivally
 moved between LPs on the same FPGA, a feat that is all but impossible to
 achieve on a CPU host. LPs can be directly connected to one another with
 hardware queues, which in the general case, have a single host cycle of
-"transmission" delay. In some cases, flow-through queues or direct connections
+"transmission" delay. In some cases, flow-through queues or wire connections
 may be used to allow combinational transmission of messages. This permits
 decomposing an ASIC into LPs that are closely, even combinationally, coupled in
 the target, without grossly affecting simulation performance.
