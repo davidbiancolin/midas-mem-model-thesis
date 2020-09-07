@@ -22,6 +22,7 @@
 \def\dsp{\def\baselinestretch{2}\large\normalsize}
 %\dsp
 
+
 % If the Grad. Division insists that the first paragraph of a section
 % be indented (like the others), then include this line:
 % \usepackage{indentfirst}
@@ -31,6 +32,11 @@
 \newcommand{\TODO}[1]{{\color{red}\textbf{TODO: #1}}}
 \newcommand{\RISCV}{\mbox{RISC-V}}
 \newcommand{\wunits}[2]{\mbox{#1\,#2}}
+
+% Environments
+\newenvironment{widequote}%
+               {\list{}{\leftmargin=0.3in\rightmargin=0.3in}\item[]}%
+               {\endlist}
 
 % commands use to alias tbd names
 % Paper name

@@ -1,7 +1,6 @@
 % Survey of existing FPGA-based discrete event simulators, and their
 % microarchitectural design.
 
-
 For the purpose of this dissertation, it is insightful to classify FPGA-based
 RTL simulators along two dimensions. For simplicity, here we consider only
 single-FPGA hosts, but we note that this discussion can trivially extended to
@@ -189,11 +188,10 @@ the 90s and 00s, both optimisitic and conservative PDES algorithms see
 contemporary use.
 - Summary of where they are used.
 
-
 \subsection{Considerations for FPGA-Hosted PDES}
 
 FPGA are a unique host platform relative to those studied in the PDES
-literatures, as a number of complications introduced by multiprocessors and
+literature, as a number of complications introduced by multiprocessors and
 networked-hosts do not apply. Notably:
 
 \begin{enumerate}
@@ -224,10 +222,10 @@ Herboldt et. al.~\cite{MolecularFPGAPDES} to simulate molecular dynamics.
 \section{ASIC Emulation As Domain-Specific PDES}
 
 In effect, DC simulators are domain-specific, FPGA-hosted PDES for doing ASIC emulation.
-As an application domain, ASIC emulation has a number of properties that make FPGAs well-suited for one another.;
+As an application domain, ASIC emulation has a number of properties that make FPGAs well-suited for one another:
 
 The first, most obvious reason is the reason FPGAs are used as ASIC prototyping
-platforms, they are a good implementation sub LPs. In the case of a RTL block with a single clock, a
+platforms, they are a good implementation substrate for LPs. In the case of a RTL block with a single clock, a
 simple LP implementation clock-gates the block it models, and adds one or more state
 machines to control when to fire the clock, and enqueue and dequeue messages
 from other LPs. When an LP clock fires, what would be thousands, possibly
@@ -249,28 +247,239 @@ may be used to allow combinational transmission of messages. This permits
 decomposing an ASIC into LPs that are closely, even combinationally, coupled in
 the target, without grossly affecting simulation performance.
 
+If you accept that FPGAs appear to be good hosts of PDES for ASIC emulation,
+the next question becomes how does one translate an ASIC into a graph of
+logical processes, which given a set of restrictions on their behavior, avoid
+deadlock, preserve the behacior of the source RTL, while still mapping
+efficiently onto the FPGA. We refer to the set of rules that define the
+behavior of these graphs as a \emph{target formalism}.  As you will see,
+properties of these graphs exploit features of the underlying target to permit
+building conservative PDES that statically avoid deadlock, and so do not need
+to employ any dynamic mechanisms for avoiding or resolving it. % Citations
+These formalisms permit building ad-hoc simulators, where a designer manually
+writes LP implementations that they stitch together to model a target design
+that has not yet be built, or hardware emulators, where the graph is inferred by a compiler that is processing extent SoC RTL. In
+the latter case, not only can LP implementations be shown to adhere to the
+rules of the target formalism, but it's simulated behavior can be verified
+against the source RTL to show it maintains the same timed behavior.
+
+\section{Target Formalisms}
+
+Target formalisms for ASIC emulation generally can be defined by a tradeoff
+between simulation performance and modelling flexibility. More flexible
+formalisms lift restrictions on LP definition and permit tighter coupling
+between LPs, enabling finer-grained resource optimizations. We explore three
+formalisms: the RAMP model, APortNetworks, and LI-BDNs. One common feature of
+all three formalisms is that they are designed to support conservative, IT
+simulators: messages are not timestamped, and LPs transmit new messages to all
+of their neighbors for every target cycle. Having a fixed-interval between
+messages removes the need for conventional conservative PDES deadlock avoidance
+(i.e, null messages) or detection schemes, instead deadlock avoidance in these
+formalisms is provided by-construction by constraining how combinational paths
+may be modelled between LPs and the conditions under which LP implementations
+must enqueue and dequeue messages.
+
+\section{Channel-Bootstrapped Formalisms}
+
+The RAMP target formalisms and APort Networks are examples of what we define as
+\emph{channel-bootstrapped} formalisms as they rely on the use of special
+point-to-point LPs called \emph{channels}, in RAMP parlance, to send the
+initial messages of the simulation. Channels are LPs because they
+model stateful interconnect: it is this statefulness that allows them to send output
+messages at time 0 before receiving any input messages.
+
+With that said, RAMP and APortNetworks differ primarily in the granularity of
+their supported non-channel LPs. The original RAMP formalism defined
+non-channel LPs, called \emph{units}, at latency-insensitive boundaries in the
+target. This would make blocks on the scale of cores, or DRAM controllers
+reasonable candidates for definition as an LP. Naturally, channels models latency
+insensitive interconnect, and generically can be defined by four parameters shown in \TODO{figure}.
+
+In practise, it is rare to find boundaries in the target design where all
+interfaces are latency insensitive, as often some subset of signals, like reset
+and interrupts, are driven combinationally or through a set of register stages.
+
+APortNetworks was designed to support finer-grained LPs that are coupled with
+register stages in the target. This relaxation makes it possible to define
+finer-grained LPs -- in their paper, Pelleaur et al. use a processor pipeline
+as a motivating example and divide different pipeline stages into seperate LPs.
+Later versions of the RAMP architecture, introduce the same sort of channel,
+called a \emph{pipe-type} channel, shown in \TODO{Figure}
+
+Pipe channels are defined by a single parameter $l$, corresponding to their
+latency. Assuming the underlying registers they model are not reset
+explicitly a using target signal, but are instead initialized at time 0 to some
+statically known value, they may provide $l$ initial messages before they must
+stall for an input message.
+
+Neither formalism appears to give any treatment to modelling a target-driven reset in
+channels, as they both rely on time-zero intialization to effectively
+"reset" target state.  We note that if these underlying state elements are
+synchronously reset, the channels with $l >= 1$ may provide no more than 1
+initial message, afterwhich its output may causually depend on a reset
+message\footnote{We further note that neither of these formalisms was designed
+to support asynchronously reset as all-events are synchronous to an implicit
+clock. At a first blush, however, asynchronous reset mandates that that even
+the first message emitted by a pipe-channel with $l > 0$ would depend causually
+on reset at time 0.}. A pipe-type channel with $l = 0$, is a degenerate LP that models a wire between the producer and consumer LP, coupling them combinationally.
+It models no target state and merely relays messages from producer to consumer.
 
 
-%  RAMP papers are domain-specific simulators
-
-%  Explain the assumptions. SIngle clock-domain.
-%  Explain the general structure of these simulators.
-%  Explain what a target formalism is:
-%    -> A means of describing an ASIC as agraph of logical LPs. Different formalism impose different rules on the LPs.
-%  Talk about deadlock avoidance
-%    -> segue to APorts
-%    -> MIDAS' target formalism.
-%       -> Restricted form of APortNetwork
-%       -> FAME1 transform 
-%    -> FAME tranform.
-%    -> LI-BDN
-%        -> Give LP multiple rules, allow them to evaluate 
+In both the RAMP Architecture and APort Networks, units model a single target
+cycle of execution by dequeuing an input message from each of its input ports,
+and enqueing a new output message into each of it's output ports. While there
+is no specification for when output messages must be enqueue vis-a-vis when
+inputs arrive, however the simplest unit implementation waits for all input
+messages to arrive and all of it's output ports to be ready to accept to
+messages, before it may \emph{fire}. Then the unit computes its state updates
+and simulateously enqueues a single output message into each output port, and
+dequeues a message from each input port.
 
 
+If the simulation designer uses exclusively, non-wire-type channels both
+formalisms are free of deadlock, as there exists no unit whose output at cycle
+$t$ depends on the output of another unit also at cycle $t$\footnote{From a conservative PDES persective, every LP has a non-zero lookahead, and given that every LP sends messages 
+at every timestamp (obviating the need for null messages), deadlock is avoided by construction}. In these
+simulators, all units can excute cycle $t$ concurrently, which assuming no
+other sources of delay, permits the simulator to run at unity FMR.
+
+% Multiclock ?
+
+As with latency-insensitive boundaries, it is not always possible to define LP
+at registered boundaries.  The use of wire-type channels, (i.e. combinational
+coupling between LPs) that introduces two principle challenges: at best, it
+increases simulator FMR, and at worst, it may introduce time-0 simulation
+deadlock.  Wire-type channels tend to increase FMR as in general a
+combinational path that spans $N$, units will take $N$ cycles to execute, with
+other channels connecting these units preventing pipelining of multiple cycles
+(i.e., this latency cannot be overlapped, with the simulation of younger target
+cycles). \TODO{figure} provides an illustration of this.
+
+Deadlock is the more pressing challenge. Wire-type channels remove the
+aforementioned property that all LPs have non-zero lookahead.  Here there are
+two situations that may emerge. If the target itself has a combinational loop,
+the behavior of the target is undefined, and simulation deadlock is
+unavoidable~\footnote{We note it is possible to have "false" combinational
+loops but many tools reject these patterns, and so it's not unreasonable to ban
+them in these simulators as well.}. Fortunately, hardware designers know well
+to avoid combinational loops. The second challenge arises from poor LP
+implementation, such as the simple unit given above, that attempts to enqueue
+and dequeue multiple messages atomically. This has the effect of introducing an
+extranous combinational dependency between output messages and input messages,
+even though there is no combinational path between these outputs and inputs in
+the underlying target. We give an example of this in \TODO{figure}. Given its
+definition of a unit, APort Networks do not give a sufficient set of
+constraints to avoid deadlock as a graph that contains a cycle of wire-type
+channels --- that do not represent a combinational loop in the target -- vacuously
+deadlocks at time 0.
 
 
+\subsection{Latency-Insensitive Bounded-Dataflow Networks}
 
+Unlike channel bootstrapped formalisms, LI-BDNs avoid deadlock by imposing
+different constraints on the implementation of LPs based on the underlying
+hardware they model, and remove the need for specialized channels to bootstrap
+simulation. Since connections between LPs always represent wire-like
+connectivity in the connectivity LI-BDNs impose no contraints on how the target
+is divided into LPs. LI-BDNs were originally developed as a more flexible abstraction for building
+latency-sensitive designs that preserve the RTL timing of a synchronous circuit, extending
+the work of Carloni et al., in the Theory of Latency Insensitive Design. This problem is analogous
+to constructing an ITDC simulator from synchronous ASIC RTL.
 
+In the terms of the paper, what we have loosely referred to as a synchronous
+block of RTL is defined synchronous sequential machine~(SSM). Vijayaraghavan et
+al.\cite{LIBDN} formally define an SSM:
+
+\begin{widequote}
+An SSM is a network of combinational operators or gates
+such as AND, OR, NOT, and state elements such as registers,
+provided the network does not contain any cycles which has
+only combinational elements.
+\end{widequote}
+
+Missing from this definition is any treatment of multiple clock domains, differ
+types of state elements, asynchronous set or reset.  Inherent to the name
+\emph{Synchronous}, Vijayaraghavan et al. forbid their existence -- in an SSM
+\emph{all} state updates occur simultaenously. While this limits the
+applicability of their approach, much of a modern SoC locally meets this
+definition, such as the islands of a GALS-based design.
+
+An LI-BDN is a dataflow network of latency-insensitive actors~(nodes) whose
+edges represent FIFO communication channels with non-zero, but finite (hence,
+bounded) capacity. The latency-insensitive actors at the nodes of the graph are
+referred to as \emph{Primitive LI-BDNs}~(in PDES terms, these are LPs). A
+LI-BDN is said to \emph{implement} an SSM, if it \emph{partially implements}
+the SSM, and is deadlock free.
+
+In the terms of a hardware engineer, partial implementation~(PI) implies that
+the message trace of outputs from the ports of the LI-BDN "matches" the
+per-cycle trace of outputs from the SSM. Vijayaraghavan et al.\cite{LIBDN}
+formally define PI:
+
+\begin{widequote}
+A BDN $R$ partially implements an SSM $S$ iff
+\begin{enumerate}
+\item There is a bijective mapping between the inputs of $S$ and
+[the input tokens of] $R$, and a bijective mapping between the outputs of $S$ and
+[the output tokens of] $R$.
+\item The output histories of $S$ and $R$ match whenever the
+input histories match, i.e.,
+\begin{align*}
+\forall n &> 0\\
+&\text{$I(k)$ for $S$ and $R$ matches $(1 \leq k \leq n)$}\\
+\Rightarrow &\text{$O(j)$ for $S$ and $R$ matches $(1 \leq j \leq n)$}
+\end{align*}
+\end{enumerate}
+\end{widequote}
+
+An SSM can be partially implemented in many different ways. For instance, the
+LP implementation desribed in \TODO{REF} is a valid partial implementation of
+the source RTL. However, it cannot \emph{implement} a larger SSM as it is
+susceptible to deadlock when composed with other LPs.  LI-BDNs garauntee
+deadlock freedom by adhering to two additional properties. The first, is
+\emph{No Extraenous Depedencies}~(NED), which defines when an LP is obligated to enqueue output messages. Vijayaraghavan et al.\cite{LIBDN} formally define NED:
+
+\begin{widequote}
+A primitive BDN has the NED property if all output FIFOs have been enqueued at least $n-1$ times,
+and for each output $O_i$, all the FIFOs for the inputs in $\emph{CombinationallyConnected}(O_i)$
+are enqueued $n$ times, and all other input FIFOs are enqueued at least $n-1$ times, then $O_i$ FIFO
+must eventually be enqueued $n$ times.
+\end{widequote}\label{def:ned}
+
+% Goes after NED
+Intuitively, it exploits the same observation that
+permits a pipe-type channel to send output messages before receiving any input
+messages could apply to units -- any output channel driven only by state in the
+LP (i.e., it's not combinationally coupled to an input) can enqueue an output
+messages for cycle $t$ before receiving any input messages for cycle $t$.
+
+The second property an LI-BDN must satisfy is the \emph{self-cleaning}~(SC) property. SC 
+defines when an LP is obligated to dequeue input tokens. Vijayaraghavan et al.\cite{LIBDN} formally define SC:
+
+\begin{widequote}
+A primitive BDN has the SC property, if when all the
+outputs are enqueued $n$ times, all the input FIFOs must
+[eventually]\footnote{Clarified in~\cite{LIBDNMasters}.} be dequeued $n$ times, assuming an infinite source for each
+input.
+\end{widequote}\label{def:sc}
+
+While the nodes of an APort Networks do not always satisfy NED, they do satisfy
+SC. At it's heart, SC provides an assurance that LPs drain their input FIFOs,
+allowing those FIFOs remain bounded. We note that if and LP fails to satisfy
+SC, it will likely fail to partially implement its SSM unless its outputs are
+completely independent of the inputs from which it is failing to dequeue. In
+this case, having unbounded FIFOs would suffice to prevent deadlock.
+
+Of particular concern to this dissertation, is method through which an SSM can
+be converted into an LI-BDN.  Vijayaraghavan et al. describe a means that uses
+a wrapper module around the patient SSM based on it's combinational
+depedencies. The SSM is treated as a black box otherwise. The wrapper circuit,
+for a single output, is shown in \ref{figure}.
+
+This method is highly amenable to automation with a FAME compiler, as it requires
+only the ability analyze combinational depedencies in the underlying SSM.
+
+\section{The MIDAS Compiler \& Simulator Microarchitecture}
 
 
 
