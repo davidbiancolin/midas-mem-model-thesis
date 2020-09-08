@@ -303,7 +303,7 @@ APortNetworks was designed to support finer-grained LPs that are coupled with
 register stages in the target. This relaxation makes it possible to define
 finer-grained LPs -- in their paper, Pelleaur et al. use a processor pipeline
 as a motivating example and divide different pipeline stages into seperate LPs.
-Later versions of the RAMP architecture, introduce the same sort of channel,
+Later versions of the RAMP architecture, introduced the same sort of channel,
 called a \emph{pipe-type} channel, shown in \TODO{Figure}
 
 Pipe channels are defined by a single parameter $l$, corresponding to their
@@ -324,36 +324,102 @@ the first message emitted by a pipe-channel with $l > 0$ would depend causually
 on reset at time 0.}. A pipe-type channel with $l = 0$, is a degenerate LP that models a wire between the producer and consumer LP, coupling them combinationally.
 It models no target state and merely relays messages from producer to consumer.
 
+Units model a single target cycle of execution by dequeuing an input message
+from each of its input ports, and enqueing a new output message into each of
+it's output ports. The simplest unit implementation, and the one perscribed by
+APort Networks, waits for all input messages to arrive and all of it's output
+ports to be ready to accept to messages, before it may \emph{fire}. Then the
+unit computes its state updates and simulateously enqueues a single output
+message into each output port, and dequeues a message from each input port.
+Figure~\ref{fig:adder-example} demonstrates the execution of a single target cycle in a channel-bootstrapped formalism.
 
-In both the RAMP Architecture and APort Networks, units model a single target
-cycle of execution by dequeuing an input message from each of its input ports,
-and enqueing a new output message into each of it's output ports. While there
-is no specification for when output messages must be enqueue vis-a-vis when
-inputs arrive, however the simplest unit implementation waits for all input
-messages to arrive and all of it's output ports to be ready to accept to
-messages, before it may \emph{fire}. Then the unit computes its state updates
-and simulateously enqueues a single output message into each output port, and
-dequeues a message from each input port.
-
+\begin{figure*}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \captionsetup{margin=0.25cm}
+        \includegraphics[width=\columnwidth]{figures/adder-example1.pdf}
+        \caption{Initial state of the graph.}
+        % graffle2pdf -c initial-state midas-graphics/graffle/adder-example.graffle figures/adder-example1.pdf
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \captionsetup{margin=0.25cm}
+        \includegraphics[width=\columnwidth]{figures/adder-example2.pdf}
+        \caption{With all input tokens available, the unit fires and advances to cycle 1.}
+        % graffle2pdf -c tfire-cycle0 midas-graphics/graffle/adder-example.graffle figures/adder-example2.pdf
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \captionsetup{margin=0.25cm}
+        \includegraphics[width=\columnwidth]{figures/adder-example3.pdf}
+        \caption{The state of the graph after firing. The unit is stalled on the arrival of a B-input token.}
+        % graffle2pdf -c cycle1 midas-graphics/graffle/adder-example.graffle figures/adder-example3.pdf
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \captionsetup{margin=0.25cm}
+        \includegraphics[width=\columnwidth]{figures/adder-example4.pdf}
+        \caption{Input B source fires, producing the needed token.}
+        % graffle2pdf -c inputb-fires midas-graphics/graffle/adder-example.graffle figures/adder-example4.pdf
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \includegraphics[width=\columnwidth]{figures/adder-example5.pdf}
+        \caption{The state of the graph after two firings of the unit.}
+        % graffle2pdf -c cycle2 midas-graphics/graffle/adder-example.graffle figures/adder-example5.pdf
+    \end{subfigure}
+    \centering
+    \vspace{-0.25in}
+    \caption{A 32-bit adder model and environment simulating a single cycle of target time.}
+    \label{fig:adder-example}
+\end{figure*}
 
 If the simulation designer uses exclusively, non-wire-type channels both
 formalisms are free of deadlock, as there exists no unit whose output at cycle
-$t$ depends on the output of another unit also at cycle $t$\footnote{From a conservative PDES persective, every LP has a non-zero lookahead, and given that every LP sends messages 
-at every timestamp (obviating the need for null messages), deadlock is avoided by construction}. In these
-simulators, all units can excute cycle $t$ concurrently, which assuming no
-other sources of delay, permits the simulator to run at unity FMR.
-
-% Multiclock ?
-
-As with latency-insensitive boundaries, it is not always possible to define LP
+$t$ depends on the output of another unit also at cycle $t$\footnote{From a
+conservative PDES persective, every LP has a non-zero lookahead, and given that
+every LP sends messages at every timestamp (obviating the need for null
+messages), deadlock is avoided by construction}. In these simulators, all units
+can excute cycle $t$ concurrently, which assuming no other sources of delay,
+permits the simulator to run at unity FMR.  However, as with latency-insensitive boundaries, it is not always possible to define LP
 at registered boundaries.  The use of wire-type channels, (i.e. combinational
 coupling between LPs) that introduces two principle challenges: at best, it
 increases simulator FMR, and at worst, it may introduce time-0 simulation
-deadlock.  Wire-type channels tend to increase FMR as in general a
+deadlock. To illustrate each of these effects, in Figure~\ref{fig:channel-deadlock} we consider a
+latency insensitive interface between two units implemented using a queue-type
+channel, one pipe and one wire-type channel, and two wire-type channels.
+
+\begin{figure*}
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \captionsetup{margin=0.25cm}
+        \includegraphics[width=\columnwidth]{figures/li-queue-channel-manual.pdf}
+        \caption{A RAMP-style queue-type channel. This allows both models to
+        fire simultaenously, but may only be used if it is acceptable to model
+        a target queue in the channel.}
+        %  -c queue midas-graphics/graffle/deadlock.graffle figures/li-queue-channel.pdf
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \captionsetup{margin=0.25cm}
+        \includegraphics[width=\columnwidth]{figures/li-pipe-channel-manual.pdf}
+        \caption{One pipe-type channel, and one-wire type channel carrying the backpressure. This leads $FMR >= 2$, with the consumer unit
+        firing first to produce a backpressure token that is subsequently consumed by the producer unit.}
+        %  -c pipe midas-graphics/graffle/deadlock.graffle figures/li-pipe-channel.pdf
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \captionsetup{margin=0.25cm}
+        \includegraphics[width=\columnwidth]{figures/li-wire-channel-manual.pdf}
+        \caption{Two-wire type channels. This deadlocks an APort Network, as neither producer nor consumer unit can fire
+        before the other.}
+        % -c wire midas-graphics/graffle/deadlock.graffle figures/li-wire-channel.pdf
+    \end{subfigure}
+    \centering
+    \vspace{-0.25in}
+    \caption{Three potential channel modelling decisions for a latency insensitive interface between two units.}
+    \label{fig:channel-deadlock}
+\end{figure*}
+
+Wire-type channels tend to increase FMR as in general a
 combinational path that spans $N$, units will take $N$ cycles to execute, with
 other channels connecting these units preventing pipelining of multiple cycles
 (i.e., this latency cannot be overlapped, with the simulation of younger target
-cycles). \TODO{figure} provides an illustration of this.
+cycles).
 
 Deadlock is the more pressing challenge. Wire-type channels remove the
 aforementioned property that all LPs have non-zero lookahead.  Here there are
@@ -370,7 +436,7 @@ even though there is no combinational path between these outputs and inputs in
 the underlying target. We give an example of this in \TODO{figure}. Given its
 definition of a unit, APort Networks do not give a sufficient set of
 constraints to avoid deadlock as a graph that contains a cycle of wire-type
-channels --- that do not represent a combinational loop in the target -- vacuously
+channels -- that do not represent a combinational loop in the target -- vacuously
 deadlocks at time 0.
 
 
@@ -399,15 +465,16 @@ only combinational elements.
 
 Missing from this definition is any treatment of multiple clock domains, differ
 types of state elements, asynchronous set or reset.  Inherent to the name
-\emph{Synchronous}, Vijayaraghavan et al. forbid their existence -- in an SSM
+``Synchronous'', Vijayaraghavan et al. forbid their existence -- in an SSM
 \emph{all} state updates occur simultaenously. While this limits the
 applicability of their approach, much of a modern SoC locally meets this
 definition, such as the islands of a GALS-based design.
 
-An LI-BDN is a dataflow network of latency-insensitive actors~(nodes) whose
+An LI-BDN is a dataflow network of latency-insensitive nodes whose
 edges represent FIFO communication channels with non-zero, but finite (hence,
-bounded) capacity. The latency-insensitive actors at the nodes of the graph are
-referred to as \emph{Primitive LI-BDNs}~(in PDES terms, these are LPs). A
+bounded) capacity. The latency-insensitive nodes of the graph are
+referred to as \emph{Primitive LI-BDNs}~(in PDES terms, these are LPs), which is to say, they 
+are not themselves subgraphs of more than one node. A
 LI-BDN is said to \emph{implement} an SSM, if it \emph{partially implements}
 the SSM, and is deadlock free.
 
