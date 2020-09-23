@@ -32,4 +32,5 @@ graffle-figures.mk: $(tex_files)
 -include graffle-figures.mk
 
 graffle2pdf: $(graffle_figures) graffle-figures.mk
-.PHONY:graffle2pdf
+figures: $(graffle_figures)
+.PHONY:graffle2pdf figures
