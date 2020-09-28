@@ -145,5 +145,5 @@ print xtick_coords
 plt.xticks(xtick_coords, xtick_labels, rotation=45, text="Dates")
 plt.xlabel('Date')
 plt.ylabel('Pages Written')
-plt.legend(['Actual', 'Projected', 'Required'])
+plt.legend(['Actual', 'Projected', 'Required'], loc='lower right')
 plt.savefig('shame.png', dpi=160, format='png', bbox_inches='tight')
