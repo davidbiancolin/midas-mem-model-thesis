@@ -644,8 +644,8 @@ only a mechanism to analyze combinational dependencies in the underlying SSM.
     \label{fig:aport-network-wrapper}
 \end{figure}
 
-\section{The MIDAS Compiler \& Generated Simulator Microarchitecture} MIDAS,
-which we provided some introduction for in Section~\ref{sec:midas-intro}, MIDAS
+\section{The MIDAS Compiler \& Generated Simulator Microarchitecture}\label{sec:midas-impl}
+MIDAS, which we provided some introduction for in Section~\ref{sec:midas-intro}, MIDAS
 was our first attempt at building a FAME compiler. Here we describe in greater
 detail how it was implemented. Specifically, we direct the reader to the
 version of MIDAS released as part of FireSim 1.5.0, which differs modestly from
@@ -892,7 +892,7 @@ At the end of the previous chapter, we identified two limitations with MIDAS
 that we aimed to address in Golden Gate. The first was that it did little to
 optimize FPGA resource utilization, precluding its use for systems of
 non-trivial scale. We made our first attempt at addressing this in Golden Gate
-in its eponymous ICCAD 2019 publication~\cite{Golden Gate}. We did this by
+in its eponymous ICCAD 2019 publication~\cite{GoldenGate}. We did this by
 switching to a LI-BDN formalism, building in compiler support to identify and
 extract target submodules, and supplying hooks to later replace those
 submodules with optimized primitive LI-BDN implementations. We expand on the
