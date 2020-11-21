@@ -1,4 +1,5 @@
-graffle_figures := figures/queue-channel.pdf \
+graffle_figures := figures/gg-target.pdf \
+	figures/queue-channel.pdf \
 	figures/pipe-channel.pdf \
 	figures/adder-example1.pdf \
 	figures/adder-example2.pdf \
@@ -10,6 +11,9 @@ graffle_figures := figures/queue-channel.pdf \
 	figures/rocket-target-graph.pdf \
 	figures/mapped-simulator-f1.pdf \
 	figures/midas-flow.pdf
+
+figures/gg-target.pdf:midas-graphics/graffle/midas2-target.graffle
+	omnigraffle-export -c gg-target midas-graphics/graffle/midas2-target.graffle figures/gg-target.pdf
 
 figures/queue-channel.pdf:midas-graphics/graffle/channel-types.graffle
 	omnigraffle-export -c queue midas-graphics/graffle/channel-types.graffle figures/queue-channel.pdf

@@ -50,7 +50,7 @@ hosting DC RTL simulators on FPGAs. First, we explore how to define simulation
 performance, and then study some CC simulator designs to help motivate the use
 of DC simulators despite their increased complexity.
 
-\section{An Iron Law For FPGA-Based Simulator Performance}
+\section{An Iron Law For FPGA-Based Simulator Performance}\label{sec:iron-law}
 
 If SoC designers turn to hardware emulation for speed, it is critical
 to understand how emulator design affects simulation throughput. For IT simulators with a single target-clock domain, Pellauer et al.~\cite{APortNetworks} present a simple performance
@@ -689,7 +689,7 @@ simulators can run at unity FMR. We show an example simulator mapped to an EC2 F
 \end{figure}
 
 
-\subsection{Endpoint Units}
+\subsection{Endpoint Units}\label{sec:midas-endpoints}
 
 Topological position aside, endpoint units differ from the hub in that they are not transformed from ASIC
 RTL and instead are written by hand, and thus, not exact models of the desired target system.
@@ -784,7 +784,7 @@ past relative to the peek-poke endpoint), and additionally, other endpoints
 connected to the hub may be relatively more or less advanced in simulation
 time.
 
-\subsection{MIDAS's Generator Side Integration}
+\subsection{MIDAS's Generator Side Integration}\label{sec:midas-chisel-api}
 
 MIDAS functions by providing an alternate generation flow for a Chisel
 generator.  In their Scala application, the user lazily instantiates their
@@ -921,45 +921,4 @@ implementation of the Chandy-Misra-Bryant algorithm to avoid
 deadlock. This explicitly timekept portion of the graph coexists with SSM
 optimizations which can be applied locally to parts of the design where the SSM
 assumption holds.
-
-%We considered a few possibilities such as leaning on the endpoint system and
-%user modifications to the target RTL, or using specialized transformations to
-%implement optimizations as modifications to the hub model.
-%We had the following objectives:
-%
-%\being{itemize}
-%\item Minimize user modification to the ASIC RTL.
-%\item Make it possible to optimize blocks that may be combinationally coupled to some part of the hub.
-%\item Provide a mechanism to rigorously verify the resulting simulator.
-%\end{itemize}
-%
-%
-%Ultimately, it was clear that the next compiler needed a generalized
-%mechanism to identify and perform optimizations. To make it easier to
-%implement optimizations, Golden Gate uses the LI-BDN target formalism,
-%removing the explicit need for channels. We acknowledge that forcing
-%optimizations to apply only at registered boundaries between units -- a
-%requirement of a channel-bootstrapped formalism -- would produce simulators
-%with better FMR, this would add complexity to passes in the compiler and
-%might make some optimizations infeasible.  We also note that these sorts of
-%optimizations not fundamentally precluded by LI-BDN: when an edge between
-%two LPs is driven by an output port with no combinational dependency on an
-%input, it may be possible to implement that edge using flow queue to save a
-%cycle of transmission latency.
-%
-%Moving to an LI-BDN formalism resolves a number of other modeling
-%challenges MIDAS users face.  Requiring that non-wire-channels be injected
-%between endpoints and the hub unit was too restrictive in some cases where
-%the user wishes to model a combinational path that propagated through the
-%endpoint. Another challenge was defining the reset semantics of these
-%stateful channels.  MIDAS relies on FPGA programming to properly initialize
-%these channels, however they are not held in target reset  during
-%simulation: it is purely coincidental that the hub model does not
-%spuriously enqueue target data into queue-type channels while parts of the
-%hub are under target reset. For a time, MIDAS would broadcast target reset
-%tokens to channels and endpoints, but too is fraught as resets driving
-%registers in the hub maybe different from this special-cased global reset.
-%Instead of requiring that user specify this reset for each channel, LI-BDN
-%can sidestep these issues entire by removing the need for stateful
-%channels, allowing the compiler to assume fewer things about target.
 
