@@ -15,7 +15,7 @@ clean:
 
 shame:
 	./run-shame.sh $(PAPER).log
-	scp shame.png a4:~/public_html/shame.png
+	scp shame.png a5:~/public_html/shame.png
 
 
 .PHONY: clean

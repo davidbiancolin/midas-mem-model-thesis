@@ -31,6 +31,13 @@ title = {{MARSSx86: A full system simulator for x86 CPUs}},
 year = {2011}
 }
 
+@misc{Verilator,
+   author = {Mentor Graphics},
+   title = "Veloce Emulation Platform",
+   year = "(Accessed January 4th, 2021)",
+   howpublished = "\url{https://www.veripool.org/wiki/verilator}",
+}
+
 @inproceedings{nehalemprototype,
 title={Intel nehalem processor core made FPGA synthesizable},
 author={Schelle, Graham and Collins, Jamison and Schuchman, Ethan and Wang, Perrry and Zou, Xiang and Chinya, Gautham and Plate, Ralf and Mattner, Thorsten and Olbrich, Franz and Hammarlund, Per and others},
@@ -96,6 +103,13 @@ organization={ACM}
   number={},
   pages={1011-1018},}
 
+@misc{Protium,
+   author = {Cadence},
+   title = "Cadence Launches Protium X1, the First Scalable, Data Center-Optimized Enterprise Prototyping System for Early Software Development",
+   year = "2019 (Accessed January 4th, 2020)",
+   howpublished = "\url{https://www.cadence.com/en_US/home/company/newsroom/press-releases/pr/2019/cadence-launches-protium-x1--the-first-scalable--data-center-opt.html}",
+}
+
 @misc{Palladium,
    author = {Cadence},
    title = "Cadence Palladium Z1 Enterprise Emulation Platform",
@@ -107,7 +121,7 @@ organization={ACM}
    author = {EETimes},
    title = "Quickturn’s New Emulation Family Sets the Standard for Verification Performance and Capacity",
    month = "January",
-   year = "1997 (Accessed July 4th, 2020)",
+   year = "1997 (Accessed July 5th, 2020)",
    howpublished = "https://www.eetimes.com/quickturns-new-emulation-family-sets-the-standard-for-verification-performance-and-capacity/"
  }
 
@@ -169,6 +183,15 @@ series = {SIGMETRICS ’93}
   number={},
   pages={60-66},}
 
+@INPROCEEDINGS{StepwisePLLModel,
+ author={Herbst, Steven and Lim, Byong Chan and Horowitz, Mark},
+ booktitle={2018 IEEE/ACM International Conference on Computer-Aided Design (ICCAD)},
+ title={Fast FPGA Emulation of Analog Dynamics in Digitally-Driven Systems},
+ year={2018},
+ volume={},
+ number={},
+ pages={1-8},
+ doi={10.1145/3240765.3240808}}
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%% RAMP Papers
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -385,6 +408,16 @@ keywords = {computer simulation, performance analysis, distributed computing, da
 location = {Los Angeles, California},
 series = {ISCA ’18}
 }
+
+@INPROCEEDINGS{VLSIFireSimEval,
+  author={Lee, Yunsup and Waterman, Andrew},
+  booktitle={2020 IEEE Symposium on VLSI Circuits},
+  title={Managing Chip Design Complexity in the Domain-Specific SoC Era},
+  year={2020},
+  volume={},
+  number={},
+  pages={1-2},
+  doi={10.1109/VLSICircuits18222.2020.9162812}}
 
 @inproceedings{FirePerf,
 author = {Karandikar, Sagar and Ou, Albert and Amid, Alon and Mao, Howard and Katz, Randy and Nikoli\'{c}, Borivoje and Asanovi\'{c}, Krste},
@@ -1042,4 +1075,49 @@ year = {2006}
  publisher = {ACM},
  address = {New York, NY, USA},
  keywords = {FPGA, XOR, memory, multi-port, parallel},
+}
+
+%RISC-V Stuff
+
+@misc{HiFiveUnleashed,
+   author = {SiFive},
+   title = "Cadence Palladium Z1 Enterprise Emulation Platform",
+   year = "2020 (Accessed November 25th, 2020)",
+   howpublished = "\url{https://www.sifive.com/boards/hifive-unleashed}",
+}
+
+@misc{FreedomU540,
+   author = {SiFive},
+   title = "SiFive FU540-C000 Manual, v1p0",
+   year = "2018",
+   howpublished = "\url{https://static.dev.sifive.com/FU540-C000-v1.0.pdf}"
+}
+
+% Workloads
+@article{SPEC2006WorkingSet,
+    author = {Gove, Darryl},
+    title = {CPU2006 Working Set Size},
+    year = {2007},
+    issue_date = {March 2007},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {35},
+    number = {1},
+    issn = {0163-5964},
+    url = {https://doi.org/10.1145/1241601.1241619},
+    doi = {10.1145/1241601.1241619},
+    abstract = {SPEC CPU2000 had a target memory footprint of 200 MB for the benchmarks [1], to enable the suite to run on machines with 256 MB of memory. Six years have elapsed since the release of that suite, and in that time memory sizes have increased significantly, so the memory requirements for the recently released CPU2006 reflect this. CPU2006 has been targeted to have a benchmark memory footprint of about 900MB, allowing the suite to run on machines with 1GB of memory.},
+    journal = {SIGARCH Comput. Archit. News},
+    month = mar,
+    pages = {90–96},
+    numpages = {7}
+}
+
+@BOOK{FPMM,
+TITLE = {FPGA-Based Prototyping Methodology Manual},
+SUBTITLE = {Best Practises in Design-For-Prototyping},
+AUTHOR = {Amos, Dough and Lesea, Austin and Richter, Ren},
+isbn = {978-1617300042},
+YEAR = {2011},
+PUBLISHER = {Synopsys Press},
 }

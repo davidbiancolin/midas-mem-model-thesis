@@ -58,12 +58,25 @@
     tabsize=2
 }
 
+\hyphenation{FIRRTL}
+\hyphenation{FPGA}
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\DeclareMathOperator{\Tr}{\mathbf{Tr}}
+\DeclareMathOperator{\AP}{\mathbf{AP}}
+\DeclareMathOperator{\PI}{\mathbf{PI}}
+\DeclareMathOperator{\PO}{\mathbf{PO}}
+\DeclareMathOperator{\CC}{\mathbf{CC}}
+\DeclareMathOperator{\X}{\mathbf{X}}
+\DeclareMathOperator{\until}{\mathbf{U}}
+\DeclareMathOperator{\R}{\mathbf{R}}
+\DeclareMathOperator{\always}{\mathbf{G}}
+\DeclareMathOperator{\F}{\mathbf{F}}
+\DeclareMathOperator{\W}{\mathbf{W}}
+
 %\lstset{style=mystyle}
 % commands use to alias tbd names
 % Paper name
-\newcommand{\PNAME}{\mbox{\textsc{fased}}\xspace}
-% Simulation framework name
-\newcommand{\SIMNAME}{MIDAS\xspace}
 
 \bibliography{refs}
 
@@ -77,7 +90,7 @@
 \title{FPGA-Accelerated Simulation of ASICs with Dynamically Scaling Clocks}
 \author{David Thomas Biancolin}
 \degreesemester{Spring}
-\degreeyear{2019}
+\degreeyear{2021}
 \degree{Doctor of Philosophy}
 \chair{Professor Krste Asanovi\'c}
 \cochair{Adjunct Professor Jonathan Richard Bachrach}
@@ -149,7 +162,13 @@
 
 \input{tex/golden-gate}
 
+\chapter{Target-to-Host Bridges And Their Performance Considerations}\label{sec:bridges}
+
+\input{tex/bridges}
+
 \chapter{Stretching the Synchronous Assumption: Support for Systems with Rationally Related Clocks}\label{sec:static-multiclock}
+
+\input{tex/static-multiclock}
 
 \chapter{Embracing Asynchrony: Generalized Support For Asychronous Events via Explicit Timestamping}\label{sec:dynamic-multiclock}
 

@@ -1,4 +1,10 @@
-graffle_figures := figures/gg-target.pdf \
+graffle_figures := figures/fased-block-diagram.pdf \
+	figures/model-operation-1.pdf \
+	figures/model-operation-2.pdf \
+	figures/model-operation-3.pdf \
+	figures/model-operation-4.pdf \
+	figures/static-multiclock-wrapper.pdf \
+	figures/gg-target.pdf \
 	figures/queue-channel.pdf \
 	figures/pipe-channel.pdf \
 	figures/adder-example1.pdf \
@@ -11,6 +17,24 @@ graffle_figures := figures/gg-target.pdf \
 	figures/rocket-target-graph.pdf \
 	figures/mapped-simulator-f1.pdf \
 	figures/midas-flow.pdf
+
+figures/fased-block-diagram.pdf:midas-graphics/graffle/memory-model-block-diagram.graffle
+	omnigraffle-export -c full midas-graphics/graffle/memory-model-block-diagram.graffle figures/fased-block-diagram.pdf
+
+figures/model-operation-1.pdf:midas-graphics/graffle/memory-model-operation.graffle
+	omnigraffle-export -c 1 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-1.pdf
+
+figures/model-operation-2.pdf:midas-graphics/graffle/memory-model-operation.graffle
+	omnigraffle-export -c 2 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-2.pdf
+
+figures/model-operation-3.pdf:midas-graphics/graffle/memory-model-operation.graffle
+	omnigraffle-export -c 3 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-3.pdf
+
+figures/model-operation-4.pdf:midas-graphics/graffle/memory-model-operation.graffle
+	omnigraffle-export -c 4 midas-graphics/graffle/memory-model-operation.graffle figures/model-operation-4.pdf
+
+figures/static-multiclock-wrapper.pdf:midas-graphics/graffle/wrapper-transforms.graffle
+	omnigraffle-export -c multiclock-wrapper midas-graphics/graffle/wrapper-transforms.graffle figures/static-multiclock-wrapper.pdf
 
 figures/gg-target.pdf:midas-graphics/graffle/midas2-target.graffle
 	omnigraffle-export -c gg-target midas-graphics/graffle/midas2-target.graffle figures/gg-target.pdf

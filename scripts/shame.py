@@ -126,6 +126,8 @@ plt.text(len(pages) - 1 + text_x_curr,
 xtick_days = [day_start]
 for i in xrange(4,13):
     xtick_days.append(datetime.datetime(2020, i, 1))
+for i in xrange(1,3):
+    xtick_days.append(datetime.datetime(2021, i, 1))
 xtick_days.append(deadline)
 
 xtick_coords = []
