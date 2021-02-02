@@ -5,6 +5,7 @@ graffle_figures := figures/fased-block-diagram.pdf \
 	figures/model-operation-4.pdf \
 	figures/static-multiclock-wrapper.pdf \
 	figures/gg-target.pdf \
+	figures/sim-wrapper-layers.pdf \
 	figures/queue-channel.pdf \
 	figures/pipe-channel.pdf \
 	figures/adder-example1.pdf \
@@ -38,6 +39,9 @@ figures/static-multiclock-wrapper.pdf:midas-graphics/graffle/wrapper-transforms.
 
 figures/gg-target.pdf:midas-graphics/graffle/midas2-target.graffle
 	omnigraffle-export -c gg-target midas-graphics/graffle/midas2-target.graffle figures/gg-target.pdf
+
+figures/sim-wrapper-layers.pdf:midas-graphics/graffle/sim-wrapper-layers.graffle
+	omnigraffle-export -c wrappers midas-graphics/graffle/sim-wrapper-layers.graffle figures/sim-wrapper-layers.pdf
 
 figures/queue-channel.pdf:midas-graphics/graffle/channel-types.graffle
 	omnigraffle-export -c queue midas-graphics/graffle/channel-types.graffle figures/queue-channel.pdf

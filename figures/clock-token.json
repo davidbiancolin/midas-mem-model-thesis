@@ -1,0 +1,9 @@
+{ comment: "Trigger update waveform. Upload this to wavedrom.com to render a waveform",
+  signal: [
+  {name: 'clockA', wave: 'n......', period: 2, phase: 0.5},
+  {name: 'clockB', wave: 'n.....', period: 3, phase: 4},
+  {name: 'clockC', wave: 'n...', period: 4, phase: 1.5},
+  {name: 'token',  wave: 'x=x===x=x===x=', data: ["111", "001","010","101","011","101",'010',"001","111"], phase: 1.15}
+   ]
+ }
+   

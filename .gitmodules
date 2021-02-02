@@ -1,3 +1,6 @@
 [submodule "midas-graphics"]
 	path = midas-graphics
 	url = git@github.com:davidbiancolin/midas-graphics.git
+[submodule "midas-scripts"]
+	path = midas-scripts
+	url = git@github.com:davidbiancolin/midas-scripts.git

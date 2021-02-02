@@ -5,62 +5,65 @@
 Until now all Golden Gate and MIDAS-generated simulators modeled systems with a
 single clock domain. Anecdotally, the lack of support for simulating targets
 with more than a single clock has been the most common criticism of FireSim
-offered by potential users FireSim, many of whom turn to using a conventional
-FPGA prototype. The criticism is well justified. Most notably, forcing the outer memory
-hierarchy to run at the speed of the cores results in a memory hierarchy that
+offered by potential users, many of whom turn to using a conventional FPGA
+prototype. The criticism is well justified: forcing the outer memory hierarchy
+to run at the same frequency of the cores results in a memory hierarchy that
 can sustain artificially high bandwidths at lower latencies.
 
 To date, the only effort to validate FireSim performance against a silicon
-implementation was conducted Lee and Waterman~\cite{VLSIFireSimEval}, where they
-compared SPECInt2006 results collected from the HiFive Unleashed~\cite{HiFiveUnleashed}
-against an equivalent design running on FireSim. While the geomean of FireSim's
-SPEC score fell within 2\% of the HiFive Unleashed, the largest difference was
-10.7\% for \texttt{429.mcf}, a benchmark with infamously poor memory locality
-(its working set has been measured 680 MB\cite{SPEC2006WorkingSet}). The
-FireSim variant differed in that it used non-standard UC Berkeley IO devices
-(and backing FireSim Bridges) and a FASED memory timing model instead of their
-commerical DDR3/4 memory controller. Most notably, the HiFive Unleashed
-coreplex and memory hierarchy spans three clock domains. Tiles run at the fastest
-frequency~(1.5 GHz in their study), the uncore runs at half this frequency~(75O
-MHz), and the DRAM memory system, capable of 2400 MT/s (resulting in a 600 MHz
-controller clock in their implementation), sits in it's own clock domain behind
-an asynchronous crossing\cite{FreedomU540}. In this case, if support for modeling
-multiple clocks with fixed frequencies were supported in FireSim, bridges would
-be the only remaining non-trivial source of simulation error in systems that do not
-dynamically scale their frequencies.
+implementation was conducted by Lee and Waterman~\cite{VLSIFireSimEval}. They
+compared SPEC2006 Integer results collected from the HiFive
+Unleashed~\cite{HiFiveUnleashed} against an equivalent design running on
+FireSim. While the geomean of FireSim's SPEC score fell within 2\% of the
+HiFive Unleashed, the largest difference was 10.7\% for \texttt{429.mcf}, a
+benchmark with infamously poor memory locality (its working set has been
+measured 680 MB\cite{SPEC2006WorkingSet}). The FireSim variant differed in that
+it used non-standard UC Berkeley IO devices (and backing FireSim Bridges) and a
+FASED memory timing model instead of their commerical DDR3/4 memory controller.
+However, the most pertinent difference between the two platforms is that the
+HiFive Unleashed coreplex and memory hierarchy spans three clock domains. Tiles
+run at the fastest frequency~(1.5 GHz in their study), the uncore runs at half
+this frequency~(75O MHz), and the DRAM memory system, capable of 2400 MT/s
+(resulting in a 600 MHz controller clock in their implementation), sits in it's
+own clock domain behind an asynchronous crossing\cite{FreedomU540}. To model
+these domains without native support for multi-clock simulation, they resorted
+to adding additional buffering between the L2 and the inner caches, and scaling
+FASED latencies to match the times expected from a controller that should be
+running at a slower frequency. Systems like the Freedom Unleashed, which do not actively scale frequencies
+after boot, are relatively common. For these systems, support for multiple, statically defined clocks
+would suffice to resolve this peformance descrepancy.
 
-A natural place to look for inspiration is in FPGA prototyping. Here,
-supporting multiple clock domains is a relatively straightforward process in
-theory. When mapping the ASIC design to the FPGA, clock generating circuits,
-like a PLL, are replaced with FPGA equivalents~\cite{FPMM}. While the absolute
-frequencies used in the prototype will be considerably slower due to frequency
-limitations of the FPGA, the relative frequencies can be maintained, and thus
-latencies through an SoC cache hierarchy can be properly modeled~(the
-aforementioned problem of modeling off-chip memory systems like DRAM remains).
-In practise, limited availability of clocking resources and restrictions in
-FPGA clock distribution can sometimes require non-trivial changes to the ASIC
-RTL. To ameliorate these challenges \emph{FPGA-Based Prototyping Methodology
-Manual}~\cite{FPMM} suggests a number of Design-For-Prototyping techniques
-including implementing only a subset of the clocking structures, sticking to
-conventional synchronous design techniques, and isolating clock generation and
-distribution structures in seperate modules at the top-level of the design
-hierarchy.
+A natural place to look for inspiration is in FPGA prototyping. Here, supporting multiple clock domains is a relatively
+straightforward process in theory. When mapping the ASIC design to the FPGA,
+clock generating circuits, like PLLs, are replaced with FPGA
+equivalents~\cite{FPMM}. While the absolute frequencies used in the prototype
+will be considerably slower due to frequency limitations of the FPGA, the
+relative frequencies can be maintained, and thus latencies through an SoC cache
+hierarchy can be properly modeled~(the aforementioned problem of modeling
+off-chip memory systems like DRAM remains).  In practise, limited availability
+of clocking resources and restrictions in FPGA clock distribution can sometimes
+require non-trivial changes to the ASIC RTL. To ameliorate these challenges
+\emph{FPGA-Based Prototyping Methodology Manual}~\cite{FPMM} suggests a number
+of Design-For-Prototyping techniques including implementing only a subset of
+the clocking structures, sticking to conventional synchronous design
+techniques, and isolating clock generation and distribution structures in
+seperate modules at the top-level of the design hierarchy.
 
 % DVFS stuff, prototypes
-Applying the prototyping approach to a decoupled simulator --- generating
-multiple host-clocks whose relative frequencies match that of the target --- is
-an abstraction breaking change conflates host and target concerns.  In practise
-optimized models and bridges are going to be resident in different clock
-domains, and thus it will be necessary to independently gate the different
+Applying the prototyping approach to a decoupled simulator---generating
+multiple host-clocks whose relative frequencies match that of the target---is
+an abstraction breaking change conflates host and target concerns.  In practise,
+optimized models and bridges are going to be resident in different target clock
+domains,and thus it will be necessary to independently gate the different
 host clocks, destroying much of the merit of generating multiple clocks in
-the first place. Instead, multiple simulated clocks can be derived from a single
+the first place. Instead, we can derive multiple simulated clocks from a single
 host clock. This approach has some appealing implications:
 \begin{itemize}
  \item It does not require FPGA-specific clocking resources beyond clock
  buffers capable of gating the host clock. For smaller units where the fanout
  on the clock enable is small, even these can be avoided by directly adding a clock enable
  to all state elements instead of directly gating the clock. This makes it easier
- to port the same simulator to a different FPGA host.
+ to port the same simulator to a different FPGA.
 
  \item It simplies the implementation, since all simulator control logic is synchronous to 
  the same clock.
@@ -71,12 +74,12 @@ that it has the potential to improve simulator throughput (\ref{eq:sim-perf})
 by putting faster parts of the target in faster host clock domains (thus
 improving the $f_{fpga}$ term). Intuitively, one would expect that a faster target clock
 domain should close timing at higher frequency than a
-slower one -- while this is generally true, the ratio of crtical-path delays
+slower one. While this is generally true, the ratio of critical-path delays
 between clock domains can differ substantially from an ASIC implementation, most notably because delay through ASIC elements do
 not scale uniformly across all structures when mapped to an FPGA~\cite{FPGAGap2}.
-We do not rule out using multiple host-clocks in the future, rather, we
+We do not rule out using multiple host clocks in the future, rather, we
 argue that host clock frequencies should be selected based on simulator
-critical paths specifically to improve simulator throughput -- not as a means to enable
+critical paths specifically to improve simulator throughput, not as a means to enable
 simulation of multiple clocks in the target.
 
 Using a single host clock still enables a variety of implementation
@@ -86,16 +89,16 @@ domain to a slow clock domain by dropping every second token or, if in the
 reverse direction, duplicating every token once. An early prototype of this
 approach can be found in FireSim version 1.4, which permitted users to
 model a clock division in the crossing between the hub and an endpoint.
-\TODO{Jenny} used thus to simulate a system with a DRAM memory systems running
+Huang et al.~\cite{centrifuge} used this to simulate targets with a DRAM memory system running
 at one third the rate of the rest of the simulator. To apply this technique across
 the target and not simply between bridges, we considered using Golden
 Gate's hierarchy manipulations to divide the target design into synchronous
 islands. Each of these islands would become seperate units transformed with an unmodified FAME transform.
-Then, in simulation mapping Golden Gate would synthesize wire-type CDC channels between
+In simulation mapping, Golden Gate would synthesize wire-type CDC channels between
 these islands\footnote{Note that the clock-domain crossing present in target still
 exists, but it is split into two synchronous halves across the models. In the future, we could
-pull these crossing-halves into the channel itself to improve simulation
-performance.} Clock frequency information would be baked into
+potentially pull these crossing-halves into the channel itself to improve simulation
+performance.}. Clock frequency information would be baked into
 these clock-crossing channels during channel synthesis. We began a prototype implementation of this
 approach~(we sketched out FIRRTL transformations to perform this partitioning
 and designed the channels) before reconsidering.  This approach introduced
@@ -123,22 +126,49 @@ domains \emph{in situ}. The hub unit instantiates seperate clock buffers for
 each clock domain, and selectively fires clocks and channels based on the set
 of clock edges it is scheduled to simulate. A single \emph{clock bridge},
 generates the clock schedule as a token stream of bit-vectors indicating which
-clocks are scheduled to fire in a given simulator timestep. For simplicity, we
-mandate all other units, bridges and optimized models, continue to be
-synchronous to a single clock. As a result, the resulting simulator remains
-implicitly timestamped.
+clocks are scheduled to fire in a given simulator timestep.
 
-All other aforementioned restrictions on target RTL still apply. Aside from
-the singleton clock bridge there must be no other clock generators in the
-design. Specifically, when in FIRRTL's low form, all clock-type members of FIRRTL statements and expressions
-must be driven by the clock bridge exclusively through a sequence of
-\texttt{Connect} statements. Asynchronous resets are still coerced by the
-compiler to synchronous ones.
+\subsection{Simplifying Assumptions}
 
-Strictly speaking, a target with more than one clock cannot be an SSM. TODO{In
-section}, we explain how multiclock RTL can be treated as an SSM under the
-assumptions of our implementation, and discuss the implications of this
-vis-a-vis verifying existing models.
+
+To expidite the implementation of our initial prototype, we made the following assumptions:
+
+\begin{enumerate}
+\item The behavior of all clocks can be statically deduced. To further restrict
+    this, we also mandate that all clocks are in-phase and rationally related.
+
+\item All clocks in the target must be sourced from the singleton clock bridge.
+    Specifically, when in FIRRTL's low form, all clock-type members of FIRRTL
+    statements and expressions must be driven by the clock bridge
+    exclusively through a sequence of \texttt{Connect} statements.
+
+\item All clock endpoints must be positive-edge triggered. Chisel has no
+    native support for negative-edge-triggered or level-sensitive state elements, however, the
+    user must avoid using these structures in black box verilog.
+
+\item It must be safe to coerce asynchronous resets to synchronous ones. Unlike in 
+    an ASIC implementation, the designer can exploit the fact that all clocks
+    in the target will come up at time zero to avoid using asynchronous
+    resets where necessary.  Our implementation still has no mechanism to
+    seperately handle launching asynchronous reset edges. This restriction
+    will be relaxed in Chapter~\ref{sec:dynamic-multiclock}.
+\item All models and bridge must be synchronous. All bridge-bound interfaces
+    must be driven and latched by state elements in the same clock domain as
+        the bridge.\TODO{Think about this some more}.
+\end{enumerate}
+
+We note that all of these assumptions were implicitly made about the target in
+older versions of FireSim. The only difference lies in how the target clock is
+sourced: instead using an explicit bridge, the target clock was driven by a
+input (this was the only legal I/O permitted on the module) on the source
+FIRRTL.
+
+Strictly speaking, a target with more than one clock cannot be an SSM, and so
+generated multi-clock simulators will no longer be LI-BDNs. However, extracted
+models will remain primitive LI-BDNs with reference SSMs.  We suspect that
+multiclock RTL that conforms to the restrictions above can be cast as an SSM
+synchronous to a single fast clock whose equivalent slow clocks have been
+replaced selectively enabled state elements.
 
 \subsection{Annotation Modifications}
 
@@ -161,7 +191,7 @@ Figure~\ref{fig:static-multiclock-wrapper}. Unlike in the single-clock
 implementation, the wrapper circuit must selectively operate on a subset of
 channels based which clocks are scheduled to fire.  Output state machines (shown in
 blue) remain mostly unchanged but are now selectively reset based on the
-scheduled clock.  We added input FSMs (shown in green) to remove the fanout from
+scheduled clock.  We added input FSMs (shown in green), essentially a pipeline stage, to remove the fanout from
 the clock token port to input channel dequeue. These too are selectively reset.
 
 Clock scheduling is managed by a two-cycle control path (shown in orange). In
@@ -195,11 +225,21 @@ out of reset.
 
 The clock bridge is responsible for determining the clock schedule by
 generating an infinite token stream of $N$-wide bitvectors, where $N$ is the
-number of clock domains in the target. Each clock token corresponds to a
-simulator timestep. Any clock scheduled to fire in a given timestep will have
+number of clock domains in the target. We show an example of this encoding for three rationally
+related in clock in Figure~\ref{fig:clock-token}. Each clock token corresponds to a
+simulator timestep. Any clock with a positive edge in given timestep will have
 its bit set in the corresponding clock token.
 
-The provided clock bridge implementation accepts clock specification that
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/clock-token.png}
+    \caption{An example encoding of three rationally related clocks (clocks two and three have periods
+    1.5 and 2 times longer than the first) into a clock token stream. Here there is a recurrance
+    after eight tokens, with the fastest clock active in all but two tokens.}
+    \label{fig:clock-token}
+\end{figure}
+
+Per our earlier assumption, the clock bridge implementation included in FireSim 1.10 accepts clock specification that
 defines the frequency of all clocks as rational multiple of the
 frequency of the zeroth clock\footnote{Another reasonable approach would be to
 specify the periods of all clocks in an agreed upon timebase. We note
@@ -255,18 +295,20 @@ hub model and their channels anontations can be subsequently updated.
 
 \subsection{The Base Clock}
 
-One consequence of simulating systems with a single global clock is that it is
-natural to specify time in cycles of that clock. Bridges can trivially track
+In a target system with a single global clock it is natural to specify time
+in cycles of that clock. Bridges can trivially track
 time with a counter that tracks the number of times it has fired. Introducing
 multiple clocks complicates this: specifications of time must either be made
-explicit, or specified in clock cycles of some agreed upon common clock. In
+explicit, or specified in clock cycles of some agreed-upon common clock. In
 either case, these specified times cannot be compared against a bridge-local
 cycle counter without the local clock's frequency, or its relative frequency to
-the agreed-upon common clock. Many of FireSim's features use specifications of global time. For example,
-instrumentation bridges (like tracerV, assertion, and print bridges) accept
+the agreed-upon common clock. This is problematic because many of FireSim's
+features use specifications of global time. For example,
+instrumentation bridges (e.g., assertion and print bridges) accept
 runtime arguments that specify windows of time overwhich they should be
-enabled. Since these features are implemented over multiple bridges, clock domain information must be provided to each
-bridge such that they can translate time specifications into local cycle counts.
+enabled. Since these features are implemented over multiple bridges in
+multi-clock targets, clock domain information must be provided to each bridge
+such that they can translate time specifications into local cycle counts.
 
 Here we exploited out assumption that all clocks are rationally related, and in
 order provide a user experience similar to the existing one, we elected to
@@ -279,19 +321,19 @@ To propagate information about a bridge's clock domain to its host-side
 components, we added an analysis pass, which runs during target transformation
 (\texttt{TargetClockAnalysis}), that determines the clock index for each bridge
 by walking clock netlist back to the clock bridge's output port. Using that
-index, this pass looks up the ratio of the bridge clock relative to the base
+index, the pass looks up the ratio of the bridge clock relative to the base
 clock. This is passed through the parameters instance to each bridge module
-during platform mapping. Bridge modules then typically serialize this informaton to the
+during platform mapping. Bridge modules typically serialize this information to the
 simulation header so they can be used in the driver to recalculate times
 specified in base-clock cycles in terms of their local clock.
 
 \subsection{Rethinking Simulation Performance}
 
-In Section~\ref{sec:Iron-Law}. we described simple equations that govern
+In Section~\ref{sec:iron-law}. we described simple equations that govern
 simulation performance.  Under a system with multiple clocks, these need to be
-updated. Amoung our users FMR is a popular abstraction, and sees frequent use
+updated. Amoung our users FMR~(Equation \ref{eq:fmr}) is a popular abstraction, and sees frequent use
 in conversations regarding simulation performance. Perhaps, the most natural
-extension of FMR for multiclock contexts is to define itin terms of the fastest
+extension of FMR for multiclock contexts is to define it in terms of the fastest
 target clock:
 
 \begin{equation}
@@ -305,40 +347,328 @@ the fastest target clock (this target clock is the virtual fast clock), the
 simulator can execute with unity FMR. This is often not the case, especially
 when modeling device clocks. For example, in a two clock system where the
 second clock has a frequency two thirds that of the base, the best case FMR the
-simulator can achieve is $frac{4}{3}$, since every other slow clock edge will not be
-coincident with a fast clock edge and thu will require a simulator timestep in which no fast clock edge is processed.
+simulator can achieve is $\frac{4}{3}$, since every other slow clock edge will not be
+coincident with a fast clock edge and thus will require a simulator timestep in which no fast clock edge is processed.
+This is reflected in the token stream illustrated in Figure~\ref{fig:clock-type}).
 
-An alternate measure of simulator efficiency, one that reveals the precense of
-host-time stalls under any frequency selection, considers all host cycles in
-which the hub model is firing at least one target clock. We refer to this as the \emph{model
+An alternate measure of simulator efficiency, one that reveals the presence of
+host-time stalls independent of frequency selection, considers all host cycles in
+which the hub model is firing at least one target clock. We define \emph{model
 activity ratio}~(MAR):
 
 \begin{equation}
     MAR = \frac{cycles_h}{timesteps}
-\end{equation}\label{eq:mue}
+\end{equation}\label{eq:mar}
 
 Where \emph{timesteps} is the number of host cycles in which one or more target
-clock edges are processed, or in other words, the total number of clock tokens
+clock edges are launched, or in other words, the total number of clock tokens
 consumed by the hub model. Like FMR, a larger MAR corresponds to worse
 simulation performance, however, in the absence of other host-time stalls all
 Golden Gate simulators can run at unity MAR.
 
-\section{Evaluation}
+%\section{Evaluation}
 
 % Resource utilization?
 %- Clock bridge resources, fmax?
 %- Scale a full system over multiple clocks
 
-\subsection{Case Study - SPEC CPU 2017 Integer Performance}
+\section{Case Study - SPEC CPU 2017 Integer Performance}
+
+Armed with the capacity to simulate multiple clock domains natively, we can
+quantify the performance difference between single clock designs and more
+realistic multi-clock designs. For this experiment we used otherwise standard
+Chipyard designs (their block diagrams match that shown in
+Figure~\ref{fig:gg-target}) and modified the clock domain organization. For
+simplicity, in all cases we coupled the periphery domain to the uncore domain
+denoted in Figure~\ref{fig:gg-target}. We considered three different configurations:
+
+\begin{enumerate}
+    \item A completely synchronous configuration running at 1.5 GHz. FASED DRAM timings were scaled up
+        by approximately 1.5 times to match a DDR3-2133 speedgrade.
+    \item A two-domain organization with the memory bus and backing DRAM subsystem sitting behind
+        an asynchronous clock crossing. Here the memory bus runs at 1.0 GHz, and the rest of the system
+        remains clocked at 1.5GHz.
+    \item A three-domain organization that loosely matches the Freedom
+        Unleashed where tiles run at 1.5 GHz and the uncore runs at 750 MHz
+        with low-latency rational clock crossings between them. The DRAM memory
+        system remains in an asynchronous domain running at 1 GHz.
+\end{enumerate}
 
 
-% Performance differences?
-% - Interaction with optimizations?
-% QC rocket
-% BOOM
+\begin{table}[t]
+\centering
+    \begin{tabular}{c c c}
+    \hline
+        \textbf{Parameter} & \textbf{Rocket} & \textbf{SonicBOOM} \\
+    \hline
+        Machine Width & 1 & 5 issue, 3 commit\\
+        ROB Depth & N/A & 96 \\
+        %Branch Predictor & TODO & Tage \\
+        L1 I\$ Capacity & 16 KiB & 32 KiB \\
+        L1 I\$ Associativity & 4-way & 8-way \\
+        L1 ITLB Capacity & 32 & 32 \\
+        L1 D\$ Capacity & 16 KiB & 32 KiB \\
+        L1 D\$ Associativity & 4-way & 8-way \\
+        L1 DTLB Capacity & 32 & 16 \\
+        L1 \& L2 Block Size & \multicolumn{2}{c}{64B} \\
+        L2 TLB Capacity &  \multicolumn{2}{c}{1024} \\
+        L2 Cache Capacity & \multicolumn{2}{c}{2 MiB}\\
+        L2 Cache Associativity & \multicolumn{2}{c}{8-way}\\
+        L2 Cache Banks & \multicolumn{2}{c}{4}\\
+        System Bus Width & \multicolumn{2}{c}{128b}\\
+        Memory Bus Width & \multicolumn{2}{c}{256b}\\
+        DRAM Speedgrade & \multicolumn{2}{c}{DDR3-2133 (14-14-14-47)} \\
+        Memory Access Scheduler & \multicolumn{2}{c}{FR-FCFS} \\
+    \end{tabular}
+    \caption{Microarchitectural parameters of the two targets under test.}
+    \label{tbl:core-parameters}
+\end{table}
 
-%- Depends on chisel / RC bump
 
+For each of these three organizations, we studied SoCs based around two
+fundamentally different pipeline microarchitectures: Rocket~\cite{rocketchip},
+a 5-stage, inorder scalar core, and SonicBOOM~\cite{SonicBOOM}, an out-of-order
+superscalar core. We used the preset \texttt{Large} core configurations for
+both microarchitectures; their parameters can be found
+Table~\ref{tbl:core-parameters}. Since BOOM can dynamically schedule around
+hazards like load misses, it should both be able to drive considerably more
+memory system bandwidth (it has 4 L1 data cache MSHRs) and tolerate some
+additional latency through the memory system (if it find sufficient ILP). We
+kept the uncore and DRAM memory system configurations fixed across the two
+designs. It was configured uses the SiFive L2 Cache Generator and a FASED-modeled,
+single-channel DDR3 memory system.
+
+\begin{figure}[htb]
+    \centering
+    %\captionsetup{margin=0.25cm}
+    \includegraphics[width=\columnwidth]{figures/boom-ccbench.pdf}
+    \caption{}
+    \label{fig:boom-ccbench}
+\end{figure}
+
+We used the ccbench ``caches" micro benchmark to measure the marginal latencies
+through the memory system under the three configurations. In
+Figure~\ref{fig:boom-ccbench}, we show ccbench's loop trip latency when doing a
+randomized pointer chase over different working set sizes (note, the pointer
+chase touches each cache line only once). Marginal latency introduced the
+one-domain design over the sychronous design include the asynchronous crossing
+plus the additional latency intoduced by register stages now running relatively
+more slowly than the cores (these could not be trivially scaled by multiplying
+a configurable value). Marginal latency introduced in three domain
+configuration can be attributed soley to running the uncore clock at half rate.
+The rational and sychronous crossings have the same latencies, though the
+rational crossing has one of it's halves running in a slower domain.
+
+.
+\begin{table}[t]
+\centering
+    \begin{tabular}{c@{\hskip 0.1in} S[table-format=3.2] S[table-format=3.2] S[table-format=3.2]}
+    \hline
+        \textbf{Benchmarks} & \textbf{Insns~(T)} &\textbf{D\$ MPKI} & \textbf{I\$ MPKI} \\
+    \hline
+        600.perlbench\_s & 2.98 & 9.0 & 10.0 \\
+        602.gcc\_s & 2.43 & 36.6 & 9.7 \\
+        605.mcf\_s & 1.60 & 97.9 & 0.1 \\
+        620.omnetpp\_s & 1.11 & 56.9 & 9.3 \\
+        623.xalancbmk\_s & 1.21 & 62.9 & 7.9 \\
+        625.x264\_s & 4.55 & 3.0 & 2.9 \\
+        631.deepsjeng\_s & 2.51 & 8.7 & 15.4 \\
+        641.leela\_s & 2.59 & 5.8& 1.5 \\
+        648.exchange2\_s & 3.24 & 0.0  &  0.1 \\
+        657.xz\_s & 9.41 & 19.8 & 0.2 \\
+    \hline
+    \end{tabular}
+    \caption{Dynamic instruction counts and L1 MPKIs of SPEC2017 Integer Speed (single-threaded) benchmarks.}
+    \label{tbl:spec-insns}
+\end{table}
+
+To provide some insight into memory system characteristics SPEC 2017 integer
+speed benchmark suite, in Table~\ref{tbl:spec-insns}, we report dynamic instruction counts,
+and L1 cache misses-per-kilo-instruction (MPKIs)\footnote{These figures were
+originally reported in our 2019 FASED publication.}.  We cross compiled the
+benchmark suite using Speckle~\cite{Speckle} and GCC version 9.2.0 with -O2
+optimizations enabled.  We ran SPEC on top of simple buildroot linux
+distributions we assembled using FireMarshal~\cite{FireMarshal}.  Our
+system-software setup is reproducible without modification using FireSim
+version 1.11 and Chipyard 1.4, following the instructions for building SPEC2017
+described in our provided documentation.
+
+\begin{figure}[htb]
+    \centering
+    %\captionsetup{margin=0.25cm}
+    \includegraphics[width=\columnwidth]{figures/rocket-static-multiclock-speedup.pdf}
+    \caption{SPEC 2017 integer speed performance on Rocket. Speedups relative to the three-domain clock organization.
+    Geomean speedups for the two domain and synchronous configurations are $1.12\times$ and $1.15\times$ respectively.}
+
+
+    \label{fig:rocket-static-speedup}
+\end{figure}
+\begin{figure}[htb]
+    \centering
+        %\captionsetup{margin=0.25cm}
+    \includegraphics[width=\columnwidth]{figures/boom-static-multiclock-speedup.pdf}
+    \caption{SPEC 2017 integer speed performance on BOOM. Speedups are relative to the three-domain clock organization.
+    Geomean speedups for the two domain and synchronous configurations are $1.07\times$ and $1.09\times$ respectively.}
+    \label{fig:boom-static-speedup}
+\end{figure}
+
+
+In Figures~\ref{fig:rocket-static-speedup, fig:boom-static-speedup}, we report
+SPEC runtimes as speedups relative to the most detailed three-domain
+configuration. BOOM designs insulated themselves better from the additional
+memory system latency brought about by running the outer memory systems at
+slower frequencies, with synchronous designs running $1.09\times$ faster versus
+$1.15\times$ for Rocket based designs. While in Rocket's case, slow downs
+correlate closely with L1 cache MPKI, BOOM's ability to dynamically schedule
+around these misses complicates the story.  MCF, the benchmark with the higher
+frequency of L1 Data cache misses, runs $1.37\times$ faster on a synchronous
+Rocket design vs $1.20\times$ on a BOOM design. Comparably, BOOM sees its
+largest performance change on 602.gcc ($1.21\times$ versus $1.26\times$ for
+rocket), which reveals the core struggles to find as much ILP in that
+benchmark as in other memory-intensive benchmarks, like 605.mcf.
+
+\input{figures/tables/runtime-table.tex}
+
+\section{Scaling Target Clock Count}
+
+For targets with relatively few clock domains, Vivado appears to be able to
+successfully place and route without any additional placement constraints.
+Though clock routing and distribution was significantly enchanced in Xilinx's
+Ultrascale archiecture, global clock resources are still scarse to conventional
+logic intconnect. Specifically, designs that require more than 24 global clock
+nets be routed through the same clock region will fail in implementation.
+
+To establish a baseline for the scalability of our approach, we attempted to synthesize a
+toy target design consisting a shift register with each of its stages different
+clock domain. Thus for an $N$ stage shift register, $N$ BUFGCEs will be
+instantiated in the hub model. Since each stage is small, this is adversarial
+design: Vivado will attempt to place all registers in the same clocking region
+(to reduce path delay), only to discover it has insufficient clocking
+resources to drive the sinks. We found that we could synthesize a 12-stage
+pipeline before running out of global clock resources in at least one clock
+region. All told, only 13 of 24 avaiable nets are used for the implementation of
+the hub model: the remaining 11 are used to route clocks for IP blocks like DDR
+constrollers and PCI-E, which are periodically striped down the FPGA. Excluding
+the clocks used in Golden Gate-generated RTL, median global clock net
+utilization across the device is 11 (ranging between 9 to 23) across the 90
+available clock regions of our VU9P part.
+
+We propose two ways to workaround this challenge. The first is obvious:
+minimize the number of unique clocks required in each clock region by
+preventing placement of too many unique clock loads.  This may occur naturally
+if, unlike the design above, each clock domain has signifcantly more logic.
+During placement, domains will tend to exclude each other as intra-domain paths
+are optimized\TODO{citation}. To test this hypothesis, we synthesized a
+multi-core rocket design and placed each tile in its own clock domain.
+Alternatively, it may be possible to optimize the AWS shell to reduce the
+number of global clock resources it requires or better isolate its clock
+domains from the rest of the simulators.  In worst case, however, placement
+consraints on parts of the hub unit may be required.
+
+A second approach may be to save global clock resources by converting a gated
+clock to use a clock-enable, which can be driven through logic interconnect.
+This introduces a high fanout logic net, which may introduce challenges of its
+own, but for relatively small clock domains could save global clock resources
+by potentially reusing the ungated host clock~(if it is being routed to the
+clock region already). This optimization could be implemented by Golden Gate
+without user intervention.
+
+\section{Improving Simulator Performance with Multi-Cycle Setup Constraints}
+
+On the surface, one challenge with using a single host clock is that all timing
+paths in the target must close timing at the emulator frequency.
+In effect, Vivado will use the same setup relationship to close timing on paths
+whose delays are many times longer than that of critical path in the fastest
+clock domain. FPGA prototypes avoid this problem entirely since each
+domain is driven with clocks with the same relative frequencies as would exist on the SoC, giving slower clock domains
+more setup margin. When this is combined with the fact that out-of-phase
+edges in slower domains can be launched between fast-clock edges, FPGA
+prototypes have a considerable performance advantage over the equivalent
+multi-clock FireSim emulator.
+
+One way to close this gap is to improve host frequency by giving Vivado more
+setup margin on paths in slower target clock domains. Here we exploit the
+observation that, given our current clock-token generation scheme, clocks in
+all but the fastest target clock domain cannot have positive edges launched in
+back-to-back host clock periods. This implies that data launched in one domain
+will not be captured by state elements in the same domain until at least two
+host cycles later. We can indicate this to Vivado using a multi-cycle setup
+constraint on all timing arcs that are internal to that domain. In many cases
+this setup relationship can be larger. A clock that has a frequency $1/N$ that
+of the fastest clock, can be given a setup constraint of $N$ periods.
+Additionally, the presence of other clocks with frequencies that are not
+integer divisions of the fastest clock, can further lengthen this constraint.
+Since the clock token stream is known at compile time, Golden Gate can analyze
+these relationships and emit target-specific multi-cycle constraints.  In
+principle, similar constraints could be emitted for inter-clock-domain paths,
+but this would require the presence of intermediate clock-tokens between the
+positive edges of both domain clocks. Since this is not frequently the case,
+and since there are considerably fewer timing arcs that cross clock domains, we
+opted to maintain a single-cycle setup relationship on these arcs.
+
+To illustrate the potential of these relaxations, we manually applied a
+two-cycle setup constraint on all intra-domain paths in the DRAM and uncore
+domains for the three-domain targets we evaluated in
+Section~\ref{sec:spec-static-multiclock}. We then resynthesized both sets of
+designs, with the constraints and without, with overconstrained
+host-frequencies to establish an emulator $f_{max}$. We report the improved
+simulator frequencies in Table~\ref{tbl:multi-cycle-constraints}. The rocket
+based design saw greater improvements that BOOM likely for a few potential
+reasons. Rocket tends to close timing at higher frequencies than BOOM in ASIC
+processes~\TODO{check?}, delays through common structures in OoO microarchitectures scale
+more poorly when mapped to FPGAs than in-order designs, and OoO cores tend to
+suffer of congestion further driving up wire delay~\TODO{WongDissertation}. Taken together, the ratio
+of core path-delay to uncore path-delay is closer to parity in BOOM, than in
+the Rocket-based design where it is closer to the expected one-to-two ratio one
+would realize in the equivalent ASIC.
+
+
+\begin{table}[t]
+\centering
+    \begin{tabular}{c@{\hskip 0.1in} S[table-format=3.1] S[table-format=3.1] S[table-format=3.1]}
+    \hline
+        \textbf{Design} & \textbf{Unrelaxed $f_{max}$} & \textbf{Relaxed $f_{fmax}$} & \textbf{\% Difference} \\
+    \hline
+        Quad-Core Rocket & 112.5 & 168.1 & 49.4 \% \\
+        Single-Core Large Boom & 70.5 & 90.0 & 28.5 \% \\
+    \hline
+    \end{tabular}
+    \caption{Simulator $f_{max}$ for the designs of the SPEC performance
+    study without (\emph{Unrelaxed}) and with~(\emph{Relaxed}) multi-cycle
+    setup constraints applied.}
+    \label{tbl:multi-cycle-constraints}
+\end{table}
+
+
+One consequence of increasing $f_{host}$ is that various extra-emulator domain
+delays will now appear to have greater latency (e.g., FASED's host DRAM
+requests will take more cycles to be served), which could increase FMR. To
+provide some perspective on this effect, we booted linux on instances of the
+relaxed and original designs that passed timing.  We report the change in
+simulation performance in Table~\ref{tbl:multi-cycle-constraints-perf}. Linux
+boot differs from SPEC in that has periods of sustained disk and DRAM use and
+so tends to have a greater FMR. However, even in linux boot these effects only modestly reduce
+the improvement brought about by the increased $f_{fpga}$.
+
+\begin{table}[t]
+\centering
+    \begin{tabular}{c@{\hskip 0.4in} S[table-format=3.0] S[table-format=1.2] S[table-format=3.1]@{\hskip 0.3in}
+        S[table-format=3.0] S[table-format=1.2] S[table-format=3.1]@{\hskip 0.3in} S[table-format=1.2]}
+    \hline
+         & \multicolumn{3}{c}{Unrelaxed} & \multicolumn{3}{c}{Relaxed} &  \\
+        \textbf{Design} & $f_{fpga}$ & FMR & $f_{emul}$ & $f_{fpga}$ & FMR & $f_{emul}$ & {Speedup} \\
+    \hline
+        Quad-Core Rocket & 110 &  1.45 & 76.0 & 150 & 1.49 & 107.3 & {$1.41\times$} \\
+        Single-Core LargeBoom & 60 & 1.57 & 38.2 & 90 & 1.65 & 54.5 & {$1.43\times$} \\
+    \hline
+    \end{tabular}
+    \caption{Simulator $f_{max}$ for the designs of the SPEC performance
+    study without (\emph{Unrelaxed}) and with~(\emph{Relaxed}) multi-cycle
+    setup constraints applied.}
+    \label{tbl:multi-cycle-constraints-perf}
+\end{table}
+
+\section{Future Work / Extensions}
 
 
 

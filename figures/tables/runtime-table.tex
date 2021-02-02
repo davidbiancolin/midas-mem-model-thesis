@@ -1,0 +1,75 @@
+\begin{table}[t]
+\centering
+    \begin{tabular}{c
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]@{\hskip 0.4in}
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]@{\hskip 0.4in}
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]@{\hskip 0.4in}
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]@{\hskip 0.4in}
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]
+    }
+\hline
+         \multirow{2}{*}{\textbf{Target}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{perlbench}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{gcc}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{mcf}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{omnetpp}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{xalancbmk}} \\
+        &
+        \multicolumn{1}{l}{{\hskip -0.00in}time} & \multicolumn{1}{l}{{\hskip -0.05in}$f_{emul}$} &
+        \multicolumn{1}{l}{{\hskip -0.08in}time} & \multicolumn{1}{l}{{\hskip -0.05in}$f_{emul}$} &
+        \multicolumn{1}{l}{{\hskip -0.08in}time} & \multicolumn{1}{l}{{\hskip -0.05in}$f_{emul}$} &
+        \multicolumn{1}{l}{{\hskip -0.08in}time} & \multicolumn{1}{l}{{\hskip -0.05in}$f_{emul}$} &
+        \multicolumn{1}{l}{{\hskip -0.08in}time} & \multicolumn{1}{l}{{\hskip -0.00in}$f_{emul}$} \\
+\hline
+BOOM-1D &      19.8 &   64.5 &  21.6 &  57.0 &  22.7 &  53.1 &    11.8 &   60.3 &       8.5 &   61.9 \\
+%b2d &      26.4 &   48.6 &  28.2 &  46.6 &  28.3 &  44.9 &    15.5 &   47.3 &      11.3 &   47.9 \\
+BOOM-3D &      29.5 &   44.9 &  34.4 &  43.4 &  34.4 &  42.1 &    18.1 &   43.9 &      14.2 &   44.4 \\
+\hline
+Rocket-1D &      14.2 &  108.9 &  19.8 &  94.9 &  28.0 &  87.8 &    10.8 &  103.5 &       9.0 &  103.9 \\
+%r2d &      18.9 &   82.2 &  25.8 &  77.0 &  36.4 &  74.7 &    14.3 &   80.9 &      12.0 &   80.3 \\
+Rocket-3D &      20.5 &   82.2 &  30.3 &  78.0 &  44.3 &  76.2 &    16.9 &   81.2 &      14.7 &   80.8 \\
+\bottomrule
+\end{tabular}
+\vspace{0.5cm}
+
+%\caption{First half}
+%\end{table}
+%
+%\begin{table}[t]
+    \begin{tabular}{c
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]@{\hskip 0.4in}
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]@{\hskip 0.4in}
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]@{\hskip 0.4in}
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]@{\hskip 0.4in}
+        S[table-format=2.0]@{\hskip 0.30in}S[table-format=3.0]
+    }
+\hline
+        \multirow{2}{*}{\textbf{Target}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{x264}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{deepsjeng}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{leela}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{exchange2}} &
+         \multicolumn{2}{c}{{\hskip -0.2in}\textbf{xz}} \\
+        & \multicolumn{1}{l}{{\hskip -0.00in}time} & \multicolumn{1}{l}{{\hskip -0.05in}$f_{emul}$} &
+        \multicolumn{1}{l}{{\hskip -0.08in}time} & \multicolumn{1}{l}{{\hskip -0.05in}$f_{emul}$} &
+        \multicolumn{1}{l}{{\hskip -0.08in}time} & \multicolumn{1}{l}{{\hskip -0.05in}$f_{emul}$} &
+        \multicolumn{1}{l}{{\hskip -0.08in}time} & \multicolumn{1}{l}{{\hskip -0.05in}$f_{emul}$} &
+        \multicolumn{1}{l}{{\hskip -0.08in}time} & \multicolumn{1}{l}{{\hskip -0.00in}$f_{emul}$} \\
+\hline
+BOOM-1D &       10.0 &   63.5 &       8.5 &   62.7 &   8.9 &   64.4 &       7.1 &   65.0 &  45.3 &   62.3 \\
+%b2d &       13.3 &   48.1 &      11.3 &   47.7 &  12.2 &   48.5 &       9.5 &   48.7 &  59.9 &   48.0 \\
+BOOM-3D &       15.0 &   44.4 &      12.5 &   44.2 &  13.4 &   44.8 &      10.3 &   45.0 &  69.3 &   44.4 \\
+\hline
+Rocket-1D &       14.7 &  108.4 &      10.7 &  109.0 &   9.5 &  109.5 &       9.7 &  109.9 &  47.8 &  107.2 \\
+%r2d &       19.6 &   81.8 &      14.2 &   82.2 &  12.6 &   82.3 &      12.9 &   82.5 &  63.8 &   82.1 \\
+Rocket-3D &       20.4 &   81.8 &      15.9 &   82.3 &  13.3 &   82.3 &      13.0 &   82.5 &  70.7 &   82.2 \\
+\bottomrule
+\end{tabular}
+
+    \caption{SPEC 2017 Integer Speed (single-threaded) emulation performance.
+    Time~(wallclock) is reported in hours, and $f_{emul}$, the effective
+    emulation frequency of the cores of the design, is reported in MHz. Note
+    that \texttt{xz} had its inputs split over two emulators to approximately
+    halve its runtime.}
+
+\end{table}

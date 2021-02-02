@@ -17,13 +17,13 @@ manage timestamps are unneeded. For this optimization to apply broadly across
 the simulator, in general, target clocks must have fixed frequency and phase, and
 all simulation events must be synchronous to these clocks.
 
-Control granularity refers to how time is permitted to advance across simulator. At one extreme there exist
+Control granularity refers to how time is permitted to advance across the simulator. At one extreme there exist
 simulators with \emph{centralized control}~(CC). These track time in
 a single location or are globally statically scheduled: the entire simulator advances in lock-step from
 timestep to timestep.  Conversely, there are simulators with \emph{distributed
 control}~(DC). These simulators are parallel systems that can be represented as a directed graph of \emph{logical
 processes}~(the nodes of the graph). Logical processes~(LPs) communicate by sending \emph{messages} over the graph's edges.
-Each LP locally tracks simulation time and can advance independently; they are themselves smaller discrete-event simulators. DC
+Each LP locally tracks simulation time and can advance independently: they are themselves smaller discrete-event simulators. DC
 simulators can be coarse-grained, with LPs simulating core-scale components, or
 fine-grained, where LPs model blocks on the scale of CAMs, RAMs, or
 combinational circuits, like multiplexers.
@@ -35,9 +35,9 @@ Taking the product of these two dimensions produces four classes of RTL simulato
 
 \item\textbf{Implicit Timekeeping, Distributed Control (ITDC)}: RAMP simulators~\cite{RAMPGold, HASim}, MIDAS-generated simulators~\cite{FireSim}.
 
-\item\textbf{Explicit Timekeeping, Centralized Control (ETCC)}: Yorktown Simulation Engine~\cite{YSESoftware}, Modern commercial emulators\footnote{As their implementations are proprietary, we can not say so definitively.}
+\item\textbf{Explicit Timekeeping, Centralized Control (ETCC)}: Yorktown Simulation Engine~\cite{YSESoftware}, modern commercial emulators\footnote{As their implementations are proprietary, we can not say so definitively.}.
 
-\item\textbf{Explicit Timekeeping, Distributed Control (ETDC)}: Multi-FPGA commercial emulators\footnote{As, above.}, This Work.
+\item\textbf{Explicit Timekeeping, Distributed Control (ETDC)}: multi-SoC commercial emulators\footnote{As, above.}, and this work.
 \end{enumerate}
 
 For all intents and purposes, DC simulators are FPGA-hosted, parallel
@@ -53,7 +53,7 @@ of DC simulators despite their increased complexity.
 \section{An Iron Law For FPGA-Based Simulator Performance}\label{sec:iron-law}
 
 If SoC designers turn to hardware emulation for speed, it is critical
-to understand how emulator design affects simulation throughput. For IT simulators with a single target-clock domain, Pellauer et al.~\cite{APortNetworks} present a simple performance
+to understand how simulator design affects simulation throughput. For IT simulators with a single target-clock domain, Pellauer et al.~\cite{APortNetworks} present a simple performance
 equation which, like the iron-law of processor performance that inspired it,
 breaks down the performance of a complete simulation into a product of terms:
 
@@ -164,8 +164,7 @@ DRC challenges with centralizing control. Distributing control introduces new
 challenges however.  Since LPs can decouple in target time, \emph{causality errors} can
 arise if LPs act on messages out of temporal order. Conversely, if LPs are too
 conservative in waiting for messages to arrive the resulting simulator may be prone to deadlock.
-Finally, a simulator that is correct~(it correctly models the target, and is
-deadlock free), can still suffer of poor simulation performance if transmission
+Finally, a simulator that is correct~(it is deadlock free and correctly models the target) can still suffer of poor simulation performance if transmission
 latency between LPs cannot be overlapped with LP execution. Designing
 high-performance algorithms that satisfy these constraints for CPU hosts has been the central focus of PDES
 community since its inception~\cite{PDESFujimotoPrimer}.
@@ -173,12 +172,12 @@ community since its inception~\cite{PDESFujimotoPrimer}.
 \subsection{A Primer on PDES}
 
 In PDES a \emph{physical process} is divided into a set of logical processes
-that communicate via timestamped messages. In effect, any one LP is it itself a discrete
-event simulator that must to process events in timestamp order~(the
+that communicate via timestamped messages. In effect, any one LP is itself a discrete
+event simulator that must process events in timestamp order~(the
 \emph{local causality constraint}). These events can be triggered internally or
 by messages received from other LPs. The fundamental difficulty in PDES is that
 an LP may not know that it has not yet received an older message and so cannot
-safely being processing another event without potentially violating the local
+safely begin processing another event without potentially violating the local
 causality constraint. A \emph{synchronization algorithm} is responsible for
 allowing LPs to make forward progress despite this. There are two broad classes of synchronization algorithm in PDES:
 \emph{conservative} and \emph{optimistic}.
@@ -198,7 +197,7 @@ null-message at time $t_{i} + t_{L}$ to each of its receivers. This may
 be sufficient to unblock the receiving LP, resolving the deadlock risk. Failing that, the receiving LP is compelled to
 send null-messages still further in the future and the process repeats.
 So long as there exists no cycle of LPs with zero lookahead, the CMB algorithm
-is guarantee to avoid deadlock; for a complete proof we refer the interested reader to Chandy and Misra~\cite{NullMessagesChandy}.
+is guaranteed to avoid deadlock; for a complete proof we refer the interested reader to Chandy and Misra~\cite{NullMessagesChandy}.
 For a given physical process, simulation performance decreases as lookahead approaches zero, as the number
 of null-messages required to avoid deadlock increases~\cite{PDESFujimotoPrimer}.
 In general, lookahead is derived from underlying properties of the
@@ -207,14 +206,14 @@ captured in the underlying system, conservative PDES algorithms may offer
 little performance benefit over sequential simulators.
 
 Optimistic synchronization algorithms, first realized by Time Warp~\cite{TimeWarp}, permit
-LPs to send messages speculatively.  Here, LPs have mechanisms to rollback from
+LPs to speculatively execute events that may violate the local causality constraint.  Here, LPs have mechanisms to rollback from
 mispeculation and to inform downstream LPs of earlier messages that were
 erroneously sent. In Time Warp, LPs correct for mispeculated messages by
-sending \emph{anti-messages}, which as the physics-analogy would suggest,
-\emph{annihilate} pair-messages that was erroneously sent
+sending \emph{anti-messages}, which as the physics analogy would suggest,
+\emph{annihilate} pair-messages that were erroneously sent
 in the past. In order to prevent unbounded growth of rollback state and to
 guarantee forward progress, optimistic simulators have a mechanism to determine
-\emph{global virtual time}: the earliest timestamp within the set of all
+\emph{global virtual time}~(GVT): the earliest timestamp within the set of all
 unprocessed events. GVT defines a time across the entire simulator at which
 the state of all LPs are known non-speculatively~\cite{TimeWarp},
 rollback state before this timestamp can be reclaimed. While the most
@@ -235,7 +234,7 @@ contemporary use~\cite{PDESRetrospective}.
 
 \subsection{Considerations for FPGA-Hosted PDES}
 
-FPGA differ from the multiprocessors and networked hosts studied in the PDES literature in a number of ways:
+FPGAs differ from the multiprocessors and networked hosts studied in the PDES literature in a number of ways:
 
 \begin{enumerate}
 \item \textbf{FPGAs support bespoke, low-latency, interconnect between LPs.} Inter-LP
@@ -410,7 +409,7 @@ Figure~\ref{fig:adder-example} demonstrates the execution of a two target cycles
     \begin{subfigure}[t]{0.45\textwidth}
         \captionsetup{margin=0.25cm}
         \includegraphics[width=\columnwidth]{figures/adder-example2.pdf}
-        \caption{With all input tokens available, the unit fires and advances to cycle 1.}
+        \caption{With all input tokens available, the unit fires and advances to cycle one.}
         % graffle2pdf -c tfire-cycle0 midas-graphics/graffle/adder-example.graffle figures/adder-example2.pdf
     \end{subfigure}
     \begin{subfigure}[t]{0.45\textwidth}
@@ -500,8 +499,8 @@ dependency between all output tokens on all input tokens, even though there
 they may be no combinational path between them in
 the underlying target. Given its definition of a unit, APort Networks do not
 give the correct set of constraints to avoid deadlock as a graph that contains
-a cycle of wire-type channels --- that do \emph{not} represent a combinational loop in
-the target --- deadlocks at time zero.
+a cycle of wire-type channels---that do \emph{not} represent a combinational loop in
+the target---deadlocks at time zero.
 
 
 \subsection{Latency-Insensitive Bounded-Dataflow Networks~(LI-BDN)}
@@ -613,8 +612,6 @@ Of particular concern to this dissertation is a method through which an SSM can
 be converted into a primitive LI-BDN.  Vijayaraghavan et al. describe a means
 that uses a wrapper module around a patient SSM: we show a modified version of the wrapper circuit, for a
 single output, in Figure~\ref{fig:libdn-wrapper} and contrast it against an equivalent wrapper
-circuit for an APort Network unit in Figure~\ref{fig:aport-network-wrapper}.
-The LI-BDN wrapper adds one bit of state per output port~(\texttt{OFired}) and, in accordance with NED, permits
 outputs to fire before all input channels hold valid tokens for the current cycle. We name the SSM-enable signal \texttt{CycleFinishing}
 to reflect the fact that, unlike in the APort Network wrapper, a target cycle can be executed over multiple host cycles
 as combinational paths resolve and new input tokens arrive. \texttt{OFired} registers ensure exactly on output
@@ -645,15 +642,15 @@ only a mechanism to analyze combinational dependencies in the underlying SSM.
 \end{figure}
 
 \section{The MIDAS Compiler \& Generated Simulator Microarchitecture}\label{sec:midas-impl}
-MIDAS, which we provided some introduction for in Section~\ref{sec:midas-intro}, MIDAS
+MIDAS, which we provided some introduction for in Section~\ref{sec:midas-intro},
 was our first attempt at building a FAME compiler. Here we describe in greater
 detail how it was implemented. Specifically, we direct the reader to the
 version of MIDAS released as part of FireSim 1.5.0, which differs modestly from
-earlier iterations described in the CARRV paper~\cite{MIDAS} and Donggyu Kim's
-dissertation~\cite{DGKDissertation}. and is the last version of the compiler
+earlier iterations described at CARRV2017~\cite{MIDAS} and Donggyu Kim's
+dissertation~\cite{DGKDissertation} and is the last version of the compiler
 before the introduction of Golden Gate features.
 
-MIDAS generates ITDC simulators from directly ASIC RTL. These simulators
+MIDAS generates ITDC simulators directly from ASIC RTL. These simulators
 implement a channel-bootstrapped formalism with all target graphs having a
 star topology. We show an example graph for a Rocket-Chip-based system, the
 most commonly used target generator in MIDAS, in Figure~\ref{fig:rocket-target-graph}.
@@ -668,7 +665,7 @@ latency, less performance critical ones, such UART and block device models, can
 be written in software hosted on the CPU. We refer to the CPU-hosted component
 of the simulator as the \emph{driver}. To avoid deadlock and provide good
 simulation FMR, MIDAS injects queue-type channels (configured to model a two-deep,
-fully-decoupled FIFO) on all decoupled interfaces, and one-cycle latency
+fully decoupled FIFO) on all decoupled interfaces, and one-cycle latency
 pipe-type channels on all others. Assuming units do not stall internally, MIDAS-generated
 simulators can run at unity FMR. We show an example simulator mapped to an EC2 F1 host in Figure~\ref{fig:mapped-simulator-f1}.
 
@@ -692,7 +689,7 @@ simulators can run at unity FMR. We show an example simulator mapped to an EC2 F
 \subsection{Endpoint Units}\label{sec:midas-endpoints}
 
 Topological position aside, endpoint units differ from the hub in that they are not transformed from ASIC
-RTL and instead are written by hand, and thus, not exact models of the desired target system.
+RTL and instead are written by hand, and thus, are not exact models of the desired target system.
 Endpoints consist of an \emph{endpoint module}, which resides on the FPGA and drives the channels bound to the hub unit, and an
 \emph{endpoint driver}, which is linked into the main simulation driver and hosted on a CPU.
 Even the purest "CPU-hosted" units require an endpoint driver that
@@ -736,7 +733,7 @@ Endpoints can leverage three types of FPGA resources:
 
 Endpoint drivers interact with their associated module using four methods
 exposed by the main simulation driver: \texttt{simif\_t::read} and
-\text{simif\_t::write} drive CPU-mastered MMIO; \texttt{simif\_t::pull} and
+\texttt{simif\_t::write} drive CPU-mastered MMIO; \texttt{simif\_t::pull} and
 \texttt{simif\_t::push} are used to drive CPU-mastered DMA.
 
 \subsection{Simulation Driver}
@@ -827,7 +824,7 @@ the arguments for the printf's format string and an enable indicating the
 printf would trigger on that cycle. Like the other I/O interfaces, these new outputs will be bound to a single assertion
 and printf endpoint later in the compiler.
 
-Now MIDAS runs its FAME-1 transform, transforming the RTL (an SSM) into a
+Now MIDAS runs its FAME1 transform, transforming the RTL (an SSM) into a
 unit. To this end, MIDAS generated the APort Network wrapper module shown previously in Figure~\ref{fig:aport-network-wrapper}.
 MIDAS converts the SSM into a patient SSM by injecting clock-enables
 on all registers (this introduces a 2:1 mux on register inputs) and by
@@ -846,13 +843,12 @@ pre-enqueue a single token (with all bits unset) to bootstrap the simulation.
 Queue-type channels use a more sophisticated implementation
 that drives forward and reverse token streams. The queue channel
 implementation allows endpoint and hub to decouple under more specific runtime conditions~(for example,
-while a queue is not full it can continue to accept forward tokens and produce reverse tokens on its the producer side
-of the queue.
+while a queue is not full it can continue to accept forward tokens and produce reverse tokens on its enqueue interface).
 
-In \emph{Host Platform Mapping}, MIDAS recursively walks the chisel-types
+In \emph{Host Platform Mapping}, MIDAS recursively walks the Chisel-types
 of the I/O a final time and attempts to find a provided endpoint for
 each type using the Endpoint Map. If the map is defined on that type, MIDAS
-instantiates the endpoint module, and connects its token-passing port~(called a \texttt{HostPort} in the codebase) to the freshly
+instantiates the endpoint module, and connects its token-passing port~(\texttt{HostPort}) to the freshly
 generated channels. All remaining unbound interfaces are then bound to the
 peek-poke endpoint. Once all endpoints have been elaborated, MIDAS binds their
 MMIO interfaces and DMA interfaces, if present, to the simulation control
@@ -860,7 +856,7 @@ and DMA buses, respectively, using two AXI4 arbiters. Memory-timing
 models have their host-memory interface driven to DRAM memory interfaces,
 this time through an $M+1:N$ AXI4 crossbar, where $M$ is the number of
 target memory models and $N$ is the number of available host memory channels. The
-extra master port is driven by the \texttt{loadmem} module, which bridges the
+extra master port is driven by a memory initialization module~(\texttt{loadmem}), which bridges the
 simulation control bus and memory bus and gives the driver the means to
 read and write to FPGA DRAM. The parameters of the host platform,
 notably the width of these buses and the number of memory channels
@@ -874,7 +870,7 @@ In a final step before verilog emission, MIDAS schedules the user's
 \emph{host transforms}.  This provides a means to programmatically modify simulator RTL to further
 customize it for a host platform. In FireSim, the \texttt{AutoILA}
 transform is run here to plumb out annotated signals to a Xilinx Integrated
-Logic Analyzer (ILA), which is required in for EC2 F1 hosts due to
+Logic Analyzer (ILA), which is required for EC2 F1 hosts due to
 restrictions in Amazon's compilation flow. Finally, the FIRRTL optimization passes are run
 and the simulator verilog is emitted.
 
@@ -900,22 +896,22 @@ design of this initial version of Golden Gate in the next
 chapter~(Chapter~\ref{sec:golden-gate}). Continued work on FAME-compiler-driven
 optimizations is the subject of Albert Magyar's Dissertation.
 
-Tackling the second challenge --- supporting targets
-with realistic clocking and reset schemes --- required yet another
-rethinking as the SSM-assumption fundamental to LI-BDN and APort Network
+Tackling the second challenge---supporting targets
+with realistic clocking and reset schemes---required yet another
+rethinking, as the SSM-assumption fundamental to LI-BDN and APort Network
 formalisms no longer applies. In Chapter~\ref{sec:static-multiclock}, we
 describe a simple extension to Golden Gate to support multiple target clock
 domains under the assumption that they have a fixed, rational relationships to one another.
-Here, we can still treat the target as synchronous but to an
+Here, we can still treat the target as synchronous but to a
 fast, virtual clock whose frequency is the least-common multiple
-of actual target clocks. This assumption permits simulators remain implicitly
+of actual target clocks. This assumption permits simulators to remain implicitly
 timestamped.
 
 To build a true emulation environment capable of simulating a broad class of
 asynchronous events that manifest in realistic SoCs, including asynchronous
-reset and clock generation and switching, and certain nonidealities like clock
+reset, clock generation and switching, and certain nonidealities like clock
 drift and jitter, we lifted the rational clock assumption and introduced explicit
-timestamping into a sub-graph of simulator. Our initial implementation,
+timestamping into a sub-graph of the simulator. Our initial implementation,
 described in Chapter~\ref{sec:dynamic-multiclock}, uses a hardware
 implementation of the Chandy-Misra-Bryant algorithm to avoid
 deadlock. This explicitly timekept portion of the graph coexists with SSM
