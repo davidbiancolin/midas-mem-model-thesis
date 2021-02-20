@@ -1,0 +1,271 @@
+% High level idea:
+% Introduce timestamped units into the simulator graph, existing models remain implicitly timestamped.
+
+The fundamental assumption made in the previous chapter was that the clocks of
+the target cannot change as a function of the simulated behavior of the target
+itself. This permits generating a clock-token stream that can runahead of the
+rest of the simulator and gives good simulation performance. Lifting this
+assumption introduces a potentially performance critical feedback loop into the
+emulator: scheduled clocks determine when target state updates occur, but those
+updates themselves affect when target clocks are scheduled.
+% We illustrate this with a simple example\TODO(clock mux).
+
+Academic work in this domain is lacking. The only hardware-accelerated platform
+for studying platforms that can preform DVFS was built by Mantovani et
+al.~\cite{DVFSPrototype}. However, that work is essentially a configurable FPGA
+prototype: it presupposes a particular target organization~(a grid of tiles
+innerconnect with a NoC) and directly directly instantiates FPGA specific
+clocking primitives. Using FPGA clocking primitives directly skirts preformance
+challenge we outlined above, allowing their system to run fast (100 MHz on a
+Virtex 7 FPGA). This makes it an attractive platform to do research on new
+DVFS policies, but not generally useful for doing pre-silicon verification or
+performance validation of an SoC which does not derive from their input RTL.
+
+For examples of FPGA-based hardware emulation of systems that support dynamic
+frequency scaling, one must look to industry. Mentor Veloce and Synopsys ZeBu,
+both have support for systems that do this sort of frequency scaling --- how
+they support this is propertiary. One 2013 Mentor Graphics patent provides some
+insight as to how this may be implemented in Veloce: a compiler detects
+``clock-enabling" functions in the target circuit, which are in-essence,
+combinational logic functions that permit a clock to be driven to a particular
+output node. For instance, the and-gate of a clock gate would be such a
+function, controlled by a "clock-enabling single" the output of the latch. More
+complex circuits, like clock multiplexers, can be decomposed into exclusive
+sets of these enabling functions. These functions are combined into a single
+``clock status" signal which indicate to the emulation clock generator that it
+should drive a clock into the sink domain. Many critical details in this system
+are intentionally left vague, and context related to emulator clock generation
+is omitted.  What appears to be the case is that target behavior governing
+clock selection and generation is managed at combinational level, which is a
+sensible design decision for generalizing support for a broad range of targets.
+It does seem to tightly couple clock generation and to target logic simulation.
+One intriguing omission is the lack fine-grained timestamping , which in
+conjuction with the observation above, seems to suggest some sort of
+centralized control with minimal decoupling acrossing the emulator.
+
+The approach we outline in this chapter is radically different than those
+outlined above, in that clock generation and selection circuits are replaced
+with indepedent decoupled units that are timestamped. In effect, this sub-graph
+combined with the hub unit are a conservative PDES, and the resulting simulator
+is ETDC.  In our implementation, no FPGA specific clock selection logic beyond
+a clock gate, is used, making our implementation portable across different
+FPGAs. In also maps well to inherently parallel nature of clock generation and
+selection in a SoC. However, this implementation strategy begets its own
+challenges however, notably the classic conservative PDES challenge achieving
+good performance and avoiding deadlock hinges on finding sufficient lookahead,
+which in some cases may not be possible without restricting target behavior.
+
+\section{Context, Goals and Motivation}
+
+To understand how we arrived at our implementation, we need to re-evaluate the
+goals outlined when we designed Golden Gate. Understand the current capability
+of FIRRTL to express clocking primitives, and the machinery available in Golden
+Gate to implement these features. Re-evaluating the goals we laid out in
+Section~\ref{sec:gg-design-objectives}.
+
+\begin{enumerate}
+\item \textbf{Maintain FireSim feature completeness.} Just as in the orginal
+redesign, it was critical that support for dynamic frequency scaling, work in
+conjunction with existing Bridges and multi-cycle resource optimizations. For
+the purposes of getting to a working prototype, we will accept a loss of
+simulation FMR. In the long run however, our goal is to support siulating
+systems that dynamically change their clocks at the same rate as an equivalent
+system that does not.
+
+\item \textbf{Minimize user modification of ASIC RTL.}
+Specifically, we want to avoid extensive changes to the designs module
+hierarchy. The use of a singleton clock bridge in the previous chapter,
+violated this objective. Indeed, in Chipyard 1.4, multi-clock configurations
+are handled different in RTL simulation (where a high frequency clock source
+drives multiple clock dividers), versus the FireSim configuration, in which all
+of this is ripped out and replaced with an instantion of the clock bridge
+outside the chip. For the purposes of this disseration, we'll permit replacing
+ASIC clock-generating circuits with models that do not exactly the same behavior\TODO{Define this?}.
+
+\item \textbf{Provide a mechanism to rigorously verify the [modifications].} We
+decided to punt on this objective here. Though, as in LI-BDN case, it would be
+nice in the future if replaced models could be verified against the underlying
+ASIC implementation. In this chapter we relied on dynamic verification, but a
+re-imaging of LI-BDN for asynchronous circuits is a long term goal.
+
+\item \textbf{Enable the use of FireSim as a library for hardware emulation.}
+This is closely related to teh second point. Clocking and reset structures
+remain the single largest point of divergence between ``Chip" configurations and
+FireSim configurations of Chipyard SoCs. At time of writing FireSim is being
+used as a library outside of Chipyard, really, our aim is to support emulation
+of arbitrary, but appropriately annotated, firrtl and not strictly Chipyard
+designs.
+
+\item \textbf{Avoid use of FPGA-specific Clocking Primitives.}
+In the interest of supporting other FPGAs in the future, and to avoid more of
+the placement and DRC challenges associated with using those devices, we wanted
+a design that used coventional logic and interconnect resources where possible.
+\end{enumerate}
+
+Another important reality to grasp is that native support for clocking
+structures in FIRRTL is nascent, and designers tend to use black-box verilog to
+describe structures like clock gates and logic primitives that act on
+clocks~(this have particular process-specific implementations that will be used
+in physical design). As a result, buiding a compiler capable of analyzing this
+netlist without conserable designer help was going to be intractable. Users will
+need to provide this compiler-required information with FIRRTL annotations.
+
+\section{Designs We Considered}
+
+%For many of the same reasons descrbed the previous chapter, an
+%FPGA-prototyping-based approaches like the one described by Mantovani et
+%al.~\cite{DVFSPrototype} was off the table.
+
+To resuse most of our work in building out static multiclock support, we
+initially tried to frame dynamic clock domain support as solving the smaller
+problem of reconstituting the clock-token stream. The most straightforward way
+of doing so is to a provide a means for users to specify that certain clocks
+have dynamic behavior on the centralized clock bridge. For these clocks, the
+clock bridge would accept a parameters to describe how it derives from other
+clock in the system (e.g., it should in effect simulate a clock mux and select
+between two other output clocks). Based on this selected behavior a set of
+target-drive inputs on the bridge would be exposed, and the user would drive
+these from the target. This would require the least modification to existing
+infrastructure as clock-enabling signals driven is already provided by bridge
+extraction. This reverse channel could enqueue a new output token on each
+simulator timestep, which in turn, may determine the contents of future clock
+tokens.
+
+While this would suffice for simulating simple systems, and would be easy to
+implement initially, the main problem with this approach is that it forces the
+designer to reexpress, in a centralized fashion, how all clocks in a system are
+generated. The difficulty is that clock generation and distribution in an SoC
+is a distributed process.  In a simple system, a clock source might feed a centralized PLL,
+which in turn, drive a series of output dividers, downstream clock muxes and
+clock gates, may be distributed throughout the design hierarchy. This simplified model is complicated by I/O
+devices which tend their own clock generation schemes. As such, it would be
+better if information about target clocks could be captured or inferred at the instantion
+sites of the ASIC circuits that are responsible for generating derived clock in
+the actual implementation, instead of forcing the user to rexpress these
+properties at the clock bridge.
+
+Indeed, in order to minimize modification to ASIC RTL it would be better to transform or
+replace ASIC circuits with FPGA-compatible equivalents. As in the previous
+chapter, this cannot be achieved simply by replacing a primitive with an FPGA
+analog, but instead requires a host-decoupled unit that deterministically
+models the behavior of the target circuit under variable host-timings.  While
+tranforming verilog models of clock-generating circuits into an exact but
+latency-insenstive equivalent (a la LI-BDN and SSMs) is a possibility in the
+future, in this chapter we are going to substitute these circuits for
+handwritten units. Golden Gate has extensive support for doing module-level
+manipulations of the design hierarchy.  Instead of using this machinery to
+preform resource optimizations, here we will leverage it extract and replace
+clock generating circuits with equivalent units.
+
+Of course, a unit, with the exception of the hub unit, represent SSMs with
+tokens of a unit being synchronous to the clock of the SSM. This clearly does
+not apply to clock generating circuits, whose inputs and outputs are
+clocks, often without phase relation to one another. Here, some timekeeping can
+no longer remain implicit: the times of each edge must be known to propely
+model the underlying circuit.
+
+Perhaps the defining of this project was whether to leave these
+clock-generating circuits as independent units or whether the
+compiler should attempt to centralize them into a single chunk of logic that could
+feed the front-end of the hub (i.e., by subsuming the role of the clock bridge
+and supplying complete clock tokens). In effect this is just a question of
+centralized versus distributed control.  In the prototype we described in this
+chapter, we elected to leave them as independent units, for the following
+reasons:
+
+- Naturally fit into the Golden Gate framework.
+ - Of replacing modules with decoupled units.
+- Can model a wide space of simulated behaviors. Complex behavior can be modelled in the replaced units. (See stanford).
+  This behavrios can be reasonable about independently of other blcoks in the system. 
+- Is a more interesting/unique system to study.
+
+A time of writing, it remains unclear if this is a better solution, as it comes
+introduces deadlock risks not associated with a centralized approach, and
+relies extensively on finding adequate lookahead to achieve good performance.
+Conversely, munging this logic together and coupling it directly to hub is
+likely to work in a broader set of cases, and produce acceptable
+performance---the final result would look much like Cadence patent described
+previously.  We will speculatively explore this tradeoff at the end of this
+chapter when we discuss future work.
+
+
+\section{Initial Implementation}
+
+As we have alluded to the previous section, our approach functions by replacing
+modules related to clock generation, switching, or gating, or behaviors that
+are otherwise asynchronous to a clock, with timestamped units~(an LP in PDES
+parlance). This modules are extracted and replaced in the same fashion as a
+Bridge or an optimized model, however, their channels are labelled as
+``timestamped". Timestamped channels send, in PDES paralance, \emph{messages}:
+a tuple of a data-value and a timestamp. Here, the resultings simulator graph
+consists of an untimestamped subgraph, consisting of optimized models and
+coventional bridges. and a timestamped subraph consisting of the timestamped
+models. The hub-unit is the only unit that exists in both subgraphs, it has
+both timestamped and unstamped input and output channels. We show an example graph in \TODO{Figure}.
+
+To improve FMR on combinationally connected paths between units (timestamped or
+unstamped), we introduced a compiler optimization that removes passthrough
+connectivity in the hub. This permits two models to drive each other directly,
+instead of passing through the hub model. As a result, simulator graphs are not
+always stars (this is reflected in \TODO{Figure}). This optimization is
+critical for improving FMR in non-trival timestamped, but as a side-effect, can
+also improve FMR when multiple optimizations are enabled byt allowing
+optimization models to drive each other directly. We expand on this in compiler modifications in \TODO{Section}.
+
+Since there is no longer a single clock token stream, we modified the hub unit
+to schedule across its multiple timestamped inputs. Timestamped inputs can be
+either clock-type or data-type~(used for modelling asynchronous resets), these
+differ in how they are presented to target RTL. The hub unit explicitly tracks
+target time, which it uses to annotate timestamped outputs as the hub advances.
+We expand on the hub-unit modifications in \TODO{Section}.
+
+Easily the challenging aspect of this implementation was modelling
+timestamped hardware. Timestamped units are implemented as bridges that use
+timestamped channels exclusively. We wrote a chisel library to make it easy to
+write simple models as translations of verilog RTL, allowing us to build models
+quickly. These models are pessimistic, and do not exploit lookahead that might
+be present in a larger circuit. To improve simulation performance, we explored
+writing specialized models that extract multi-cycle lookahead that is available
+in certain circuits.
+
+
+% Show an example graph.
+% - Two sides, time-stamped models on one side, existing LI-BDN models on the other
+% Show a promote passthrough paths variant.
+
+\subsection{Hub Unit Modifications}
+% Hub model modifications.
+% - Clocks
+% - Async Reset
+
+\subsection{Compiler Modifications}
+% Baseline Compiler modifications
+% - Extract passthroughs.
+%   - Clock source + clock divider
+
+\subsection{Baseline Timestamped Models}
+% Library for building timestamped bridges
+% - Dynamic verification of TS bridges
+% - 2:1 Clock Mux Example
+
+\section{Example Case Study}
+% Baseline Performance & Resource Utilization
+% Example designs: Parallel dividers cascade, parallel muxes, mux cascade, clock gate
+
+
+\section{Performance Optimizations}
+% Optimizations
+% - Double tokens
+% - Muxes with lookahead
+
+\section{Deadlock Considerations}
+
+% Full-system demo
+
+\section{Future Work}
+% - Optimized clock-muxes
+
+
+%Patents:
+%https://patents.google.com/patent/US20150046144A1/en
+%

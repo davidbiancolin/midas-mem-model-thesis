@@ -1,7 +1,7 @@
 #! /bin/bash
 set -ex
 # Target completion date date
-finish_date=2021-2-13
+finish_date=2021-3-13
 # Length in pages
 target_thesis_length=110
 

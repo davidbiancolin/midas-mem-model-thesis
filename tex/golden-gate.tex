@@ -10,7 +10,7 @@ reader to Albert Magyar's dissertation. Code references in this chapter will
 refer to sources in FireSim version
 1.8.0\footnote{https://github.com/firesim/firesim/tree/1.8.0}.
 
-\section{Design Objectives}
+\section{Design Objectives}\label{sec:gg-design-objectives}l
 
 We had the following objectives in mind when we set to redesign MIDAS:
 
@@ -75,7 +75,7 @@ acknowledge that forcing optimizations to apply only at registered boundaries
 between units~(a requirement of a channel-bootstrapped formalism) would
 produce simulators that sustain greater FMRs, this would add complexity to the
 compiler and could make many optimizations infeasible. We also note that these
-sorts ``channel-like`` of optimizations are not fundamentally precluded by the LI-BDN formalism. For example, when an edge
+sorts ``channel-like" of optimizations are not fundamentally precluded by the LI-BDN formalism. For example, when an edge
 between two units is driven by an output port with no combinational dependency on
 an input, it may be possible to implement that edge using a flow-through queue to save a
 cycle of transmission latency.
@@ -154,8 +154,8 @@ itself depends on. We give an example invocation of Golden Gate in Listing~\ref{
 
 \section{Updated Compiler Flow}
 
-We show a depiction of Golden Gate's compilation flow and how modifies an
-illustrative toy-design in figure~\ref{fig:gg-toolchain}.  We omitt
+We show a depiction of Golden Gate's compilation flow and how it modifies an
+illustrative toy-design in figure~\ref{fig:gg-toolchain}.  We omit
 debug-synthesis transforms, and user-provided transformations for brevity.
 Golden Gate tranformations, which are statically ordered in
 \texttt{MidasTransforms}\footnote{See sim/midas/src/main/scala/midas/passes/MidasTransforms.scala}, can be
@@ -199,7 +199,7 @@ circuit from transform-to-transform instead of an auxiliary
 datastruture that persists across transformations. The main motivation for doing so was to make transforms in the
 compiler robust against running lowering or optimization transformations
 between them. The FIRRTL compiler framework provides callbacks for defining
-how annotations should be modified when the circuit structures an annotation targets are
+how an annotation should be updated when the circuit structures it targets are
 changed (a process known as \emph{renaming}). We describe the key annotations here:
 
 \begin{itemize}
@@ -260,9 +260,9 @@ them~(\texttt{BridgeExtraction}). Connections to instances of
 a bridge are replaced with connections to newly added
 top-level I/O. Note that a single bridge module with $N$ instances will produce $N$
 sets of ports at the top-level. The bridge and connection annotations are
-"promoted" to point at these new top-level interfaces. Bridge annotations are then
+``promoted" to point at these new top-level interfaces. Bridge annotations are then
 replaced with a form of annotation that targets top-level I/O
-(\texttt{BridgeIOAnnotation} instead of a module but are otherwise indentical.
+(\texttt{BridgeIOAnnotation} instead of a module but are otherwise indentical).
 Finally, connection annotations are assigned new \texttt{globalNames} to ensure they
 are unique and their corresponding bridge annotations are updated to reflect
 that.
@@ -270,7 +270,7 @@ that.
 Next, Golden Gate prepares for its optimization-focused hierarchy manipulations
 by adding a wrapper module, the \emph{FAME wrapper}, around the existing
 design~(\texttt{WrapTop}). Once optimization candidates have been removed, the
-previous top-level module will become the central "hub" unit in the simulator.
+previous top-level module will become the central hub unit in the simulator.
 
 It is at this point we envisioned custom optimization analyses would be run
 find and label optimization opportunities. Currently, the multi-ported RAM
@@ -305,7 +305,7 @@ added~(\texttt{InferModelPorts}), since connections between nodes (both bridges 
 now uniformly target top-level I/O.  This transformation
 ensures that connection annotations on instances of the same module agree as to how
 ports correspond to channels. Since \texttt{FAMEDefaults} makes no attempt to
-group channels currently, this mainly serves as a consistency check on
+combine leaf channels into aggregate ones, this mainly serves as a consistency check on
 bridge-bound channels and ensures no connection annotations have been lost.
 
 The bulk of the complexity in Simulator Synthesis is contained in its default
@@ -362,12 +362,12 @@ invocation, and produces three layers of wrapper modules, shown in Figure~\ref{f
 
 \subsection{Channel Synthesis}
 The first wrapper layer~(\texttt{SimWrapper}) directly interfaces with the transformed RTL and instantiates
-channel implementations. Elaboration of this module is driven by two inputs. First, the user-defined parameters instance
-which, as in MIDAS, specifies properties about the host-platform. Second, by
-annotations, specifically connection annotations, labelling the now transformed target.
-Each connection annotation will corespond with a channel implentation, however how that channel
+channel implementations. Elaboration of this module is driven by two inputs: the user-defined parameters instance
+which, as in MIDAS, specifies properties about the host-platform. and the set of
+annotations, notably connection annotations, labelling the now transformed target.
+Each connection annotation will corespond with a channel implementation, however how that channel
 is bound depends on the \texttt{sources} and \texttt{sinks} enumerated by the annotation.
-Connection annotations that posses both \texttt{sources} and \texttt{sinks}
+Connection annotations that possess both \texttt{sources} and \texttt{sinks}
 connect two models in the transformed RTL; these are \emph{loopback} channels
 that drive an input and an output interface on the transformed target. Conversly,
 annotations that possess an empty \texttt{sources} or \texttt{sinks} parameter
@@ -405,7 +405,7 @@ to use the new Bridge system, without changing existing host software.
 
 \subsection{Platform Wrapper}
 The last level of wrapper module is an FPGA-specific shim layer. The user
-selects their desired shim through parameters instance. This serves as an
+selects their desired shim through the parameters instance. This serves as an
 opportunity to introduce FPGA-specific hardware and modify interface names to
 slot into an FPGA shell project. We note that this top-level module could
 instantiate all of the IP required to define a complete FPGA project~(as in
@@ -424,14 +424,13 @@ implemented in BRAM and are instead decomposed into LUTs and
 registers~\cite{FPGAGap2}.  While using double-pumping, BRAM duplication, or
 FPGA-optimized microarchitectures~\cite{MultiportXOR} can help, here we used Golden Gate to
 replace the SRAM with a multi-cycle unit to further reduce resource
-utilization. This optimization lets a target memory with $M$ asynchronous read ports and
-$N$ write ports to be implemented by time-multiplexing
-a single dual-ported BRAM. In contrast to the static time-multiplexing schemes described
+utilization. This optimization implements a target memory possessing $M$ asynchronous read ports and
+$N$ write ports with a single time-multiplexed dual-ported BRAM. In contrast to the static time-multiplexing schemes described
 by Pellauer et al.~\cite{APortNetworks} and Dwiel et al.~\cite{fabscalarfpga}, our optimization can decouple arbitrary target
 memories and replace them with an optimized model without any constraints on the structure or timing of the
 target design.
 
-In order to rigoursly verify optimizations, in our ICCAD publication we also
+In order to rigorously verify optimizations, in our ICCAD publication we also
 introduced a bounded-model checking flow, called Latency-Insensitive Model
 Equivalence~(LIME), hosted in UCLID5~\cite{UCLID5}, to formally verify that
 optimized models are valid LI-BDNs implementations of their reference RTL.  Our

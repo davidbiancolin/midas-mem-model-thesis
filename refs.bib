@@ -875,6 +875,14 @@ title = {Theory of composable latency-insensitive refinements}
 BOOM is written in roughly 9,000 lines of the hardware construction language Chisel. We leveraged Berkeley’s open-source Rocket-chip SoC generator, allowing us to quickly bring up an entire multi-core processor system (including caches and uncore) by replacing the in-order Rocket core with an out-of-order BOOM core. BOOM supports atomics, IEEE 754-2008 floating-point, and page-based virtual memory. We have demonstrated BOOM running Linux, SPEC CINT2006, and CoreMark.}
 }
 
+@article{SonicBOOM,
+  title={SonicBOOM: The 3rd Generation Berkeley Out-of-Order Machine},
+  author={Zhao, Jerry and Korpan, Ben and Gonzalez, Abraham and Asanovic, Krste},
+  booktitle={Fourth Workshop on Computer Architecture Research with RISC-V},
+  year={2020},
+  month={May}
+}
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%% Benchmarks
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -1144,4 +1152,18 @@ doi={10.1109/ICCAD45719.2019.8942048}}
    title = "Speckle",
    year = "2021 (Accessed January 20th, 2021)",
    howpublished = "\url{https://github.com/ccelio/Speckle}",
+}
+
+@misc{SiFiveCache,
+   author = "GitHub",
+   title = "block-inclusivecache-sifive",
+   year = "2021 (Accessed February 1st, 2021)",
+   howpublished = "\url{https://github.com/sifive/block-inclusivecache-sifive}",
+}
+
+@misc{ccbench,
+   author = "GitHub",
+   title = "ccbench",
+   year = "2021 (Accessed February 1st, 2021)",
+   howpublished = "\url{https://github.com/ucb-bar/ccbench}",
 }
