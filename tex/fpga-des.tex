@@ -10,8 +10,8 @@ al. in \emph{A-Port Networks: Preserving the Timed Behavior of Synchronous
 Systems for Modeling on FPGAs}~\cite{APortNetworks}.
 
 Timekeeping strategy refers to how the simulator tracks simulated time (target time). \emph{Explicit timekeeping}~(ET)
-simulators having dedicated state to track time (in seconds) whereas simulators with implicit
-timekeeping (IT) instead rely on target-cycle count as a proxy. Implicit timekeeping represents an
+simulators having dedicated state to track time (in seconds) whereas simulators with \emph{implicit
+timekeeping} (IT) instead rely on target-cycle count as a proxy. Implicit timekeeping represents an
 implementation optimization as additional FPGA resources required track and
 manage timestamps are unneeded. For this optimization to apply broadly across
 the simulator, in general, target clocks must have fixed frequency and phase, and
@@ -19,10 +19,10 @@ all simulation events must be synchronous to these clocks.
 
 Control granularity refers to how time is permitted to advance across the simulator. At one extreme there exist
 simulators with \emph{centralized control}~(CC). These track time in
-a single location or are globally statically scheduled: the entire simulator advances in lock-step from
-timestep to timestep.  Conversely, there are simulators with \emph{distributed
-control}~(DC). These simulators are parallel systems that can be represented as a directed graph of \emph{logical
-processes}~(the nodes of the graph). Logical processes~(LPs) communicate by sending \emph{messages} over the graph's edges.
+a single location or are globally statically scheduled (i.e., the entire simulator advances in lock-step from
+timestep to timestep).  Conversely, there are simulators with \emph{distributed
+control}~(DC). These simulators are parallel systems that can be represented as a directed graph of  \emph{logical
+processes}~(LP). Logical processes, the nodes of the graph, communicate by sending \emph{messages} over the graph's edges.
 Each LP locally tracks simulation time and can advance independently: they are themselves smaller discrete-event simulators. DC
 simulators can be coarse-grained, with LPs simulating core-scale components, or
 fine-grained, where LPs model blocks on the scale of CAMs, RAMs, or
@@ -37,14 +37,14 @@ Taking the product of these two dimensions produces four classes of RTL simulato
 
 \item\textbf{Explicit Timekeeping, Centralized Control (ETCC)}: Yorktown Simulation Engine~\cite{YSESoftware}, modern commercial emulators\footnote{As their implementations are proprietary, we can not say so definitively.}.
 
-\item\textbf{Explicit Timekeeping, Distributed Control (ETDC)}: multi-SoC commercial emulators\footnote{As, above.}, and this work.
+\item\textbf{Explicit Timekeeping, Distributed Control (ETDC)}: multi-chip commercial emulators\footnote{As above.}, and this work.
 \end{enumerate}
 
 For all intents and purposes, DC simulators are FPGA-hosted, parallel
 discrete-event simulators.  Parallel, discrete-event simulation~(PDES) has been
 a vibrant area of research since the 1980s, but PDES researchers have focused
 nearly exclusively on non-FPGA hosts (including multiprocessors, GPUs,
-supercomputers, networks thereof).  In the next sections, we briefly introduce
+supercomputers, and networks thereof).  In the next sections we briefly introduce
 relevant PDES work, and explain how prior work in that field translates to
 hosting DC RTL simulators on FPGAs. First, we explore how to define simulation
 performance, and then study some CC simulator designs to help motivate the use
@@ -71,20 +71,21 @@ breaks down the performance of a complete simulation into a product of terms:
 
 The right term of this equation, host frequency~($f_{fpga}$), is set by the
 critical path delay of the simulator. Depending on the simulator's design and
-the target it simulates, this may correspond to a critical path in the target design or, more frequently, a path that
-drives scheduling logic in the simulator itself (i.e., some part of the circuit deciding whether to
-advance forward in simulation time). The left term, a ratio of host-to-target cycles, is a measure of the
+the target it simulates, this may correspond to a critical path in the target design or a path that
+drives scheduling logic in the simulator itself~\cite{APortNetworks} (i.e., some part of the circuit deciding whether to
+advance forward in simulation time). The left term, a ratio of host to target cycles, is a measure of the
 microarchitectural efficiency of the simulator. In an FPGA prototype, this term is
-effectively one: every host clock simulates a target clock. In
-a host-decoupled simulator, in practice, it is always less than one\footnote{While it is possible to simulate multiple target cycles per
-host cycle by unrolling successive cycles of execution, there is no incentive
+effectively one: every host clock cycle simulates a target clock cycle. In
+a host-decoupled simulator, in practice, it is always less than
+one\footnote{While it is possible to simulate multiple target cycles per host
+cycle by unrolling successive cycles of execution, there is no incentive
 to do so globally across a simulator, as it would double resource utilization,
 and likely double the critical path delay of the simulator. In DC simulators
 of target machines with multiple clock domains, it may make sense to do this
 for relatively small LPs in the fastest clock domains, if the simulator is
 rate-limited on those LPs.}. Given this, Pellauer et al. tend to the
-more-intuitive reciprocal of this term and dubbing it the FPGA-cycles-to-Model-cycles
-Ratio~(FMR). We give it in Equation~\ref{eq:fmr}. Unless it can be deduced statically,
+more-intuitive reciprocal of this term and dubbing it the \emph{FPGA-cycles-to-Model-cycles
+Ratio}~(FMR). We give it in Equation~\ref{eq:fmr}. Unless it can be deduced statically,
 FMR is only usefully defined over a non-trivial interval of simulation.
 
 \begin{equation}
@@ -98,11 +99,11 @@ schedules accesses only for ports that are used could have lower FMR: when the r
 approach one. Continuing with
 this example, one could gang together multiple BRAMs or LUTRAMs to build a more
 highly ported RAM structure capable of more port accesses per cycle~\cite{MultiportLVT, MultiportXOR}.
-While this could reduce the FMR of statically scheduled implementation from four to as low as one, it
+While this could reduce the FMR of the statically scheduled implementation from four to as low as one, it
 comes at the expense of FPGA resources and, potentially, a longer simulator
 critical path which may counteract the FMR improvement.
 
-To apply Equation~\ref{eq:sim-perf} to DC simulators, we can modify it to use
+To apply Equation~\ref{eq:sim-perf} to DC simulators with a single target clock domain, we can modify it to use
 the FMR of the LP that has executed the fewest number of target cycles.
 However, when LPs may advance only a bounded number of cycles
 ahead of slower LPs in the system, for a sufficiently long simulation Equation~\ref{eq:sim-perf}
@@ -118,11 +119,11 @@ or dynamically varying, number of host cycles to execute, there are two
 common approaches.  The first is what we call \emph{static-barrier synchronization}\footnote{Pellauer et al.~\cite{APortNetworks}
 instead use the term \emph{unit-delay simulation}, but this differs from how the term is used in other simulation contexts, where
 it applies how delays in the target are modeled~(see the YSE~\cite{YSEHardware} for an example).}
-Here the simulator is granted a fixed $N$-host-cycle budget to
+Here the simulator is granted a fixed $N$ host-cycle budget to
 compute each target cycle, where $N$ is equal the largest possible
 latency a sub-block may take to execute~(i.e., in isolation its worst-case FMR is $N$). While simple to
 implement, this will result in wasted host cycles as in many target cycles the
-full $N$ cycle allocation may be unneeded.  We also note that while it's
+full $N$ cycle allocation may be unneeded.  We also note that while it is
 relatively easy to provide tight bounds for models of many on-chip
 blocks, like multi-ported RAMs, it is more difficult to do so for I/O devices, which may require large $N$
 in the worst case, but far less on average.
@@ -135,17 +136,17 @@ synchronization}. While this removes wasted host idle-cycles (FMR can fall
 below $N$), it introduces new control signals that often set the critical
 path delay of the simulator: these signals must be routed to a central
 location on the FPGA, propagated through a potentially wide and-reduction network, and then fanned out again across the FPGA.
-This problem is exacerbated in modern FPGAs, like the VU9P devices used in EC2 F1, which are composed of multiple
+This problem is exacerbated in modern FPGAs, like the VU9P devices used in Amazon's EC2 F1 instances, which are composed of multiple
 dies\footnote{In Xilinx parlance, each logic die is referred to as a
-super-logic regions~(SLRs).}, as these control signals must use relatively
+super-logic region~(SLR).}, as these control signals must use relatively
 scarcer and higher-delay inter-die interconnect. Additionally, the scarcity of inter-die interconnect
 puts increased pressure on the router, and for high utilizations often results
-in unrouted nets, and other related DRC errors.  To improve simulator
+in unrouted nets and other related DRC errors.  To improve simulator
 frequency, it is natural, perhaps even necessary, to pipeline these signals at
 the expense of a fixed increase to FMR: unless simulation of target cycle can
 be overlapped, FMR will increase by one for each additional pipeline stage. To make things worse, while
 FPGAs have scaled in capacity, their logic delays, and thus achievable
-$f_{max}$, have seen little improvement. Since an increase in capacity begets
+$f_{fpga}$, have seen little improvement. Since an increase in capacity begets
 more sub-blocks, the larger and-reduction network is not offset by logic-delay
 improvements which further lengthens the critical path of the simulator.
 
@@ -154,26 +155,28 @@ where they introduce a notion of \emph{minimum FMR}~(MFMR). In their work they t
 and synthesized them onto FPGAs: their elaboration flow emits multi-cycle models for CAMs and RAMs whose
 microarchitecture guarantees they will complete within the user-specified MFMR. The centralized controller
 need only be aware of longer-latency events that may exceed this MFMR~(specifically instruction and data cache misses, and complex
-arithemtic operations~\cite{fabscalarfpga}) reducing the size of the and-reduction network.
+arithmetic operations~\cite{fabscalarfpga}) reducing the size of the and-reduction network.
 
 \section{Distributed Control~(DC) Simulators}
 These trends in FPGA scaling make it necessary to decentralize timekeeping to
-build fast simulators.  Having more LPs, each of which manage fewer control
-signals that are routed locally, improve ${f_{max}}$ while easing the routing and
-DRC challenges with centralizing control. Distributing control introduces new
-challenges however.  Since LPs can decouple in target time, \emph{causality errors} can
-arise if LPs act on messages out of temporal order. Conversely, if LPs are too
+build fast simulators. Having more LPs, each of which manage fewer control
+signals that are routed locally, improves ${f_{max}}$ while easing the routing and
+DRC challenges of centralizing control. The caveat is that distributing control
+can substiantially increase simulator design complexity. Since LPs can decouple in target time,
+causality errors can arise if LPs act on messages out of temporal order. Conversely, if LPs are too
 conservative in waiting for messages to arrive the resulting simulator may be prone to deadlock.
-Finally, a simulator that is correct~(it is deadlock free and correctly models the target) can still suffer of poor simulation performance if transmission
+Finally, a simulator that is correct~(it is deadlock free and correctly models
+the target) can still suffer of poor simulation performance if transmission
 latency between LPs cannot be overlapped with LP execution. Designing
-high-performance algorithms that satisfy these constraints for CPU hosts has been the central focus of PDES
-community since its inception~\cite{PDESFujimotoPrimer}.
+high-performance algorithms that satisfy these constraints for CPU hosts has
+been the central focus of PDES community since its
+inception~\cite{PDESFujimotoPrimer}.
 
-\subsection{A Primer on PDES}
+\subsection{A Primer on Parallel Discrete-Event Simulation}
 
-In PDES a \emph{physical process} is divided into a set of logical processes
-that communicate via timestamped messages. In effect, any one LP is itself a discrete
-event simulator that must process events in timestamp order~(the
+In PDES, a physical system can be divided into a set of interacting physical processes~(PPs). A PDES of this system
+represents each of these physical processes with a logical processes~(LPs) that communicate via timestamped messages passed over
+FIFO communication channels.  In effect, any one LP is itself a discrete-event simulator that must process events in timestamp order~(the
 \emph{local causality constraint}). These events can be triggered internally or
 by messages received from other LPs. The fundamental difficulty in PDES is that
 an LP may not know that it has not yet received an older message and so cannot
@@ -186,20 +189,20 @@ In conservative synchronization algorithms, LPs wait to process events until
 they are certain they will not violate the local causality constraint. This
 conservatism is ripe for deadlock: it simply takes a cycle of LPs with one
 waiting on the next. Conservative PDES overcomes deadlock by requiring that LPs have non-zero
-\emph{lookahead}. That is to say, output messages must only depend on input
-messages that are at least lookahead seconds in the past. Armed with this,
+\emph{lookahead}($t_{L}$). That is to say, output messages must only depend on input
+messages that are were received in the past. Armed with this,
 it becomes possible to detect and resolve deadlock, or avoid it altogether.
 The Chandy-Misra-Bryant~(CMB)~\cite{NullMessagesBryant, NullMessagesChandy} algorithm avoids deadlock by introducing
-\emph{null-messages} which indicate the absence of a real
-message up to its timestamp. If an LP with non-zero lookahead, $t_{L}$, is blocked on a input whose latest
-message is timestamped to time $t_{i}$, the LP must eventually issue a
-null-message at time $t_{i} + t_{L}$ to each of its receivers. This may
+\emph{null messages} which indicate the absence of a real
+message up to its timestamp. If an LP with non-zero lookahead is blocked on a input whose latest
+message has the timestamp $t_{i}$, the LP must eventually issue a
+null message at time $t_{i} + t_{L}$ to each of its receivers. This may
 be sufficient to unblock the receiving LP, resolving the deadlock risk. Failing that, the receiving LP is compelled to
-send null-messages still further in the future and the process repeats.
+send null messages still further in the future and the process repeats.
 So long as there exists no cycle of LPs with zero lookahead, the CMB algorithm
-is guaranteed to avoid deadlock; for a complete proof we refer the interested reader to Chandy and Misra~\cite{NullMessagesChandy}.
-For a given physical process, simulation performance decreases as lookahead approaches zero, as the number
-of null-messages required to avoid deadlock increases~\cite{PDESFujimotoPrimer}.
+is guaranteed to avoid deadlock: for a complete proof we refer the interested reader to Chandy and Misra~\cite{NullMessagesChandy}.
+Simulation performance decreases as lookahead approaches zero, as the number
+of null messages required to avoid deadlock increases~\cite{PDESFujimotoPrimer}.
 In general, lookahead is derived from underlying properties of the
 physical process; if sufficient lookahead cannot be
 captured in the underlying system, conservative PDES algorithms may offer
@@ -219,10 +222,11 @@ the state of all LPs are known non-speculatively~\cite{TimeWarp},
 rollback state before this timestamp can be reclaimed. While the most
 basic conservative algorithms can be implemented more simply than optimistic
 simulators, for many types of physical processes, namely those for which
-sufficiently lookaheads cannot be found (either deduced statically or discovered
-at runtime), optimistic simulators out-perform pessimistic ones. While debate between proponents of conservative and optimistic PDES raged through
-the 1990s and 2000s, both optimistic and conservative PDES algorithms see
-contemporary use~\cite{PDESRetrospective}.
+sufficiently lookaheads cannot be found (either deduced statically or
+discovered at runtime), optimistic simulators out-perform pessimistic ones.
+While debate between proponents of conservative and optimistic PDES raged
+through the 1990s and 2000s, both optimistic and conservative PDES algorithms
+see contemporary use~\cite{PDESRetrospective}.
 
 %In VLSI design, optimistic VHDL and Verilog
 %PDES have been built. Modern, multithreaded RTL simulators are necessarily
@@ -244,7 +248,7 @@ Interconnect is relatively abundant can support hundreds or thousands
 of direct links between LPs implemented on the same FPGA.
 
 \item \textbf{FPGAs trivially support FIFO communication channels}. Unlike in
-conventional PDES hosts, channels between FPGA-hosted LPs are easily made FIFO.
+some conventional PDES hosts, channels between FPGA-hosted LPs are easily made FIFO.
 LPs do not need to reorder messages, and
 can assume messages from the same sender arrive in monotonically increasing
 time-order.
@@ -254,7 +258,7 @@ time-order.
 %can be made to operate such that LPs do not need to tolerate potentially lost messages.
 
 \item \textbf{FPGA compute resources are relatively inflexible}. FPGAs are considerably more difficult to
-program as LPs and other simulation resources must be written in RTL. FPGAs lack native floating-point support which is
+program since LPs and other simulation resources must be written in RTL. FPGAs lack native floating-point support which is
 critical in many PDES application domains. In many cases, it is not clear that
 FPGA implementation of an LP would be faster than a CPU-hosted one.
 \end{enumerate}
@@ -267,7 +271,7 @@ synchronization algorithm over a regular grid of processing elements~(PEs).  Whi
 possible to implement RTL simulator using PDES-A, the effective simulation
 capacity and throughput of such a system would be considerably lower than
 FPGA-based emulators and prototypes. Where FPGAs hold more promise is in domain-specific PDES that
-can exploit the features of its interconnect, without succumbing to the additional complexity of programming FPGAs.
+can exploit the features of its interconnect without succumbing to the additional complexity of programming FPGAs.
 
 \subsection{ASIC Emulation As Domain-Specific PDES}
 
@@ -287,7 +291,7 @@ interconnect. High-bandwidth interconnect between LPs removes any need to compre
 otherwise optimize, transmission between LPs, reducing simulator complexity.
 Hundreds, even thousands, of cycle-by-cycle traces of messages can be trivially
 moved between LPs on the same FPGA, a feat that is all but impossible to
-achieve on a CPU host. LPs can be directly connected to one another with
+achieve on a conventional CPU host. LPs can be directly connected to one another with
 hardware queues, which in the general case, have a single host cycle of
 "transmission" delay. In some cases, flow-through queues or wire connections
 may be used to allow combinational transmission of messages.
@@ -295,44 +299,56 @@ may be used to allow combinational transmission of messages.
 Given that FPGAs appear to be good hosts of PDES for ASIC emulation,
 the question becomes how does one translate an ASIC into a graph of
 LPs, such that the resulting graph is deadlock free and preserves the behavior of the source RTL while still mapping
-efficiently onto the FPGA. We refer to the set of rules that define the
-behavior of these graphs as a \emph{target formalism}.
-These formalisms permit building ad-hoc simulators, where a designer manually
-writes LP implementations that they stitch together to model a target design
-that has not yet be built~(this includes RAMPGold~\cite{RAMPGold},
-HASim~\cite{HASim}, and other RAMP simulators), or hardware emulators, where
-the graph is inferred by a compiler that is processing extent SoC RTL. In
-the latter case, not only can LP implementations be shown to adhere to the
-rules of the target formalism, but its simulated behavior can be verified
-against the source RTL.
+efficiently onto the FPGA.
 
-\subsection{Target Formalisms}
+The natural place to start is with synchronous systems of a single clock domain,
+as these are simpler to simulate, yet still useful for doing performance
+studies on a large class of target machines.  These systems can be implicitly timekept---messages are only ever sent at
+cycle-boundaries---and so synchronization problem associated with general PDES
+can be greatly simplified. Nonetheless, achieving good performance and deadlock
+freedom remains a challenge. To solve this, ITDC simulators constrain the
+behavior of LPs so as to prevent deadlock by construction, by both by
+exploiting properties of the underlying physical system, and restricting how
+the target may be legally divided into LPs. We refer to the set of rules that
+define the behavior of these LP graphs as a \emph{target formalism}.
 
-Target formalisms for ASIC emulation are defined by a tradeoff
-between simulation performance and modeling flexibility. More flexible
-formalisms lift restrictions on LP definition and permit tighter coupling
-between LPs whereas coarser-grained formalisms tend
-to have better simulation performance. We explore three
-formalisms: the RAMP model~(exposed as part of RDL~\cite{RDL}),
-APortNetworks~\cite{APortNetworks}, and LI-BDNs~\cite{LIBDN}. One common
-feature of all three formalisms is that they are designed to support conservative, ITDC
-simulators: messages are not timestamped, and LPs transmit new messages to all
-of their neighbors on every target cycle. When messages are not timestamped, we will refer
-to them as \emph{tokens}, the term used more frequently in RAMP related works, to distinguish them. 
-Having a fixed-interval between tokens removes the need for conventional conservative PDES deadlock avoidance
-(i.e, null messages) or detection schemes, instead deadlock avoidance in these
-formalisms is achieved by-construction by constraining how combinational paths
-may be modeled between LPs and the conditions under which LP implementations
-must enqueue and dequeue tokens.
+\subsection{Target Formalisms for ITDC Simulators}
+
+Target formalisms for ITDC simulators are defined by a tradeoff between
+simulation performance and modeling flexibility. More flexible formalisms lift
+restrictions on LP definition and permit tighter coupling between LPs whereas
+coarser-grained formalisms tend to have better simulation performance. We
+explore three formalisms: the RAMP model~(exposed as part of RDL~\cite{RDL}),
+APortNetworks~\cite{APortNetworks}, and LI-BDNs~\cite{LIBDN}. For the
+remainder of this dissertation, we will refer untimestamped messages to them as
+\emph{tokens}, the term used more frequently in RAMP related works, to
+distinguish them.  Having a fixed time-interval between tokens removes the need
+for conventional conservative PDES deadlock avoidance (i.e, null messages) or
+detection schemes, instead deadlock avoidance in these formalisms is achieved
+by-construction by constraining how combinational paths may be modeled between
+LPs and the conditions under which LP implementations must enqueue and dequeue
+tokens.
+
+Practically speaking, these formalisms can be employed in two ways. First,
+they can be used to build \emph{ad-hoc simulators}, where a designer manually writes
+LP implementations that they stitch together to model a target design that has
+not yet be built~(this includes RAMPGold~\cite{RAMPGold}, HASim~\cite{HASim},
+and other RAMP simulators). Here there is no reference system against
+which the simulator can be validated. Second, they can be used to build
+hardware emulators, where the LP graph is generated by a compiler that is
+processing realizable SoC RTL. This RTL in effect a reference system, and so
+not only can LP implementations be shown to adhere to the rules of the target
+formalism, but their simulated behavior can be verified.
 
 \subsection{Channel-Bootstrapped Formalisms}
 
-The RAMP model~\cite{RDL} and APort Networks~\cite{APortNetworks} are examples of what we call
-\emph{channel-bootstrapped} formalisms as they rely on the use of special
-point-to-point LPs called \emph{channels}~(in RAMP parlance) to provide the
-initial tokens of the simulation. Channels are LPs because they
-model stateful interconnect: it is this statefulness that allows them to send output
-tokens at time zero before receiving any input tokens.
+The RAMP model~\cite{RDL} and APort Networks~\cite{APortNetworks} are examples
+of what we call \emph{channel-bootstrapped} formalisms as they rely on the use
+of special point-to-point LPs called \emph{channels}~(in RAMP parlance) to
+seed the initial tokens of the simulation. Channels are LPs because they
+model stateful interconnect: it is this statefulness that allows them to send
+output tokens at time zero before receiving any input tokens. In essence, this is
+a cycle-level form of lookahead that is sufficient to provide deadlock avoidance.
 
 With that said, RAMP and APortNetworks differ primarily in the granularity of
 their supported non-channel LPs, or \emph{units}~(again, in RAMP parlance). The
@@ -378,7 +394,7 @@ provide $l$ initial tokens before they must wait for an input token.
 
 Neither formalism appears to give any treatment to modeling a target-driven reset in
 channels, as they both rely on time-zero initialization to effectively
-"reset" target state.  We note that if these underlying state elements are
+``reset" target state.  We note that if these underlying state elements are
 synchronously reset, the channels with $l >= 1$ may provide no more than one
 initial token, as future tokens may causally depend on a reset
 token\footnote{We further note that neither of these formalisms was designed
@@ -437,13 +453,13 @@ Figure~\ref{fig:adder-example} demonstrates the execution of a two target cycles
 If the simulation designer uses exclusively non-wire-type channels, both
 formalisms are free of deadlock as there exists no unit whose output at cycle
 $t$ depends on the output of another unit also at cycle $t$\footnote{From a
-conservative PDES perspective, every LP has a non-zero lookahead, and given that
+conservative PDES perspective, every cycle of LPs has a non-zero lookahead, and given that
 all LPs send tokens at every timestamp (obviating the need for null
 messages) deadlock is avoided by construction}. In these simulators, all units
 can execute cycle $t$ concurrently which, assuming no other sources of delay,
 permits the simulator to run at unity FMR.  As is the case with latency-insensitive boundaries, it is not always possible to define LPs
 at registered boundaries.  The use of wire-type channels (i.e. combinational
-coupling between LPs) introduces two principle challenges: at best it
+coupling between LPs with $T_{L} = 0$) introduces two principle challenges: at best it
 increases simulator FMR, and at worst it may introduce time-zero simulation
 deadlock. To illustrate each of these effects, in Figure~\ref{fig:channel-deadlock} we consider a
 latency-insensitive interface between two units implemented three different ways: with a queue-type
@@ -461,7 +477,7 @@ channel, with one pipe and one wire-type channel, and with two wire-type channel
     \begin{subfigure}[t]{0.49\textwidth}
         \captionsetup{margin=0.25cm}
         \includegraphics[width=\columnwidth]{figures/li-pipe-channel-manual.pdf}
-        \caption{One pipe-type channel (carrying the payload) and one-wire type channel (carrying backpressure). This leads $FMR >= 2$, with the decoupled-source unit
+        \caption{One pipe-type channel (carrying the payload) and one-wire type channel (carrying backpressure). This leads to $FMR >= 2$, with the decoupled-source unit
         firing first to produce a backpressure token that is subsequently consumed by the decoupled-sink unit.}
         %  -c pipe midas-graphics/graffle/deadlock.graffle figures/li-pipe-channel.pdf
     \end{subfigure}
@@ -485,11 +501,11 @@ pipelining multiple cycles of target execution (i.e., this latency cannot be
 overlapped with the simulation of younger target cycles).
 
 Deadlock is the more pressing challenge. Wire-type channels remove the
-aforementioned property that all LPs have non-zero lookahead.  Here there are
+aforementioned property that all cycles of LPs have non-zero lookahead.  Here there are
 two situations that may emerge. If the target itself has a combinational loop,
 the behavior of the physical system is itself undefined, and simulation
 deadlock is unavoidable\footnote{We note it is possible to have "false"
-combinational loops but many tools reject these patterns, and so it's not
+combinational loops but many tools reject these patterns, and so it is not
 unreasonable to ban them in these simulators as well.}. As a matter of
 practice, hardware designers know to avoid combinational loops. The second
 challenge arises from poor LP implementation, such as the implementation prescribed by
@@ -509,11 +525,15 @@ Unlike channel bootstrapped formalisms, LI-BDNs avoid deadlock by imposing
 different constraints on the implementation of LPs based on the underlying
 hardware they model, and remove the need for specialized channels to bootstrap
 simulation. Since connections between LPs always represent wire-like
-connectivity, LI-BDNs impose no constraints on how a synchronous target
-is divided into LPs. LI-BDNs were originally developed as a more flexible abstraction for building
-latency-sensitive designs that preserve the RTL timing of a synchronous circuit, extending
-the work of Carloni et al., in the Theory of Latency Insensitive Design~\cite{TheoryOfLIDesign}, however the authors identify that this problem is analogous
-to constructing an ITDC simulator from synchronous ASIC RTL.
+connectivity, LI-BDNs impose no constraints on how a synchronous target is
+divided into LPs. LI-BDNs were originally developed as a more flexible
+abstraction for building latency-sensitive designs that preserve the RTL timing
+of a synchronous circuit, extending the work of Carloni et al., in the Theory
+of Latency Insensitive Design~\cite{TheoryOfLIDesign}, however the authors
+identify that this problem is analogous to constructing an ITDC simulator from
+synchronous ASIC RTL. From a PDES perspective, we will see that LI-BDNs avoid
+deadlock by ensuring that units (LPs) themselves always exploit single-cycle
+lookahead available in their reference physical processes when it is available.
 
 In the terms of Vijayaraghavan et al.\cite{LIBDN}, what we have loosely referred to as a synchronous
 block of RTL thus far is defined synchronous sequential machine~(SSM). Vijayaraghavan et
@@ -568,7 +588,7 @@ input histories match, i.e.,
 
 All SSMs have infinitely many possible partial implementations\footnote{For
 instance, one can take any existing partial implementation, and introduce an
-extra cycle of delay on any of its outputs. As we'll show later, since it's
+extra cycle of delay on any of its outputs. As we will show later, since it is
 always possible to produce an LI-BDN from any SSM, it follows by induction that are infinitely many partial implementations
 for any SSM.}, though some implementations deadlock when composed into larger graphs.
 Consider the unit implementation prescribed by APort Networks: it produces valid partial implementations of
@@ -654,7 +674,7 @@ MIDAS generates ITDC simulators directly from ASIC RTL. These simulators
 implement a channel-bootstrapped formalism with all target graphs having a
 star topology. We show an example graph for a Rocket-Chip-based system, the
 most commonly used target generator in MIDAS, in Figure~\ref{fig:rocket-target-graph}.
-The \emph{hub} is transformed from ASIC RTL that has been elaborated by a user-provided Chisel
+The \emph{hub unit} is transformed from ASIC RTL that has been elaborated by a user-provided Chisel
 generator. This RTL does not represent a
 closed system: it exposes I/O interfaces that must be tied to units that model those
 devices. These units, which form satellite nodes in the graph, we call \emph{endpoint} units.
@@ -700,7 +720,7 @@ Similarly, FPGA-hosted models tend to have a driver
 that is responsible for configuring the endpoint module before simulation commences and for periodically polling
 instrumentation registers.
 
-Endpoints can leverage three types of FPGA resources:
+Endpoints can leverage three types of resources:
 
 \begin{enumerate}
 \item \textbf{CPU-mastered MMIO.} Here, modules expose 32-bit registers that can be
@@ -727,7 +747,7 @@ Endpoints can leverage three types of FPGA resources:
     disk. Instead, MIDAS provides a simple means to let endpoints drive the FPGA
     DRAM memory system.  MIDAS's memory timing models, both those described
     in the CARRV publication~\cite{MIDAS} and later by FASED~\cite{FASED},
-    use FPGA DRAM as a backing store for a timing model that's implemented
+    use FPGA DRAM as a backing store for a timing model that is implemented
     in FPGA fabric.
 \end{enumerate}
 
@@ -911,10 +931,9 @@ To build a true emulation environment capable of simulating a broad class of
 asynchronous events that manifest in realistic SoCs, including asynchronous
 reset, clock generation and switching, and certain nonidealities like clock
 drift and jitter, we lifted the rational clock assumption and introduced explicit
-timestamping into a sub-graph of the simulator. Our initial implementation,
+timestamping into a sub-graph of the simulator. Our prototype,
 described in Chapter~\ref{sec:dynamic-multiclock}, uses a hardware
 implementation of the Chandy-Misra-Bryant algorithm to avoid
 deadlock. This explicitly timekept portion of the graph coexists with SSM
 optimizations which can be applied locally to parts of the design where the SSM
 assumption holds.
-

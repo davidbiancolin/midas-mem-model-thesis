@@ -72,7 +72,8 @@ print projection_y
 print remaining_x
 print remaining_y
 plt.figure(figsize = (8,4))
-plt.plot(pages, 'bo-', projection_x, projection_y, 'bo--', remaining_x, remaining_y, 'go--')
+#plt.plot(pages, 'bo-', projection_x, projection_y, 'bo--', remaining_x, remaining_y, 'go--')
+plt.plot(pages, 'bo-')
 #plt.plot(pages, 'bo-', projection_x, projection_y, 'bo--')
 #plt.plot(pages, 'bo', interp_x, interp_y, 'b-', remaining_x, remaining_y, 'go--')
 
@@ -105,21 +106,21 @@ text_x_required  = text_x(required_rate, current_rate <= required_rate)
 text_props = {'ha': 'center', 'va': 'center'}
 #text_props = {}
 
-# Required pages per day annotation
-plt.text(len(pages) - 1 + text_x_required,
-         pages[-1] + text_y_required,
-         '{0:1.2f} pages/day'.format(required_rate),
-         text_props,
-         rotation=required_degrees,
-         color = 'g')
-
-# Current pages per day annotation
-plt.text(len(pages) - 1 + text_x_curr,
-         pages[-1] + text_y_curr,
-         '{0:1.2f} pages/day'.format(current_rate),
-         text_props,
-         rotation=current_degrees,
-         color = 'b')
+## Required pages per day annotation
+#plt.text(len(pages) - 1 + text_x_required,
+#         pages[-1] + text_y_required,
+#         '{0:1.2f} pages/day'.format(required_rate),
+#         text_props,
+#         rotation=required_degrees,
+#         color = 'g')
+#
+## Current pages per day annotation
+#plt.text(len(pages) - 1 + text_x_curr,
+#         pages[-1] + text_y_curr,
+#         '{0:1.2f} pages/day'.format(current_rate),
+#         text_props,
+#         rotation=current_degrees,
+#         color = 'b')
 
 
 

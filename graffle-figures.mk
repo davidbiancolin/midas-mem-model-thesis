@@ -1,4 +1,13 @@
-graffle_figures := figures/fased-block-diagram.pdf \
+graffle_figures := figures/pdes-wrapper.pdf \
+	figures/promote-passthroughs.pdf \
+	figures/clock-div3.pdf \
+	figures/clock-mux-glitchless.pdf \
+	figures/clock-gate.pdf \
+	figures/clock-organizations.pdf \
+	figures/clock-gate-control-loop.pdf \
+	figures/clock-mux-sync.pdf \
+	figures/pdes-demo-target.pdf \
+	figures/fased-block-diagram.pdf \
 	figures/model-operation-1.pdf \
 	figures/model-operation-2.pdf \
 	figures/model-operation-3.pdf \
@@ -18,6 +27,33 @@ graffle_figures := figures/fased-block-diagram.pdf \
 	figures/rocket-target-graph.pdf \
 	figures/mapped-simulator-f1.pdf \
 	figures/midas-flow.pdf
+
+figures/pdes-wrapper.pdf:midas-graphics/graffle/wrapper-transforms.graffle
+	omnigraffle-export -c pdes-wrapper midas-graphics/graffle/wrapper-transforms.graffle figures/pdes-wrapper.pdf
+
+figures/promote-passthroughs.pdf:midas-graphics/graffle/promote-passthroughs.graffle
+	omnigraffle-export -c main midas-graphics/graffle/promote-passthroughs.graffle figures/promote-passthroughs.pdf
+
+figures/clock-div3.pdf:midas-graphics/graffle/clock-muxes.graffle
+	omnigraffle-export -c clock-divider-3 midas-graphics/graffle/clock-muxes.graffle figures/clock-div3.pdf
+
+figures/clock-mux-glitchless.pdf:midas-graphics/graffle/clock-muxes.graffle
+	omnigraffle-export -c glitchless midas-graphics/graffle/clock-muxes.graffle figures/clock-mux-glitchless.pdf
+
+figures/clock-gate.pdf:midas-graphics/graffle/clock-muxes.graffle
+	omnigraffle-export -c clock-gate midas-graphics/graffle/clock-muxes.graffle figures/clock-gate.pdf
+
+figures/clock-organizations.pdf:midas-graphics/graffle/clock-organizations.graffle
+	omnigraffle-export -c combo midas-graphics/graffle/clock-organizations.graffle figures/clock-organizations.pdf
+
+figures/clock-gate-control-loop.pdf:midas-graphics/graffle/clock-gate-control-loop.graffle
+	omnigraffle-export -c baseline midas-graphics/graffle/clock-gate-control-loop.graffle figures/clock-gate-control-loop.pdf
+
+figures/clock-mux-sync.pdf:midas-graphics/graffle/clock-muxes.graffle
+	omnigraffle-export -c sync midas-graphics/graffle/clock-muxes.graffle figures/clock-mux-sync.pdf
+
+figures/pdes-demo-target.pdf:midas-graphics/graffle/midas2-target.graffle
+	omnigraffle-export -c pdes-demo-truncated midas-graphics/graffle/midas2-target.graffle figures/pdes-demo-target.pdf
 
 figures/fased-block-diagram.pdf:midas-graphics/graffle/memory-model-block-diagram.graffle
 	omnigraffle-export -c full midas-graphics/graffle/memory-model-block-diagram.graffle figures/fased-block-diagram.pdf

@@ -9,6 +9,7 @@
 \usepackage{siunitx}
 \usepackage{listings}
 \usepackage{rotating}
+\usepackage{algpseudocode}
 \usepackage{multirow}
 \usepackage{xspace}
 \usepackage{amsmath}
@@ -56,6 +57,40 @@
     showstringspaces=false,
     showtabs=false,
     tabsize=2
+}
+\lstdefinestyle{scalaStyle}{
+  xleftmargin=0.75cm,
+  language=scala,
+  aboveskip=3mm,
+  belowskip=3mm,
+  numbers=left,
+  showstringspaces=false,
+  basicstyle={\small\ttfamily},
+  keywordstyle=\color{magenta},
+  commentstyle=\color{blue},
+  stringstyle=\color{red},
+  numberstyle=\color{red},
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=true,
+  captionpos=b,
+  tabsize=2,
+}
+
+\lstdefinestyle{verilogStyle}{
+  xleftmargin=0.75cm,
+  language=scala,
+  aboveskip=3mm,
+  belowskip=3mm,
+  numbers=left,
+  showstringspaces=false,
+  basicstyle={\small\ttfamily},
+  numberstyle=\color{red},
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=true,
+  captionpos=b,
+  tabsize=2,
 }
 
 \hyphenation{FIRRTL}
@@ -156,7 +191,7 @@
 
 \chapter{On The Design of FPGA-Based Discrete-Event Simulators}\label{ch:fpga-des}
 
-\input{tex/fpga-des}
+\input{tex/fpga-des}\label{sec:fpga-des}
 
 \chapter{Golden Gate: An Optimizing FAME Compiler}\label{sec:golden-gate}
 
@@ -166,11 +201,11 @@
 
 \input{tex/bridges}
 
-\chapter{Support for Systems With Multiple Fixed-Frequency Clocks}
+\chapter{Support for Systems With Multiple Fixed-Frequency Clocks}\label{sec:static-multiclock}
 
 \input{tex/static-multiclock}
 
-\chapter{Embracing Asynchrony: Generalized Support For Asychronous Events via Explicit Timestamping}\label{sec:dynamic-multiclock}
+\chapter{Modeling Asynchrony with Explicit Timestamping}\label{sec:dynamic-multiclock}
 
 \input{tex/dynamic-multiclock}
 

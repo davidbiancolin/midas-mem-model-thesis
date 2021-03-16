@@ -975,6 +975,23 @@ year = {2006}
   number={},
   pages={262-291},}
 
+@techreport{fujimoto1988lookahead,
+  title={Lookahead in parallel discrete event simulation},
+  author={Fujimoto, Richard M},
+  year={1988},
+  institution={UTAH UNIV SALT LAKE CITY SCHOOL OF COMPUTING}
+}
+
+@INPROCEEDINGS{LogicPDESGPU,
+  author={B. {Wang} and Y. {Zhu} and Y. {Deng}},
+  booktitle={Design Automation Conference}, 
+  title={Distributed time, conservative parallel logic simulation on GPUs}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={761-766},
+  doi={10.1145/1837274.1837467}}
+
 @article{PDESA,
   author = {Rahman, Shafiur and Abu-Ghazaleh, Nael and Najjar, Walid},
   title = {PDES-A: Accelerators for Parallel Discrete Event Simulation Implemented on FPGAs},
@@ -992,6 +1009,80 @@ year = {2006}
   articleno = {12},
   numpages = {25},
   keywords = {PDES, accelerator, parallel simulation, coprocessor, FPGA}
+}
+
+@inproceedings{ImplicitLookahead,
+    author = {Nicol, David M.},
+    title = {Parallel Discrete-Event Simulation of FCFS Stochastic Queueing Networks},
+    year = {1988},
+    isbn = {0897912764},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi-org.libproxy.berkeley.edu/10.1145/62115.62128},
+    doi = {10.1145/62115.62128},
+    abstract = {Physical systems are inherently parallel; intuition suggests that simulations of these systems may be amenable to parallel execution. The parallel execution of a discrete-event simulation requires careful synchronization of processes in order to ensure the execution's correctness; this synchronization can degrade performance. Largely negative results were recently reported in a study which used a well-known synchronization method on queueing network simulations. In this paper we discuss a synchronization method, appointments, which has proven itself to be effective on simulations of FCFS queueing networks. The key concept behind appointments is the provision of lookahead. Lookahead is a prediction on a processor's future behavior, based on an analysis of the processor's simulation state. We show how lookahead can be computed for FCFS queueing network simulations, give performance data that demonstrates the method's effectiveness under moderate to heavy loads, and discuss performance trade-offs between the quality of lookahead, and the cost of computing lookahead.},
+    booktitle = {Proceedings of the ACM/SIGPLAN Conference on Parallel Programming: Experience with Applications, Languages and Systems},
+    pages = {124–137},
+    numpages = {14},
+    location = {New Haven, Connecticut, USA},
+    series = {PPEALS '88}
+}
+
+@article{ImplicitLookahead2,
+    author = {Lubachevsky, Boris D.},
+    title = {Efficient Parallel Simulations of Dynamic Ising Spin Systems},
+    year = {1988},
+    issue_date = {March 1988},
+    publisher = {Academic Press Professional, Inc.},
+    address = {USA},
+    volume = {75},
+    number = {1},
+    issn = {0021-9991},
+    url = {https://doi.org/10.1016/0021-9991(88)90101-5},
+    doi = {10.1016/0021-9991(88)90101-5},
+    journal = {J. Comput. Phys.},
+    month = mar,
+    pages = {103–122},
+    numpages = {20}
+}
+
+@article{PDESForVLSI,
+author = {Bailey, Mary L. and Briner, Jack V. and Chamberlain, Roger D.},
+title = {Parallel Logic Simulation of VLSI Systems},
+year = {1994},
+issue_date = {Sept. 1994},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {26},
+number = {3},
+issn = {0360-0300},
+url = {https://doi.org/10.1145/185403.185424},
+doi = {10.1145/185403.185424},
+abstract = {Fast, efficient logic simulators are an essential tool in modern VLSI system design. Logic simulation is used extensively for design verification prior to fabrication, and as VLSI systems grow in size, the execution time required by simulation is becoming more and more significant. Faster logic simulators will have an appreciable economic impact, speeding time to market while ensuring more thorough system design testing. One approach to this problem is to utilize parallel processing, taking advantage of the concurrency available in the VLSI system to accelerate the logic simulation task.Parallel logic simulation has received a great deal of attention over the past several years, but this work has not yet resulted in effective, high-performance simulators being available to VLSI designers. A number of techniques have been developed to investigate performance issues: formal models, performance modeling, empirical studies, and prototype implementations. Analyzing reported results of these techniques, we conclude that five major factors affect performance: synchronization algorithm, circuit structure, timing granularity, target architecture, and partitioning. After reviewing techniques for parallel simulation, we consider each of these factors using results reported in the literature. Finally we synthesize the results and present directions for future research in the field.},
+journal = {ACM Comput. Surv.},
+month = sep,
+pages = {255–294},
+numpages = {40},
+keywords = {parallelism, parallel architecture, timing granularity, circuit structure, synchronization algorithm, partitioning}
+}
+
+@article{CMBMicroprocessorEval,
+    author = {Soul\'{e}, Larry and Gupta, Anoop},
+    title = {An Evaluation of the Chandy-Misra-Bryant Algorithm for Digital Logic Simulation},
+    year = {1991},
+    issue_date = {Oct. 1991},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {1},
+    number = {4},
+    issn = {1049-3301},
+    url = {https://doi-org.libproxy.berkeley.edu/10.1145/130611.130613},
+    doi = {10.1145/130611.130613},
+    abstract = {We explore the suitability of the Chandy-Misra-Bryant (CMB) algorithm for the domain of digital logic simulation. Our evaluation is based on results for six realistic benchmark circuits, one of them being the R6000 microprocessor form MIPS. A quantitative evaluation of the concurrency exhibited by the CMB algorithm shows that an average of 42-196 element activations can be evaluated in parallel if arbitrarily many processors are available. One major factor limiting the parallel performance is the large number of deadlocks that occur. We present a classification of the types of deadlocks and describe them in terms of circuit structure. Using domain-specific knowledge, we propose and evaluate several methods for both reducing the number of deadlock occurences and for reducing the time  spent on each occurence. Running on a 16-processor Encore Multimax we observe speedups of 6-9. While these self-relative speedups are larger than a parallel version of the traditional centralized-time event-driven algorithm, they come at the price of large overheads: significantly more complex element evaluations, extra element evaluations, and deadlock resolution time. These overheads overwhelm the advantages of using distributed time and consistently make the parallel performance of the CMB algorithm about three times slower than that of the traditional parallel event-driven algorithm. Our experience leads us to conclude that the distributed-time CMB algorithm does not present a viable alternative to the centralized-time event-driven algorithm in the domain of parallel digital logic  simulation.},
+    journal = {ACM Trans. Model. Comput. Simul.},
+    month = oct,
+    pages = {308–347},
+    numpages = {40}
 }
 
 @article{TheoryOfLIDesign,
