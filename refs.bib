@@ -32,8 +32,7 @@ year = {2011}
 }
 
 @misc{Verilator,
-   author = {Mentor Graphics},
-   title = "Veloce Emulation Platform",
+   title = "Verilator",
    year = "(Accessed January 4th, 2021)",
    howpublished = "\url{https://www.veripool.org/wiki/verilator}",
 }
@@ -125,11 +124,13 @@ organization={ACM}
    howpublished = "https://www.eetimes.com/quickturns-new-emulation-family-sets-the-standard-for-verification-performance-and-capacity/"
  }
 
-@misc{Veloce,
-   author = {Mentor Graphics},
-   title = "Veloce Emulation Platform",
-   year = "(Accessed July 4th, 2020)",
-   howpublished = "\url{https://www.mentor.com/products/fv/emulation-systems/}",
+@patent{MentorClockGen,
+   author = {Suresh, Krishnamurthy and Agarwal, Satish Kumar and Jain, Amit and Gupta, Sanjay},
+   title = "Dynamic Control Of Design Clock Generation In Emulation",
+   number = "9946823",
+   nationality = "United States",
+   year = "(Accessed March 18th, 2021)",
+   howpublished = "\url{https://patents.google.com/patent/US20150046144A1/en}",
 }
 
 @misc{ZeBu,
@@ -728,6 +729,16 @@ year={2014},
 organization={IEEE}
 }
 
+@INPROCEEDINGS{gem5dvfs,
+  author={V. {Spiliopoulos} and A. {Bagdia} and A. {Hansson} and P. {Aldworth} and S. {Kaxiras}},
+  booktitle={2013 IEEE 21st International Symposium on Modelling, Analysis and Simulation of Computer and Telecommunication Systems}, 
+  title={Introducing DVFS-Management in a Full-System Simulator}, 
+  year={2013},
+  volume={},
+  number={},
+  pages={535-545},
+  doi={10.1109/MASCOTS.2013.75}}
+
 
 @article{APortNetworks,
  author = {Pellauer, Michael and others},
@@ -1257,4 +1268,18 @@ doi={10.1109/ICCAD45719.2019.8942048}}
    title = "ccbench",
    year = "2021 (Accessed February 1st, 2021)",
    howpublished = "\url{https://github.com/ucb-bar/ccbench}",
+}
+
+@inproceedings{DVFSPrototype,
+    author = {Mantovani, Paolo and Cota, Emilio G. and Tien, Kevin and Pilato, Christian and Di Guglielmo, Giuseppe and Shepard, Ken and Carlon, Luca P.},
+    title = {An FPGA-Based Infrastructure for Fine-Grained DVFS Analysis in High-Performance Embedded Systems},
+    year = {2016},
+    publisher = {IEEE Press},
+    url = {https://doi.org/10.1145/2897937.2897984},
+    doi = {10.1145/2897937.2897984},
+    abstract = {Emerging technologies provide SoCs with fine-grained DVFS capabilities both in space (number of domains) and time (transients in the order oftens of nanoseconds). Analyzing these systems requires cycle-accurate accounting of rapidly-changing dynamics and complex interactions among accelerators, interconnect, memory, and OS. We present an FPGA-based infrastructure that facilitates such analyses for high-performance embedded systems. We show how our infrastructure can be used to first generate SoCs with loosely-coupled accelerators, and then perform design-space exploration considering several DVFS policies under full-system workload scenarios, sweeping spatial and temporal domain granularity.},
+    booktitle = {2016 53nd ACM/EDAC/IEEE Design Automation Conference (DAC)},
+    pages = {1–6},
+    numpages = {6},
+    location = {Austin, TX, USA}
 }
