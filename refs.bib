@@ -863,7 +863,6 @@ title = {Theory of composable latency-insensitive refinements}
     Year = {2016},
     Month = {Apr},
     Number = {UCB/EECS-2016-17},
-    Abstract = {Rocket Chip is an open-source Sysem-on-Chip design generator that emits synthesizable RTL. It leverages the Chisel hardware construction language to compose a library of sophisticated generators for cores, caches, and interconnects into an integrated SoC. Rocket Chip generates general-purpose processor cores that use the open RISC-V ISA, and provides both an in-order core generator (Rocket) and an out-of-order core generator (BOOM). For SoC designers interested in utilizing heterogeneous specialization for added efficiency gains, Rocket Chip supports the integration of custom accelerators in the form of instruction set extensions, coprocessors, or fully independent novel cores. Rocket Chip has been taped out (manufactured) eleven times, and yielded functional silicon prototypes capable of booting Linux.}
 }
 @techreport{Hwacha,
     Author = {Lee, Yunsup and Schmidt, Colin and Ou, Albert and Waterman, Andrew and Asanovi\'{c}, Krste},
@@ -880,10 +879,7 @@ title = {Theory of composable latency-insensitive refinements}
     Institution = {EECS Department, University of California, Berkeley},
     Year = {2015},
     Month = {June},
-    Number = {UCB/EECS-2015-167},
-    Abstract = {BOOM is a synthesizable, parameterized, superscalar out-of-order RISC-V core designed to serve as the prototypical baseline processor for future micro-architectural studies of out-of-order processors. Our goal is to provide a readable, open-source implementation for use in education, research, and industry.
-
-BOOM is written in roughly 9,000 lines of the hardware construction language Chisel. We leveraged Berkeley’s open-source Rocket-chip SoC generator, allowing us to quickly bring up an entire multi-core processor system (including caches and uncore) by replacing the in-order Rocket core with an out-of-order BOOM core. BOOM supports atomics, IEEE 754-2008 floating-point, and page-based virtual memory. We have demonstrated BOOM running Linux, SPEC CINT2006, and CoreMark.}
+    Number = {UCB/EECS-2015-167}
 }
 
 @article{SonicBOOM,
@@ -970,7 +966,6 @@ year = {2006}
   issn = {0164-0925},
   url = {https://doi.org/10.1145/3916.3988},
   doi = {10.1145/3916.3988},
-  abstract = {Virtual time is a new paradigm for organizing and synchronizing distributed systems which can be applied to such problems as distributed discrete event simulation and distributed database concurrency control. Virtual time provides a flexible abstraction of real time in much the same way that virtual memory provides an abstraction of real memory. It is implemented using the Time Warp mechanism, a synchronization protocol distinguished by its reliance on lookahead-rollback, and by its implementation of rollback via antimessages.},
   journal = {ACM Trans. Program. Lang. Syst.},
   month = jul,
   pages = {404–425},
@@ -1243,10 +1238,11 @@ doi={10.1109/ICCAD45719.2019.8942048}}
 
 
 @misc{FireMarshal,
-   author = "GitHub",
-   title = "FireMarshal",
-   year = "2021 (Accessed January 20th, 2021)",
-   howpublished = "\url{https://github.com/firesim/firemarshal}",
+    title={FireMarshal: Reproducible Software Workload Management},
+    author={Pemberton, Nathan and Amid, Alon},
+    booktitle={2021 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)},
+    year={2021},
+    month={3}
 }
 
 @misc{Speckle,
@@ -1282,4 +1278,205 @@ doi={10.1109/ICCAD45719.2019.8942048}}
     pages = {1–6},
     numpages = {6},
     location = {Austin, TX, USA}
+}
+
+@INPROCEEDINGS{Graphicionado,
+  author={T. J. {Ham} and L. {Wu} and N. {Sundaram} and N. {Satish} and M. {Martonosi}},
+  booktitle={2016 49th Annual IEEE/ACM International Symposium on Microarchitecture (MICRO)}, 
+  title={Graphicionado: A high-performance and energy-efficient accelerator for graph analytics}, 
+  year={2016},
+  volume={},
+  number={},
+  pages={1-13},
+  doi={10.1109/MICRO.2016.7783759}}
+
+@INPROCEEDINGS{Eyeriss,
+  author={Y. {Chen} and J. {Emer} and V. {Sze}},
+  booktitle={2016 ACM/IEEE 43rd Annual International Symposium on Computer Architecture (ISCA)}, 
+  title={Eyeriss: A Spatial Architecture for Energy-Efficient Dataflow for Convolutional Neural Networks}, 
+  year={2016},
+  volume={},
+  number={},
+  pages={367-379},
+  doi={10.1109/ISCA.2016.40}}
+
+@inproceedings{AlexNet,
+author = {Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E.},
+title = {ImageNet Classification with Deep Convolutional Neural Networks},
+year = {2012},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+booktitle = {Proceedings of the 25th International Conference on Neural Information Processing Systems - Volume 1},
+pages = {1097–1105},
+numpages = {9},
+location = {Lake Tahoe, Nevada},
+series = {NIPS'12}
+}
+
+
+@misc{Graviton,
+   title = "AWS Graviton Processor",
+   year = "2020 (Accessed March 29th, 2021)",
+   howpublished = "\url{https://aws.amazon.com/ec2/graviton/}",
+ }
+
+@inproceedings{FSDChip,
+    author = {Bannon, Pete and Venkataramanan, Ganesh and Das Sarma, Debjit and Talpes, Emil},
+    year = {2019},
+    month = {08},
+    pages = {1-22},
+    title = {Computer and Redundancy Solution for the Full Self-Driving Computer},
+    doi = {10.1109/HOTCHIPS.2019.8875645}
+}
+@article{TPU,
+    author = {Jouppi, Norman P. and Young, Cliff and Patil, Nishant and Patterson, David and Agrawal, Gaurav and Bajwa, Raminder and Bates, Sarah and Bhatia, Suresh and Boden, Nan and Borchers, Al and Boyle, Rick and Cantin, Pierre-luc and Chao, Clifford and Clark, Chris and Coriell, Jeremy and Daley, Mike and Dau, Matt and Dean, Jeffrey and Gelb, Ben and Ghaemmaghami, Tara Vazir and Gottipati, Rajendra and Gulland, William and Hagmann, Robert and Ho, C. Richard and Hogberg, Doug and Hu, John and Hundt, Robert and Hurt, Dan and Ibarz, Julian and Jaffey, Aaron and Jaworski, Alek and Kaplan, Alexander and Khaitan, Harshit and Killebrew, Daniel and Koch, Andy and Kumar, Naveen and Lacy, Steve and Laudon, James and Law, James and Le, Diemthu and Leary, Chris and Liu, Zhuyuan and Lucke, Kyle and Lundin, Alan and MacKean, Gordon and Maggiore, Adriana and Mahony, Maire and Miller, Kieran and Nagarajan, Rahul and Narayanaswami, Ravi and Ni, Ray and Nix, Kathy and Norrie, Thomas and Omernick, Mark and Penukonda, Narayana and Phelps, Andy and Ross, Jonathan and Ross, Matt and Salek, Amir and Samadiani, Emad and Severn, Chris and Sizikov, Gregory and Snelham, Matthew and Souter, Jed and Steinberg, Dan and Swing, Andy and Tan, Mercedes and Thorson, Gregory and Tian, Bo and Toma, Horia and Tuttle, Erick and Vasudevan, Vijay and Walter, Richard and Wang, Walter and Wilcox, Eric and Yoon, Doe Hyun},
+    title = {In-Datacenter Performance Analysis of a Tensor Processing Unit},
+    year = {2017},
+    issue_date = {May 2017},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {45},
+    number = {2},
+    issn = {0163-5964},
+    url = {https://doi.org/10.1145/3140659.3080246},
+    doi = {10.1145/3140659.3080246},
+    journal = {SIGARCH Comput. Archit. News},
+    month = jun,
+    pages = {1–12},
+    numpages = {12},
+    keywords = {RNN, MLP, CNN, neural network, TensorFlow, TPU, GPU, deep learning, LSTM, DNN, accelerator, domain-specific architecture}
+}
+
+@misc{AppleM1,
+   title = "Apple Unleashed M1",
+   year = "2020 (Accessed March 29th, 2021)",
+   howpublished = "\url{https://www.apple.com/in/newsroom/2020/11/apple-unleashes-m1/}"
+ }
+
+@misc{SAHARA,
+   title = "Expanding Domestic Manufacturing of Secure, Custom Chips for Defense Needs",
+   year = "March 18th, 2021 (Accessed March 29th, 2021)",
+   howpublished = "\url{https://www.darpa.mil/news-events/2021-03-18}"
+ }
+@inproceedings{StructuredASIC,
+    author = {Wu, Kun-Cheng and Tsai, Yu-Wen},
+    title = {Structured ASIC, Evolution or Revolution?},
+    year = {2004},
+    isbn = {1581138172},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi-org.libproxy.berkeley.edu/10.1145/981066.981088},
+    doi = {10.1145/981066.981088},
+    booktitle = {Proceedings of the 2004 International Symposium on Physical Design},
+    pages = {103–106},
+    numpages = {4},
+    keywords = {ASIC, structured ASIC},
+    location = {Phoenix, Arizona, USA},
+    series = {ISPD '04}
+}
+
+@ARTICLE{AgileHW,
+  author={Y. {Lee} and A. {Waterman} and H. {Cook} and B. {Zimmer} and B. {Keller} and A. {Puggelli} and J. {Kwak} and R. {Jevtic} and S. {Bailey} and M. {Blagojevic} and P. {Chiu} and R. {Avizienis} and B. {Richards} and J. {Bachrach} and D. {Patterson} and E. {Alon} and B. {Nikolic} and K. {Asanovic}},
+  journal={IEEE Micro}, 
+  title={An Agile Approach to Building RISC-V Microprocessors}, 
+  year={2016},
+  volume={36},
+  number={2},
+  pages={8-20},
+  doi={10.1109/MM.2016.11}}
+
+@ARTICLE{BlackParrot,
+  author={D. {Petrisko} and F. {Gilani} and M. {Wyse} and D. C. {Jung} and S. {Davidson} and P. {Gao} and C. {Zhao} and Z. {Azad} and S. {Canakci} and B. {Veluri} and T. {Guarino} and A. {Joshi} and M. {Oskin} and M. B. {Taylor}},
+  journal={IEEE Micro}, 
+  title={BlackParrot: An Agile Open-Source RISC-V Multicore for Accelerator SoCs}, 
+  year={2020},
+  volume={40},
+  number={4},
+  pages={93-102},
+  doi={10.1109/MM.2020.2996145}}
+
+@INPROCEEDINGS{Pulp,
+  author={D. {Rossi} and F. {Conti} and A. {Marongiu} and A. {Pullini} and I. {Loi} and M. {Gautschi} and G. {Tagliavini} and A. {Capotondi} and P. {Flatresse} and L. {Benini}},
+  booktitle={2015 IEEE Hot Chips 27 Symposium (HCS)}, 
+  title={PULP: A parallel ultra low power platform for next generation IoT applications}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={1-39},
+  doi={10.1109/HOTCHIPS.2015.7477325}}
+
+@ARTICLE{Celerity,
+  author={S. {Davidson} and S. {Xie} and C. {Torng} and K. {Al-Hawai} and A. {Rovinski} and T. {Ajayi} and L. {Vega} and C. {Zhao} and R. {Zhao} and S. {Dai} and A. {Amarnath} and B. {Veluri} and P. {Gao} and A. {Rao} and G. {Liu} and R. K. {Gupta} and Z. {Zhang} and R. {Dreslinski} and C. {Batten} and M. B. {Taylor}},
+  journal={IEEE Micro}, 
+  title={The Celerity Open-Source 511-Core RISC-V Tiered Accelerator Fabric: Fast Architectures and Design Methodologies for Fast Chips}, 
+  year={2018},
+  volume={38},
+  number={2},
+  pages={30-41},
+  doi={10.1109/MM.2018.022071133}}
+
+@misc{IntelMultiCore,
+   title = "Dual Core Era Begins, PC Makers Start Selling Intel-Based PCs",
+   year = "April 18th, 2005 (Accessed March 29th, 2021)",
+   howpublished = "\url{https://www.intel.com/pressroom/archive/releases/2005/20050418comp.htm}"
+ }
+
+@ARTICLE{MooresLaw,
+  author={G. E. {Moore}},
+  journal={Electronics},
+  title={Cramming more components onto integrated circuits},
+  year={1965},
+  volume={38},
+  number={8},
+}
+@ARTICLE{DennardScaling,
+  author={R. H. {Dennard} and F. H. {Gaensslen} and H. {Yu} and V. L. {Rideout} and E. {Bassous} and A. R. {LeBlanc}},
+  journal={IEEE Journal of Solid-State Circuits}, 
+  title={Design of ion-implanted MOSFET's with very small physical dimensions}, 
+  year={1974},
+  volume={9},
+  number={5},
+  pages={256-268},
+  doi={10.1109/JSSC.1974.1050511}}
+
+@ARTICLE{ScalingChallenges,
+  author={E. J. {Nowak}},
+  journal={IBM Journal of Research and Development}, 
+  title={Maintaining the benefits of CMOS scaling when scaling bogs down}, 
+  year={2002},
+  volume={46},
+  number={2.3},
+  pages={169-180},
+  doi={10.1147/rd.462.0169}}
+
+@phdthesis{WatermanDissertation,
+    Author = {Waterman, Andrew},
+    Title = {Design of the RISC-V Instruction Set Architecture},
+    School = {EECS Department, University of California, Berkeley},
+    Year = {2016},
+    Month = {Jan},
+    URL = {http://www2.eecs.berkeley.edu/Pubs/TechRpts/2016/EECS-2016-1.html},
+    Number = {UCB/EECS-2016-1}
+}
+
+@article{SeminalPaper,
+  author    = {Kelvin Xu and
+               Jimmy Ba and
+               Ryan Kiros and
+               Kyunghyun Cho and
+               Aaron C. Courville and
+               Ruslan Salakhutdinov and
+               Richard S. Zemel and
+               Yoshua Bengio},
+  title     = {Show, Attend and Tell: Neural Image Caption Generation with Visual
+               Attention},
+  journal   = {CoRR},
+  volume    = {abs/1502.03044},
+  year      = {2015},
+  url       = {http://arxiv.org/abs/1502.03044},
+  archivePrefix = {arXiv},
+  eprint    = {1502.03044},
+  timestamp = {Mon, 13 Aug 2018 16:47:52 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/XuBKCCSZB15.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }

@@ -148,7 +148,7 @@ To expedite the implementation of our initial prototype, we made the following a
     native support for negative-edge-triggered or level-sensitive state elements, the
     user must avoid using these structures in black-box verilog.
 
-\item It must be legal to replace asynchronous resets to synchronous ones. Unlike in 
+\item It must be legal to replace asynchronous resets with synchronous ones. Unlike in 
     an ASIC implementation, the designer can exploit the fact that all clocks
     in the target will come up at time zero to avoid using asynchronous
     resets where typically necessary. The implementation outlined in this chapter has no mechanism to
@@ -157,12 +157,11 @@ To expedite the implementation of our initial prototype, we made the following a
 \item All extracted models and bridges must be synchronous. This permits all existing resource optimizations to remain unchanged,
     and simplifies bridge design.
 
-    %All bridge-bound interfaces must be driven and latched by state elements in the same clock domain as the bridge.%\TODO{Think about this some more}.
 \end{enumerate}
 
 All of these assumptions were implicitly made about the target in
 older versions of FireSim. The only difference lies in how the target clock is
-sourced: instead using an explicit bridge, the target clock was driven by a
+sourced: instead of using an explicit bridge, the target clock was driven by a
 input (this was the only legal I/O permitted on the module) on the source
 FIRRTL.
 
@@ -171,7 +170,7 @@ generated multi-clock simulators will no longer be LI-BDNs. However, extracted
 models will remain primitive LI-BDNs with reference SSMs.  We suspect that
 multi-clock RTL that conforms to the restrictions above can be cast as an SSM
 synchronous to a single fast clock whose equivalent slow clocks have been
-replaced with selectively enabled state elements. We leave a more an extension of LI-BDN
+replaced with selectively enabled state elements. We leave an extension of LI-BDN
 to support targets the conform to the assumptions above as future work.
 
 \subsection{Annotation Modifications}
@@ -244,7 +243,7 @@ its bit set in the corresponding clock token.
 \end{figure}
 
 Per our earlier assumption, the clock bridge implementation included in FireSim 1.10 accepts clock specification that
-defines the frequency of all clocks as rational multiple of the
+defines the frequency of all clocks as a rational multiple of the
 frequency of the zeroth clock\footnote{Another reasonable approach would be to
 specify the periods of all clocks in an agreed upon timebase. We note
 that in this case all clocks are rationally related to a fast clock whose
@@ -489,14 +488,15 @@ configuration can be attributed solely to running the uncore clock at half rate.
 In this case study, we'll look at single-threaded performance of SPEC 2017
 Integer Speed benchmark suite.  This suite has many of the same benchmarks as
 its predecessor, the SPEC2006 suite used by Lee and Waterman in their VLSI
-evaluation of FireSim, however each the benchmark's inputs are larger to better stress modern memory systems.
+evaluation of FireSim, however each the benchmark's inputs are larger to better
+stress modern memory systems.
 To provide some insight into the suite's memory system characteristics, in
-Table~\ref{tbl:spec-insns} we report dynamic instruction counts,
-and L1 cache misses-per-kilo-instruction (MPKIs) running on a Rocket configuration with the 
-same L1 cache organization as the ones use in our study\footnote{These figures were
+Table~\ref{tbl:spec-insns} we report dynamic instruction counts
+and L1 cache misses-per-kilo-instruction~(MPKI) running on a Rocket configuration with the 
+same L1 cache organization as the ones we use in our study\footnote{These figures were
 originally reported in our 2019 FASED publication.}.  We cross-compiled SPEC using Speckle~\cite{Speckle} and GCC version 9.2.0 with -O2
 optimizations enabled.  We ran SPEC on top of simple Buildroot Linux
-distributions we assembled using FireMarshal~\cite{FireMarshal}.  Our
+distributions that we assembled using FireMarshal~\cite{FireMarshal}.  Our
 system-software setup is reproducible without modification using FireSim
 version 1.11 and Chipyard 1.4, following the instructions for building SPEC2017
 provided in our documentation.
@@ -533,14 +533,14 @@ the highest frequency of L1 data cache misses\footnote{This remains the case on
 the BOOM configuration's larger 32 KiB L1 cache.}, runs $1.37\times$ faster on a synchronous Rocket
 design vs $1.20\times$ on a BOOM design. Instead, BOOM sees its largest
 performance change on \texttt{602.gcc} ($1.21\times$ versus $1.26\times$ for
-Rocket), which reveals that core is able to find more ILP in \texttt{605.mcf}
+Rocket), which reveals that the core is able to find more instruction-level parallelism in \texttt{605.mcf}
 despite having less data locality than \texttt{602.gcc}.
 
 \input{figures/tables/runtime-table.tex}
 
 From an emulation performance perspective, simulating a more realistic clock
 organization comes at the expense of increased runtime. As shown in
-Table~\ref{tbl:spec-emulation-performance}, benchmarks take on average 49.4\%
+Table~\ref{tbl:spec-emulation-performance}, benchmarks take on average of 49.4\%
 and 53.0\% longer to simulate on the three-domain Rocket and Boom
 configurations, respectively. The drivers of this are twofold. First, since
 not all target clocks are integer divisions of the tile clock, simulation
@@ -569,7 +569,7 @@ EC2 F1 2x.large instances cost \$1.65/hr for on demand instances, and \$0.50/hr
 (typically) for spot instances. Considering just the BOOM designs, total
 emulation time was 164 and 251 hours for the synchronous and three-domain
 designs, respectively: on the spot these experiments would cost \$82 and \$126. One
-implication of AWS's cost model is that there no disincentive to
+implication of AWS's cost model is that there is no disincentive to
 using more FPGAs to improve simulation throughput. While
 Table~\ref{tbl:spec-emulation-performance} reports an enormous runtime for
 \texttt{657.xz}, this is the sum of its two roughly balanced inputs, so we split the
@@ -582,56 +582,99 @@ and 35.8 h).
 
 \section{Scaling Target Clock Count}\label{sec:clock-scalability}
 
-For targets with relatively few clock domains, Vivado is generally able to
-successfully place and route without any additional placement constraints.
 Though clock routing and distribution was enhanced in Xilinx's Ultrascale
-architecture, global clock resources are still scarce relative to conventional
-logic interconnect. More concretely, designs that require more than 24 global
-clock nets be routed through the same clock region will fail in implementation.
+architecture, global clock resources are decidedly scarce relative to
+conventional logic interconnect and subject to a unique set of constraints
+which limit the scalability of our approach. To illustrate this we first give an
+overview of Ultrascale+ global clock resources and constraints imposed by
+Vivado, before measuring the practical limits of our current implementation in
+FireSim.
 
-To establish a baseline for the scalability of our approach, we attempted to synthesize a
-toy target design consisting a shift register with each of its stages driven by a different clock. 
-Thus for an $N$ stage shift register, $N$ BUFGCEs will be
-instantiated in the hub model. Since each stage is small, this is an adversarial
-design: Vivado will attempt to place all registers in the same clocking region
-(to reduce path delay), only to discover it has insufficient clocking
-resources to drive the sinks. Using Vivado 2018.3 and FireSim's custom AWS shell (based off version 1.4.8), we found that we could synthesize a 12-stage
-pipeline before running out of global clock resources in at least one clock
-region. In this region only 13 of 24 available nets are used for the implementation of
-the hub model: the remaining 11 are used to route clocks for IP blocks like DDR
-controllers and PCI-E, which are periodically striped down the FPGA. Excluding
-the clocks used in Golden Gate-generated RTL, median global clock-net
-utilization across the device is 11 (ranging between 9 and 23) across the 90
-available clock regions of our VU9P part. This will prove problematic for simulating systems
-with dozens of clocks, which is not unheard of in modern SoCs.
+%For targets with relatively few clock domains, Vivado is generally able to
+%successfully place and route without any additional placement constraints.
 
-We propose two means to attack this challenge. The first is obvious and follows Xilinx's recommendation:
-minimize the number of unique clocks required in each clock region by
-preventing placement of too many distinct clock domains. This may occur naturally
-if, unlike the design above, each clock domain has significantly more logic.
-During placement domains will tend to exclude each other as the placer will
-tend to put primitives in the same clock domain closer together. Alternatively,
-it may be possible to optimize the AWS shell to reduce the number of global
-clock resources it requires, or better isolate its clock domains from the rest
-of the simulator's. In worst case, however, placement constraints on parts of
-the hub unit may be required.
+The Ultrascale+ clocking architecture divides
+a device into a regular grid of rectangular \emph{clock regions}~(CR). Each
+CR has vertical and horizontal tracks which can be connected to the four
+adjacent CRs via configurable buffers at its boundary. At the center of a CR lie switches for
+driving clocks from the tracks to CR-local clock sinks like CLBs and BRAMs. Global clock tracks have two flavors: \emph{routing tracks}, which connect
+a clock from its source (e.g., an I/O or a PLL) to the \emph{root} of the clock
+tree, and \emph{distribution tracks}, which implement a balanced tree to
+deliver the clock from its root to all CRs in which there are clock sinks.
+To feed this interconnect, global clock buffers and clock generation blocks, like PLLs, are vertically
+striped down the device in physical layer~(PHY) blocks. These feed into
+global routing and distribution networks in adjacent CRs. In each these PHY blocks there
+are 24 BUFGCEs---the primitives we rely upon to implement target-clock gating.
 
-A second approach may be to save global clock resources by converting a gated
-clock to use a clock enable, which can be driven through logic interconnect.
-This introduces a high fanout logic net but for relatively small clock domains could save global clock resources
-by reusing the ungated host clock~(if it is being routed to the
-clock region already). This optimization could be implemented by Golden Gate
-without user intervention.
+To implement our simulators, by default Vivado trys to match delays through
+each clock tree carrying a target clock. It places all BUFGCEs for target clocks, as well as the global buffer
+(BUFG) to supply the ungated clock, in the same PHY block. To minimize clock
+skew between each domain, these buffers drive trees rooted at the same CR, and
+each tree spans the same rectangular region of CRs. Critically, this means that
+all target clocks, even those whose sinks reside in a single CR, consume tracks in all other CRs
+with sinks belonging to another target clock domain. Given our current implementation, this puts an upper
+bound on the scalability of our approach of 23 target clocks (alongside the
+emulator clock). Unfortunately, this upper bound neglects periphery IP,
+like DRAM controllers and PCI-E interfaces, which consume CR resources that may
+fall within the rectangular region required to implement the target-domain
+clock trees.
+
+To establish a practical upper bound for the scalability of our current
+implementation, we synthesized a toy target consisting a shift register with
+each of its stages driven by a different clock.  Thus for an $n$-stage shift
+register, $n$ BUFGCEs will be instantiated in the hub unit. Since the number of
+clock sinks per domain is small, this will produce an optimistic result: the
+size of simulator clock trees will be defined by the location of sinks in the
+main emulation clock domain. Given no additional bridges are instantiated, this
+is close to the smallest class of design one can push through Golden Gate.
+
+Using Vivado 2018.3 and FireSim's custom AWS shell (based off version 1.4.8),
+we found that we could synthesize a 12-stage pipeline before running out of
+global clock resources in at least one CR. In this CR only 13 of
+24 available nets are used for the implementation of the hub model: the
+remaining 11 are used to route clocks for IP blocks and other AWS-shell-related utilities. Excluding the clocks used in Golden
+Gate-generated RTL, median global clock-net utilization across the device is 11
+(ranging between 9 and 23) across the 90 available CRs of our VU9P FPGA.
+This will prove problematic for simulating systems with dozens of clocks,
+which is not unheard of in modern SoCs.
+
+There are a few means to address this challenge. The first is to simply reduce the number of unique clocks required in each
+CR with a more optimized resource allocation. One
+way to achieve this is to break Vivado's default behavior of putting gated
+target clocks in the same clock group~(so as to produced matched delays). This
+would permit smaller clock domains to have proportionally smaller clock trees,
+freeing up significant global clock resources. The downside is that this may significantly hamper
+Vivado's ability to meet timing constraints on paths that span clock domains.
+That said, our simulators tend to have lower $f_{max}$ than many FPGA applications
+and may therefore be more robust against intra-domain variability in clock delay. Alternatively, it
+may be possible to optimize the AWS shell to reduce the number of global clock
+resources it requires, or better isolate its clock domains from the rest of the
+simulator's. Expending approximately half of all available clock routing resources on the FPGA
+to shell overhead seems like an unnecessary large cost. Clock utilization overhead should be an important consideration
+when porting FireSim to new FPGAs in the future.
+
+A second approach is to consume fewer global clocks by using finer-grained
+clock gating where possible.  Vivado has native support for gated-clock
+conversion, a historical pain-point in building FPGA prototypes, wherein it
+synthesizes behavioral clock-gates or specially annotated clocks into an
+FPGA-optimized equivalent based on the size of the clock domain. For clocks with large numbers of sinks, it appears
+to use BUFGCEs much like we do. For smaller numbers, it may use clock gates on
+leaf clocking resources (not exposed to the user), or finer still, the clock
+enables on logic elements and block rams themselves. This would permit Vivado
+to avoid the use of a BUFGCE in cases where we use one currently.
+In the event Vivado cannot effectively perform this gated-clock conversion,
+finer-grained clock gating can be implemented in Golden Gate itself by adding
+clock enables to stateful elements in FIRRTL, much like MIDAS's FAME transform.
 
 \section{Improving Simulator Performance with Multi-Cycle Setup Constraints}\label{sec:multi-cycle-constraints}
 
 On the surface, one challenge with using a single host clock is that all
 paths in the target must close timing at the emulator frequency.
 In effect, Vivado will use the same setup relationship to close timing on paths
-whose delays are many times longer than that of critical path in the fastest
+whose delays are many times longer than that of the critical path in the fastest
 clock domain. FPGA prototypes avoid this problem entirely since each
 domain is driven with clocks of the same relative frequency as would exist on the SoC, giving slower clock domains
-more setup margin. When this is combined with the fact that out-of-phase
+more time to meet setup constraints. When this is combined with the fact that out-of-phase
 edges in slower domains can be launched between fast-clock edges, FPGA
 prototypes have a considerable performance advantage over the equivalent
 multi-clock FireSim emulator.
@@ -732,13 +775,13 @@ improvements we could explore.
     \item  \textbf{Automatic generation of target-specific, multi-cycle setup constraints.} As we
 showed for a limited set of designs in
 Section~\ref{sec:multi-cycle-constraints}, multi-cycle setup constraints can
-provide an enormous performance benefit. In future, we plan to have Golden Gate emit target-tailored
-constraints these during compilation so these benefits are automatically passed
+provide an enormous performance benefit. In the future, we plan to have Golden Gate emit target-tailored
+constraints during compilation so these benefits can be automatically passed
 on to the user.
 
-\item \textbf{Improve best-case FMR by combining clock tokens}. Here we exploit the observation that if the state
-updates brought about clock token $N$ are not observable by any domain
-scheduled to fire in clock token $N+1$, it is safe to fuse these two tokens
+\item \textbf{Improve best-case FMR by combining clock tokens}. Here we leverage the observation that if the state
+updates brought about by clock token $n$ are not observable by any domain
+scheduled to fire in clock token $n+1$, it is safe to fuse these two tokens
 into single token with the union of their bits set. In many cases, this will
 address the performance cost described in
 Section~\ref{sec:multiclock-sim-perf}. In that example, clock tokens that fire
@@ -754,19 +797,13 @@ could be fed into the clock bridge generator is relatively straightforward
 process in FIRRTL and so this optimization can be easily explored.
 
 \item \textbf{Investigate schemes for improving clock scalability.}
-Firstly, we need to better understand the scaling trends for different targets
-and different Vivado implementation strategies.  In
-Section~\ref{sec:clock-scalability} we proposed two means to improve
-the number of clocks we can simulate in a single target. Automatic
-gated-clock conversion is a relatively straightforward optimization as
-in FIRRTL we can easily assess
-the number of clock loads in a domain and selectively emit clock-enables
-instead of a BUFGCE---this is no different than how MIDAS's FAME-1 transformation
-implemented SSM to patient-SSM conversion. Providing placement constraints
-would be effective solution, although trying to automatically emit them brings to mind many of the
-challenges that plague automatic floorplanning. In lieu of that, providing a user-friendly mechanism to
-provide customized placement constraints would be a very useful intermediate
-step.
+In Section~\ref{sec:clock-scalability}, we proposed two means to improve the
+number of clocks we can simulate in a single target: place and route global
+clocks more efficiently, and use fewer global clocks where possible.
+While these should be evaluated on the Xilinx VU9P available in AWS,
+the portability of any approach should take into better account the
+feature set available in Intel FPGAs, which we have neglected in this
+work.
 
 \item \textbf{Runtime-configurable target clock frequencies.} To avoid needing to
 synthesize multiple bitstreams to evaluate different clock frequency
@@ -783,6 +820,6 @@ large scale reimplementation. For instance, the clock bridge can easily be
 modified to generate tokens for any clock whose edge times are known \emph{a priori}.
 Lifting effectively \emph{all} of these constraints, most notably to
 support dynamically changing clock frequencies, is a more challenging
-undertaking that requires a rethinking of clock bridge abstraction. This is the
-subject of the next, and final, chapter of this dissertation.
+undertaking that requires a rethinking of the clock bridge abstraction. This is the
+subject of the next chapter of this dissertation.
 

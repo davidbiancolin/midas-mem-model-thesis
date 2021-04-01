@@ -171,6 +171,7 @@
 \clearpage
 \listoftables
 \begin{acknowledgements}
+\input{tex/acknowledgements}
 \end{acknowledgements}
 \end{frontmatter}
 
@@ -179,13 +180,9 @@
 
 \chapter{Introduction}
 
-%\input{tex/introduction}
+\input{tex/introduction}
 
-%\chapter{Anatomy Of A Modern SoC}
-%
-%\input{tex/modern-soc-anatomy}
-
-\chapter{Full-System Simulation of SoCs}
+\chapter{Full-System Simulation of SoCs}\label{sec:simulation-background}
 
 \input{tex/simulation-background}
 
@@ -197,9 +194,9 @@
 
 \input{tex/golden-gate}
 
-\chapter{Target-to-Host Bridges And Their Performance Considerations}\label{sec:bridges}
-
-\input{tex/bridges}
+%\chapter{Target-to-Host Bridges And Their Performance Considerations}\label{sec:bridges}
+%
+%\input{tex/bridges}
 
 \chapter{Support for Systems With Multiple Fixed-Frequency Clocks}\label{sec:static-multiclock}
 
@@ -209,9 +206,9 @@
 
 \input{tex/dynamic-multiclock}
 
-%\chapter{Conclusion}
-%
-%%\input{tex/conclusion}
+\chapter{Conclusion}
+
+\input{tex/conclusion}
 
 \printbibliography
 
