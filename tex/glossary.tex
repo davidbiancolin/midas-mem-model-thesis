@@ -1,0 +1,36 @@
+\begin{tabularx}{\textwidth}{lX}
+\multicolumn{2}{c}{\textbf{Abbreviations}} \\
+\textbf{ASIC} & Application-Specific Integrated Circuit \\
+\textbf{FAME} & FPGA Architecture Model Execution \\
+\textbf{FPGA} & Field-Programmable Gate Array \\
+\textbf{HDL} & Hardware Description Language \\
+\textbf{LI-BDN} & Latency-Insensitive Bounded Dataflow Network \\
+\textbf{LP} & Logical Process \\
+\textbf{NRE} & Non-recurring Engineering [cost] \\
+\textbf{PDES} & Parallel Discrete-Event Simulation \\
+\textbf{SoC} & System-on-a-Chip. Used interchangeably with ASIC in this text. \\
+\textbf{RTL} & Register Transfer Level \\
+& \\
+\multicolumn{2}{c}{\textbf{Key Definitions}} \\
+\textbf{Bridge} & A target black-box and its custom unit implementation. \\
+\textbf{Chisel} & An open-source HDL embedded in Scala \\
+\textbf{Channel} & A point-to-point LP that may model stateful interconnect. \\
+\textbf{FIRRTL} & Flexible Intermediate Representation for RTL \\
+\textbf{Host Decoupling} & The property that permits simulated time to advance independently of wall-clock~(host) time.
+Simulators are host-decoupled. FPGA prototypes are not. \\
+\textbf{Host} & The system on which a simulation executes. \\
+\textbf{Host Time} & Wall-clock time. Seen by the user and the host. \\
+\textbf{Hub Unit} & The singleton unit representing all unoptimized RTL. \\
+\textbf{Message} & A 2-tuple consisting of a signal value and a timestamp. \\
+\textbf{Model} & An optimized UU. A valid primitive LI-BDN. \\
+\textbf{Target} & The closed system under simulation. \\
+\textbf{Target Time} & The time perceived by the system under simulation. See Target. \\
+\textbf{Token} & An untimestamped data value. \\
+\textbf{TU} & A timestamped unit; a unit that acts on messages. \\
+%\textbf{FPGA Prototyping} & A fast, non-deterministic form of hardware-assisted verification in which
+%a design is implemented directly on one or more FPGAs. \\
+%\textbf{Hardware Emulation} & A more debuggable form of hardware-assisted verification in which
+%target and host-time have been decoupled. Note, we use emulation and simulation interchangeably in this text. \\
+\textbf{Unit} & An LP representing a part of an SoC or its environment. \\
+\textbf{UU} & An untimestamped unit; a unit that acts on tokens. \\
+\end{tabularx}

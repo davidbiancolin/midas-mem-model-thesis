@@ -46,7 +46,8 @@ remaining_x = [len(pages)-1, max_days]
 remaining_y = [pages[-1], int(sys.argv[3])]
 
 pages_remaining = target_page_count - current_page_count
-required_rate = float(pages_remaining) / days_remaining
+#required_rate = float(pages_remaining) / days_remaining
+required_rate = 0
 current_rate = float(current_page_count) / (len(pages) - 1)
 
 est_days_to_completion = float(pages_remaining) / current_rate
@@ -114,7 +115,7 @@ text_props = {'ha': 'center', 'va': 'center'}
 #         rotation=required_degrees,
 #         color = 'g')
 #
-## Current pages per day annotation
+# Current pages per day annotation
 #plt.text(len(pages) - 1 + text_x_curr,
 #         pages[-1] + text_y_curr,
 #         '{0:1.2f} pages/day'.format(current_rate),
@@ -122,12 +123,19 @@ text_props = {'ha': 'center', 'va': 'center'}
 #         rotation=current_degrees,
 #         color = 'b')
 
+plt.annotate("Draft Complete!",
+            xy=(381, 138), xycoords='data',
+            xytext=(320, 80), textcoords='data',
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0.5"))
+
+
+
 
 
 xtick_days = [day_start]
 for i in xrange(4,13):
     xtick_days.append(datetime.datetime(2020, i, 1))
-for i in xrange(1,3):
+for i in xrange(1,4):
     xtick_days.append(datetime.datetime(2021, i, 1))
 xtick_days.append(deadline)
 
@@ -150,3 +158,4 @@ plt.xlabel('Date')
 plt.ylabel('Pages Written')
 plt.legend(['Actual', 'Projected', 'Required'], loc='lower right')
 plt.savefig('shame.png', dpi=160, format='png', bbox_inches='tight')
+plt.savefig('shame.pdf', dpi=160, format='pdf', bbox_inches='tight')

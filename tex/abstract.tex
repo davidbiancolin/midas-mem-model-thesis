@@ -1,0 +1,25 @@
+While specialization appears to be only path towards higher performance and more
+energy efficient computer hardware, the enormous non-recurring engineering (NRE) cost
+of designing modern systems-on-a-chip~(SoCs) is a major barrier to the wider
+adoption of custom silicon. As part of a larger effort exploring more
+cost-effective agile methodologies for designing custom silicon, this work
+contributes to a novel \emph{single-FPGA} hardware emulation framework, FireSim, that aims to
+radically reduce the cost of doing fast and accurate full-system simulation.
+
+In this dissertation, we start by introducing a compiler infrastructure, called
+\texttt{Golden Gate}, capable of performing general multi-cycle resource
+optimizations in order to fit larger SoCs on a single FPGA. The
+nature of these optimizations is described at length in A. Magyar's
+dissertation~\cite{MagyarDissertation}. Using this compiler infrastructure, we
+study optimization-compatible schemes for simulating SoCs with more realistic
+clocking organizations.  We first present a simple approach for simulating
+systems with multiple fixed-frequency clocks.  We then extend this to support a
+more general class of clock switching and generation behavior, notably to
+enable timing-exact simulation dynamic frequency scaling. Our approach is based
+on prior work in software-based, conservative parallel-discrete event
+simulation wherein we replace clock switching and generation structures, like
+clock multiplexors, with decoupled models that act on timestamped message
+streams.  Unlike other academic FPGA-based systems, which tend to be FPGA
+prototypes that rely on direct instantiation of FPGA clocking primitives, here
+we strictly use clock gating to derive simulated clocks, making our approach
+far easier to use and FPGA portable.

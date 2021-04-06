@@ -1,54 +1,53 @@
-Our goal in building out the FireSim project was to build a radically
+Our goal for the FireSim project was to build a radically
 inexpensive, yet fast and productive, cycle-accurate full-system simulation
-technology to attack a key contributor to the NRE of building silicon.  While
-our system is most similar to existing hardware emulators, our approach is
-unique in that is uses a single COTS FPGA, and depends on a completely open
-source toolchain. However, it was difficult to make this comparison in good
-faith, as early versions of FireSim had two critical limitations: were limited
-to supporting to small, single-clock domain.
+technology. This was in service of reducing key contributor to the NRE of building silicon.  While
+FireSim is most similar to existing hardware emulators, our approach is
+unique in that is uses a single commercial-off-the-shelf FPGA, and depends on a
+completely open-source toolchain. However, it was difficult to make a comparison to existing hardware emulation solutions
+in good faith, as early versions of FireSim had two critical limitations: the SoCs it could support 
+were small, and could possess only a single-clock domain.
 
 We designed Golden Gate to address these limitations~(Chapter~\ref{sec:golden-gate}). First, Golden Gate uses a LI-BDN
 target formalism and RAMP-inspired multi-cycle optimizations to fit larger SoCs
-on a single FPGA; descriptions of these optimizations can be found in Albert
-Magyar's dissertation. Overcoming the clocking limitations was the primary focus of this dissertation.
-To model multiple clock domains, we introduced a new FAME transform that avoid
-using dedicated FPGA clock resources like prior academic work, in favor of a
+on a single FPGA. Descriptions of these optimizations can be found in Albert
+Magyar's dissertation~\cite{MagyarDissertation}. Overcoming the clocking limitations was the primary focus of this dissertation.
+To model multiple clock domains, we introduced a new FAME transform that avoids
+using dedicated FPGA clocking resources like prior academic work~\cite{DVFSPrototype}, in favor of a
 clock-gating scheme that should be portable to many different FPGA
-platforms~(Chapter~\ref{sec:static-multiclock}.  To model clock switching an
+platforms~(Chapter~\ref{sec:static-multiclock}). To model clock switching and
 generation circuits, which form the basis of dynamic frequency scaling support
 in realistic SoCs, we introduced a timestamped subgraph into the simulator that
 implements a conservative PDES~(Chapter~\ref{sec:dynamic-multiclock}).
 
-One takeaway from our work in supporting clock switching and generation
-structures is that closely coupled clock-generating circuits, like ICGs and
+One take-away from our work in supporting clock switching and generation
+structures is that closely coupled circuits, like ICGs and
 clock multiplexors, are probably best simulated \emph{in situ}, instead of
 being extracted into a decoupled unit. State for these circuits can be left in
 the target, and combinational functions they perform on clocks can be hoisted
-into the hub-unit's second stage to act on future clock enables. This would
-generate new clock buffers for these derived clocks. This clearly would be
-insufficient for modelling clock generators like PLLs that can't be described
-as digital functions on existing clocks, like PLLs.  For modelling this class
-of circuits, having an independent TU unit seems entirely sensible.  This
-hybrid approach would also reduce the number of timestamped inputs on the hub
-unit, addressing a potential scalability challenge in systems with many clocks.
-Implementing and studying this approach is the logical continutation of the
+into the hub unit's second stage. Here they would act directly on future clock
+enables to drive additional clock buffers. Clearly, this would be
+insufficient for modeling clock generators, like PLLs, that can't be described
+as combinational functions on existing clocks. For modeling circuits of this
+nature, having an independent TUs seems entirely sensible.  This hybrid
+approach would also reduce the number of timestamped inputs on the hub unit,
+addressing a potential scalability challenge in systems with many clocks.
+Implementing and studying this approach is the logical continuation of the
 work described in this dissertation.
 
-While Golden Gate has made inroads in simulating far more realistic SoCs in
-FireSim, there are still many domains under the FireSim project that require
-attention.  First, FireSim should be ported to other FPGAs to verify our claims
-about the flexibility of our approaches. Here there are ongoing efforts, both
-at Berkeley and abroad. Perhaps the biggest frontier for innovation lies in
-improving FireSim's debuggability. Snapshotting features, to provide greater
-visibility over the target, are important tool in commerical hardware
-emulators. Earlier verions of MIDAS had support for this, but that
-implementation presupposed a monolithic, single-clock domain hub and used a
-scan chain that increased FPGA resource utilization.  Supporting
-resource-efficient state capture that co-exists with resource optimizations is
-both an important and compelling avenue for future work.
+While Golden Gate has made inroads in simulating far more realistic SoCs on a
+single FPGA, there are still many domains under the FireSim project that
+require attention.  First, FireSim should be ported to other FPGAs to verify
+our claims about the flexibility of our approaches. Here there are ongoing
+efforts both at Berkeley and from the community at large. Perhaps the biggest
+frontier for innovation lies in improving FireSim's debuggability. Snapshotting
+features, to provide greater visibility over the target, are important feature
+in commercial hardware emulators that FireSim currently lacks. MIDAS did have
+support for this, but its implementation presupposed a monolithic, single clock
+domain hub.  Supporting resource-efficient state capture that co-exists with
+resource optimizations is both an important and compelling avenue for future
+work.
 
-FireSim's growing userbase of both industrial and academic users, suggests our
-vision for a more cost-effective full-system simulation technology addresses a
+FireSim's growing user base, both academic and industrial, suggests our vision
+for a more cost-effective full-system simulation technology addresses a
 material technology gap. We hope that FireSim and the contributions of this
-dissertation inspire more academic research in to better open-source hardware
-emulation systems in the future.
+dissertation inspire more academic research in this domain in the future.

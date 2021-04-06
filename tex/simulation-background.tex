@@ -8,7 +8,7 @@ architecture researchers employ full-system simulation for higher-level
 architectural and microarchitectural studies, and how academics have sought to
 use FPGAs to accelerate these simulations.
 We conclude by reviewing work done by the Berkeley Architecture
-Research~(BAR) group over the past decade that attempts to build more
+Research~(UCB-BAR) group over the past decade that attempts to build more
 cost-effective hardware emulators by applying techniques from academic
 FPGA-accelerated microarchitecture simulators as compiler transformations on
 SoC RTL.
@@ -492,7 +492,7 @@ as these simulators would essentially be area-optimized hardware emulators of th
 they would exactly represent the input design's behavior and so would not need
 to be validated against silicon.
 
-This was one vision that drove research done at BAR over the past decade.
+This was one vision that drove research done at UCB-BAR over the past decade.
 To address the RTL design productivity challenge, we developed
 Chisel~\cite{Chisel}. Chisel, an RTL design language hosted in Scala, allows
 designers to specify rich hardware generators by leaning on the host language to provide
@@ -500,11 +500,11 @@ powerful metaprogramming features not available in SystemVerilog or VHDL.
 Instead of performing parameter sweeps in a software model, with a generator
 the user explores the design space by elaborating and evaluating different
 \emph{instances} of the design produced by different generator configurations.
-The Rocket Chip SoC generator~\cite{RocketChip} is one example of this: it
+The Rocket Chip SoC generator~\cite{RocketChip}, now maintained by SiFive, is one example of this: it
 generates complete RISC-V SoCs including
 core pipelines, private caches, uncores, and common periphery devices. Rocket
 Chip lets the user stitch together near-arbitrary networks of disparate devices
-using its diplomacy~\cite{Diplomacy} library, developed by SiFive, which leverages Scala's type
+using its diplomacy library~\cite{Diplomacy}, developed by SiFive, which leverages Scala's type
 system to provide intelligent, area-optimized system integration. The
 Berkeley Out-of-Order Machine (BOOM)~\cite{BOOM} and Hwacha vector-fetch
 processor~\cite{Hwacha} generators provide additional core IP that can be
@@ -524,7 +524,7 @@ FPGA BRAMs to save FPGA resources.
 
 \subsection{Strober and MIDAS}\label{sec:midas-intro}
 
-The first FAME-compiler-like work done at BAR can be found in the
+The first FAME-compiler-like work done at UCB-BAR can be found in the
 Strober~\cite{Strober} energy modeling project. While
 gate-level-simulation-driven power estimation using commercial tools like
 Synopsys PrimeTime PX provides accurate pre-silicon results, gate-level
@@ -562,7 +562,7 @@ these two projects. MIDAS, as presented at CARRV2018~\cite{MIDAS}, retained all
 of Strober's features but used Chisel3 and FIRRTL, vastly improved simulation
 performance, and made it easier to support co-simulation of other I/O models.
 
-MIDAS would become the basis for a number of research projects at BAR. To improve simulator debuggability, DESSERT~\cite{DESSERT},
+MIDAS would become the basis for a number of research projects at UCB-BAR. To improve simulator debuggability, DESSERT~\cite{DESSERT},
 leveraged MIDAS's state snapshotting features to perform
 \emph{ganged-simulation}. Here one instance of a simulator runs ahead of a second lagging instance, to
 detect a simulation error. A detectable error could be either a fired hardware assertion, which had been synthesized from the source FIRRTL, or a
@@ -581,7 +581,7 @@ in greater detail in a later chapter.
 
 \subsection{FireSim}
 
-As Strober was being developed, BAR continued to study new architectures for
+As Strober was being developed, UCB-BAR continued to study new architectures for
 warehouse-scale computers, notably as part of the FireBox~\cite{FireBox} project.
 FireBox was an early example of a disaggregated datacenter and relied on
 high-bandwidth photonic networking made possible with relatively inexpensive
@@ -627,8 +627,8 @@ mainline FireSim. Academically, FireSim has been used for microarchitectural per
 and commercially, it has seen use at Intensivate, Esperanto, and SiFive. FireSim is also being used as a RISC-V platform in DARPA's
 FETT~\cite{FETT} bug bounty program~\cite{FireSimFETT}.
 
-As a final note, in 2020 BAR released Chipyard~\cite{Chipyard}, which unifies all of
-our SoC design tools and IP under a single environment. In Chipyard,
+As a final note, in 2020 UCB-BAR released Chipyard~\cite{Chipyard}, which unifies many of the aformentioned SoC design tools and IP, including 
+many open-source libraries developed by SiFive, under a single environment. In Chipyard,
 FireSim is a library for doing hardware emulation; many stand-alone utilities
 that were previously hosted in FireSim but aren't strictly related to hardware emulation
 support, such as FireMarshal, have been hoisted up into Chipyard.
@@ -642,7 +642,7 @@ and barred use of asynchronous resets. This precludes
 simulating most realistic systems and made it challenging to validate FireSim
 against existing RISC-V silicon. Secondly, capacity challenges with EC2
 FPGAs made it difficult to simulate larger systems, notably the test-chips
-BAR was designing concurrently. Without the ability to do multi-FPGA
+UCB-BAR was designing concurrently. Without the ability to do multi-FPGA
 partitioning, and without any automated application of RAMP-style
 optimizations, FireSim was hamstrung to supporting only relatively small
 SoCs. Taken together, these restrictions kneecapped FireSim to being a limited, albeit

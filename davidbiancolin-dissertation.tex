@@ -2,7 +2,8 @@
 % The Current Maintainer of this work is Paul Vojta.
 
 \documentclass[phd]{ucbthesis}
-\usepackage{biblatex}
+\usepackage[maxbibnames=99]{biblatex}
+\usepackage{tabularx}
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage{subcaption}
@@ -122,13 +123,14 @@
 
 % Declarations for Front Matter
 
-\title{FPGA-Accelerated Simulation of ASICs with Dynamically Scaling Clocks}
+\title{Automated, Deterministic Simulation of ASICs with Dynamic Frequency Scaling Using Commodity FPGAs}
+
 \author{David Thomas Biancolin}
 \degreesemester{Spring}
 \degreeyear{2021}
 \degree{Doctor of Philosophy}
 \chair{Professor Krste Asanovi\'c}
-\cochair{Adjunct Professor Jonathan Richard Bachrach}
+\cochairs{Professor Krste Asanovi\'c}{Adjunct Assistant Professor Jonathan Richard Bachrach}
 \othermembers{Professor Sanjit Seshia \\ Professor Robert Leachman }
 % Previous degrees are no longer to be listed on the title page.
 % \prevdegrees{B.A. (University of Northern South Dakota at Hoople) 1978 \\
@@ -156,12 +158,18 @@
 % (Optional) \part{First Part}
 
 \begin{abstract}
-%\input{tex/abstract}
+\input{tex/abstract}
 \end{abstract}
 
 \begin{frontmatter}
 % You can delete the \clearpage lines if you don't want these to start on
 % separate pages.
+
+\chapter*{}
+    \begin{center}
+    For Ivan Blunno (1973 - 2016)
+    \end{center}
+\clearpage
 
 \setcounter{tocdepth}{2}
 \setcounter{secnumdepth}{2}
@@ -170,7 +178,13 @@
 \listoffigures
 \clearpage
 \listoftables
+\clearpage
+\chapter*{Glossary of Terms}
+    \addcontentsline{toc}{chapter}{Glossary of Terms}
+    \input{tex/glossary.tex}
+
 \begin{acknowledgements}
+\addcontentsline{toc}{chapter}{Acknowledgements}
 \input{tex/acknowledgements}
 \end{acknowledgements}
 \end{frontmatter}
